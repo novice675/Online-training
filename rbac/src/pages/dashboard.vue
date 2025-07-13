@@ -1,16 +1,5 @@
 <template>
     <div class="dashboard-container">
-        <!-- 基础用法 -->
-        <div v-watermark>默认水印</div>
-
-        <!-- 自定义水印 -->
-        <div v-watermark="{
-            text: '张三爱上李四',
-            fontSize: 20,
-            color: '#ff0000',
-            rotate: -45,
-            opacity: 0.2
-        }" style="width:500px;height:200px">自定义水印</div>
 
         <div class="action-bar">
             <el-button type="primary" v-auth="`create`" @click="handleAdd">
@@ -40,7 +29,7 @@
             </el-button>
         </div>
 
-        <div class="data-container">
+        <div class="data-container" v-watermark="options">
             <div class="data-header">
                 <h2>数据列表</h2>
                 <el-input v-model="searchQuery" placeholder="搜索数据..." class="search-input" clearable>
@@ -66,6 +55,15 @@ import VirtuaList from '../components/VirtuaList.vue';
 import { jsPDF } from "jspdf";
 import { Plus, Edit, Delete, Picture, Document, Search } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
+import type { WatermarkOptions } from '../types/interfaces/watermark';
+
+const options: WatermarkOptions = {
+  text: '演示水印',
+  fontSize: 18,
+  color: '#888',
+  opacity: 0.15,
+  rotate: -20
+};
 
 // 模拟数据生成
 const generateData = () => {

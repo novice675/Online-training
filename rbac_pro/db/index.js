@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://127.0.0.1:27017/rbac0').then(res => {
+mongoose.connect('mongodb+srv://mariadigo45566:sJj2QDWGxaBpltgW@cluster0.ke8hvn6.mongodb.net').then(res => {
     console.log("连接成功");
 }).catch(err => {
     console.log(err);
 })
+
 // 用户表
 const userSchema = new mongoose.Schema({
     username: String,

@@ -63,4 +63,11 @@ declare interface PageResult<T> {
     total: number;
     pageNum: number;
     pageSize: number;
+}
+
+import type { WatermarkOptions } from './interfaces/watermark';
+declare module 'vue' {
+  interface Directives {
+    watermark: WatermarkOptions;
+  }
 } 
