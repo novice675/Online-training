@@ -150,16 +150,22 @@ const router = createRouter({
   ]
 });
 
+// 判断路由是否已经存在
+const hasRouter = (to: RouteLocationNormalizedGeneric) => {
+  // router.hasRoute()` 是一个方法，用于检查路由器实例中是否存在指定名称的路由记录
+  return router.hasRoute(to.name as string);
+}
+
 // 获取用户登录后，有权限访问的路由
 const getOwnRouters = () => {
+  // 获取用户登录角色
   const userStore = useUserStore();
   const userRoles = userStore.roleName || [];
-  // 递归过滤路由，包括子路由
+  // 根据菜单递归过滤路由，包括子路由
   const filterRoutes = (routes: RouteConfig[]): RouteConfig[] => {
     return routes.filter(route => {
       // 检查当前路由是否有权限
       const hasPermission = route.meta.roleName.some(role => userRoles.includes(role));
-
       // 如果有子路由，递归过滤子路由
       if (route.children && route.children.length > 0) {
         const filteredChildren = filterRoutes(route.children);
@@ -175,15 +181,9 @@ const getOwnRouters = () => {
   return filterRoutes(menuRoutes);
 }
 
-// 判断路由是否已经存在
-const hasRouter = (to: RouteLocationNormalizedGeneric) => {
-  return router.hasRoute(to.name as string);
-}
-
-// 判断用户访问的路由，是否是自己有权限访问的路由
+// 判断用户访问路由是否是自身有权限访问的路由
 const isOwnRouter = (to: RouteLocationNormalizedGeneric) => {
   const routes = getOwnRouters();
-
   // 递归检查路由权限
   const checkRoutePermission = (routes: RouteConfig[], path: string): boolean => {
     return routes.some(route => {
@@ -198,7 +198,6 @@ const isOwnRouter = (to: RouteLocationNormalizedGeneric) => {
       return false;
     });
   };
-
   return checkRoutePermission(routes, to.path);
 }
 
@@ -265,7 +264,6 @@ router.beforeEach((to, _, next) => {
       return;
     }
   }
-
   // 如果系统中不存在这个路由，并且该路由是用户没有权限访问的路由，就进入404页面
   if (!hasRouter(to) && !isOwnRouter(to)) {
     router.addRoute({

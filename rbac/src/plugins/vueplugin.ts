@@ -1,7 +1,6 @@
 import { useUserStore } from '../stores/user'
 
-// 这是一个权限控制插件，用于实现按钮级别的权限控制
-// 通过自定义指令 v-auth 来控制按钮的显示/隐藏
+// 自定义指令 v-auth 控制按钮的显示/隐藏,实现按钮级别的权限控制
 // 基于用户权限（auths）来控制按钮的可见性
 const myVueplugin = (app: any) => {
     // 注册全局组件和注册全局指令

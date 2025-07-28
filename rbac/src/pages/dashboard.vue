@@ -1,6 +1,5 @@
 <template>
     <div class="dashboard-container">
-
         <div class="action-bar">
             <el-button type="primary" v-auth="`create`" @click="handleAdd">
                 <el-icon>
@@ -32,17 +31,11 @@
         <div class="data-container" v-watermark="options">
             <div class="data-header">
                 <h2>数据列表</h2>
-                <el-input v-model="searchQuery" placeholder="搜索数据..." class="search-input" clearable>
-                    <template #prefix>
-                        <el-icon>
-                            <Search />
-                        </el-icon>
-                    </template>
-                </el-input>
+                <!-- 移除搜索输入框 -->
             </div>
 
             <div class="virtual-list-container">
-                <VirtuaList :list="filteredList" ref="virtualListRef" class="virtual-list"></VirtuaList>
+                <VirtuaList :list="mockList" ref="virtualListRef" class="virtual-list"></VirtuaList>
             </div>
         </div>
     </div>
@@ -51,81 +44,73 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
 import html2canvas from 'html2canvas';
-import VirtuaList from '../components/VirtuaList.vue';
 import { jsPDF } from "jspdf";
+import VirtuaList from '../components/VirtuaList.vue';
 import { Plus, Edit, Delete, Picture, Document, Search } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 import type { WatermarkOptions } from '../types/interfaces/watermark';
+import { mockList } from '../mock/index'
 
 const options: WatermarkOptions = {
-  text: '演示水印',
-  fontSize: 18,
-  color: '#888',
-  opacity: 0.15,
-  rotate: -20
+    text: '演示水印',
+    fontSize: 18,
+    color: '#888',
+    opacity: 0.15,
+    rotate: -20
 };
 
-// 模拟数据生成
-const generateData = () => {
-    return new Array(100000).fill(0).map((_, index) => ({
-        id: index + 1,
-        name: `数据项 ${index + 1}`,
-        description: `这是第 ${index + 1} 条数据的详细描述`,
-        status: index % 3 === 0 ? '活跃' : index % 3 === 1 ? '待处理' : '已完成',
-        createTime: new Date(Date.now() - index * 1000 * 60 * 60).toLocaleString()
-    }));
-};
+// 删除 generateData、arr、searchQuery、filteredList 相关逻辑
 
-const arr = generateData();
 const isShow = ref(false);
 const virtualListRef = ref<InstanceType<typeof VirtuaList> | null>(null);
-const searchQuery = ref('');
-
-// 过滤数据
-const filteredList = computed(() => {
-    if (!searchQuery.value) return arr;
-    const query = searchQuery.value.toLowerCase();
-    return arr.filter(item =>
-        item.name.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query) ||
-        item.status.toLowerCase().includes(query)
-    );
-});
-
 
 // 导出图片
 const exportImage = () => {
-    isShow.value = true;
+    isShow.value = true; // 标记导出操作，可能用于后续扩展
+    // 获取需要导出的DOM节点（虚拟列表组件的根元素）
     const renderDom = virtualListRef?.value?.$el;
+    // 使用html2canvas将DOM节点渲染为canvas
     html2canvas(renderDom, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff'
+        scale: 2, // 提高分辨率，保证图片清晰
+        useCORS: true, // 允许跨域图片渲染
+        backgroundColor: '#ffffff' // 设置背景为白色
     }).then(canvas => {
+        // 将canvas内容转为图片base64数据
         const img = canvas.toDataURL('image/png');
+        // 创建一个a标签用于下载图片
         const a = document.createElement('a');
         a.href = img;
         a.download = `数据列表_${new Date().toLocaleDateString()}.png`;
+        // 创建并触发点击事件，自动下载图片
         const event = new MouseEvent('click');
         a.dispatchEvent(event);
+        // 提示用户导出成功
         ElMessage.success('图片导出成功');
     });
 };
 
 // 导出PDF
 const exportPdf = () => {
+    // 获取需要导出的DOM节点（虚拟列表组件的根元素）
     const renderDom = virtualListRef?.value?.$el;
+    // 先用html2canvas将DOM渲染为图片
     html2canvas(renderDom, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff'
+        scale: 2, // 提高分辨率，保证PDF清晰
+        useCORS: true, // 允许跨域图片渲染
+        backgroundColor: '#ffffff' // 设置背景为白色
     }).then(canvas => {
+        // 将canvas内容转为图片base64数据
         const imgData = canvas.toDataURL('image/png');
+        // 创建jsPDF实例，A4纸，单位mm
         const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 210; // A4纸的宽度
+        const imgWidth = 210; // A4纸宽度（mm）
+        // 按比例计算图片高度，保证不变形
         const imgHeight = canvas.height * imgWidth / canvas.width;
+        // 添加图片到PDF
         pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        // 保存PDF文件
         pdf.save(`数据列表_${new Date().toLocaleDateString()}.pdf`);
+        // 提示用户导出成功
         ElMessage.success('PDF导出成功');
     });
 };
@@ -214,5 +199,57 @@ const handleDelete = () => {
 /* 输入框聚焦样式：边框变为主题蓝色 */
 :deep(.el-input__wrapper.is-focus) {
     box-shadow: 0 0 0 1px #409eff inset;
+}
+
+.list-item {
+  padding: 12px 20px;
+  border-bottom: 1px solid #ebeef5;
+  transition: background-color 0.3s;
+}
+
+.list-item:hover {
+  background-color: #f5f7fa;
+}
+
+.item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.item-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+  word-break: break-all;
+}
+
+.item-description {
+  font-size: 13px;
+  color: #909399;
+  white-space: pre-line;
+  word-break: break-all;
+}
+
+.item-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 90px;
+}
+
+.item-time {
+  font-size: 12px;
+  color: #b1b1b1;
 }
 </style>

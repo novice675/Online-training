@@ -17,6 +17,7 @@
     "jspdf-font": "^1.0.7",
     "lodash": "^4.17.21",
     "mock": "^0.1.1",
+    "mockjs": "^1.1.0",
     "pinia": "^3.0.3",
     "pinia-plugin-persistedstate": "^4.3.0",
     "pug": "^2.0.4",

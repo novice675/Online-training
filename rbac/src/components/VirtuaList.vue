@@ -4,8 +4,8 @@
         height: `${containerHeight}px`,
         position: 'relative'
     }" @scroll="handleScroll">
-        <!-- 占位元素，用于撑开滚动条 -->
-        <div :style="{ height: `${itemHeight * props.list.length}px` }"></div>
+        <!-- 用真实总高度撑开滚动条 -->
+        <div :style="{ height: `${totalHeight}px` }"></div>
         <!-- 可视区域，通过 transform 偏移 -->
         <div ref="vlist" :style="{
             position: 'absolute',
@@ -15,8 +15,7 @@
             transform: `translateY(${offset}px)`
         }">
             <ul class="virtual-list">
-                <li v-for="(item) in dataList" :key="item.id"
-                    :style="{ height: `${itemHeight}px` }"
+                <li v-for="(item, i) in dataList" :key="item.id" :ref="el => setItemRef(el, startIndex + i - buffer)"
                     class="list-item">
                     <div class="item-content">
                         <div class="item-main">
@@ -37,16 +36,16 @@
 </template>
 
 <script lang="ts">
-// 这个脚本块用于类型导出
 import { defineComponent } from 'vue'
 export default defineComponent({
-  name: 'VirtuaList'
+    name: 'VirtuaList'
 })
 </script>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, nextTick, watch, onUpdated } from 'vue'
 import _ from 'lodash'
+import type { ComponentPublicInstance } from 'vue'
 
 interface ListItem {
     id: number;
@@ -60,22 +59,124 @@ const props = defineProps<{
     list: ListItem[]
 }>()
 
-// 容器引用，用于获取容器高度和滚动位置
 const container = ref<HTMLDivElement | null>(null)
-// 虚拟列表容器引用
-const vlist = ref<HTMLDivElement | null>(null)
-// 容器高度
 const containerHeight = ref(0)
-// 列表项高度（固定值）
-const itemHeight = 60 // 增加高度以适应更多内容
-// 可视区域起始索引
 const startIndex = ref(0)
-// 可视区域结束索引
 const endIndex = ref(0)
-// 可视区域能显示的最大项数
-const pageItems = ref(0)
-// 列表偏移量
 const offset = ref(0)
+
+// 1. 记录每个子项的高度和偏移量
+const itemHeights = ref<number[]>([])
+const offsets = ref<number[]>([])
+
+// 2. 渲染每个子项时，动态测量高度
+const itemRefs = ref<HTMLElement[]>([])
+
+const setItemRef = (el: Element | ComponentPublicInstance | null, idx: number) => {
+    // 只处理原生 DOM 元素
+    if (el instanceof Element) {
+        itemRefs.value[idx] = el as HTMLElement
+    }
+}
+
+// 3. 计算 offsets
+const updateOffsets = () => {
+    offsets.value = [0]
+    for (let i = 0; i < itemHeights.value.length; i++) {
+        offsets.value[i + 1] = offsets.value[i] + (itemHeights.value[i] || 0)
+    }
+}
+
+// 4. 测量所有可见子项高度
+const measureHeights = () => {
+    let changed = false
+    for (let i = startIndex.value; i < endIndex.value; i++) {
+        const el = itemRefs.value[i]
+        if (el) {
+            const h = el.offsetHeight
+            if (itemHeights.value[i] !== h) {
+                itemHeights.value[i] = h
+                changed = true
+            }
+        }
+    }
+    if (changed) updateOffsets()
+}
+
+// 5. 计算 startIndex
+const getStartIndex = (scrollTop: number) => {
+    // 二分查找
+    let low = 0, high = offsets.value.length - 1
+    while (low < high) {
+        const mid = Math.floor((low + high) / 2)
+        if (offsets.value[mid] <= scrollTop) {
+            low = mid + 1
+        } else {
+            high = mid
+        }
+    }
+    return Math.max(0, low - 1)
+}
+
+// 6. 计算 endIndex
+const getEndIndex = (start: number, scrollTop: number, viewHeight: number) => {
+    let sum = offsets.value[start] || 0
+    let i = start
+    while (i < itemHeights.value.length && sum < scrollTop + viewHeight) {
+        sum += itemHeights.value[i] || 0
+        i++
+    }
+    return i
+}
+
+// 7. 处理滚动
+const handleScroll = _.throttle(() => {
+    if (!container.value) return
+    const scrollTop = container.value.scrollTop
+    startIndex.value = getStartIndex(scrollTop)
+    endIndex.value = getEndIndex(startIndex.value, scrollTop, containerHeight.value)
+    offset.value = offsets.value[startIndex.value] || 0
+    nextTick(measureHeights)
+}, 16)
+
+// 8. 初始化
+const initHeights = (len: number) => {
+    itemHeights.value = Array(len).fill(60)
+    itemRefs.value = Array(len)
+    updateOffsets()
+}
+
+// 9. 监听数据变化和内容变化
+onMounted(() => {
+    if (container.value) {
+        containerHeight.value = container.value.parentElement?.offsetHeight as number
+    }
+    initHeights(props.list.length)
+    endIndex.value = getEndIndex(0, 0, containerHeight.value)
+    nextTick(measureHeights)
+})
+
+watch(() => props.list.length, (newLen) => {
+    initHeights(newLen)
+    endIndex.value = getEndIndex(0, 0, containerHeight.value)
+    nextTick(measureHeights)
+})
+
+onUpdated(() => {
+    nextTick(measureHeights)
+})
+
+// 10. 计算可见数据
+const buffer = 3 // 预渲染3个
+const dataList = computed(() =>
+    props.list.slice(
+        Math.max(0, startIndex.value - buffer),
+        Math.min(props.list.length, endIndex.value + buffer)
+    )
+)
+
+// 11. 总高度
+const totalHeight = computed(() => offsets.value[offsets.value.length - 1] || 0)
 
 // 获取状态对应的标签类型
 const getStatusType = (status: string) => {
@@ -90,51 +191,6 @@ const getStatusType = (status: string) => {
             return '';
     }
 }
-
-// 处理滚动事件，使用节流优化性能
-const handleScroll = _.throttle(() => {
-    if (!container.value) return
-
-    const scrollTop = container.value.scrollTop
-    const newStartIndex = Math.floor(scrollTop / itemHeight)
-
-    // 限制 startIndex 在合理范围内
-    startIndex.value = Math.max(0, newStartIndex)
-    endIndex.value = Math.min(startIndex.value + pageItems.value, props.list.length)
-    if (endIndex.value < props.list.length - 1) {
-        endIndex.value += 1;
-    }
-
-    // 更新偏移量
-    offset.value = startIndex.value * itemHeight
-}, 16) // 使用 16ms（约 60fps）的节流时间
-
-// 组件挂载时初始化
-onMounted(() => {
-    if (container.value) {
-        // 获取容器高度
-        containerHeight.value = container.value.parentElement?.offsetHeight as number
-        // 计算可视区域能显示的最大项数
-        pageItems.value = Math.ceil(containerHeight.value / itemHeight)
-        endIndex.value = pageItems.value
-    }
-})
-
-// 计算需要渲染的数据列表
-const dataList = computed(() => props.list.slice(startIndex.value, endIndex.value + 1))
-
-// 导出组件实例类型
-defineExpose({
-  container,
-  vlist,
-  containerHeight,
-  itemHeight,
-  startIndex,
-  endIndex,
-  pageItems,
-  offset,
-  dataList
-})
 </script>
 
 <style scoped>
