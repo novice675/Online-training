@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
-const { userModel, roleModel, PermissionModel } = require('../db/index')
-
+const  PermissionModel  = require('../models/Permissions')
+const  roleModel  = require('../models/Role')
+const  userModel  = require('../models/User')
+//登录
 router.post('/login', async (req, res) => {
     let user = await userModel.findOne(req.body);
     if (!user) {
@@ -38,4 +40,20 @@ router.post('/login', async (req, res) => {
         });
     }
 });
+//获取所有角色
+router.get('/RoleList' ,async (req,res)=>{
+    let data = await roleModel.find()
+    res.send({
+        code:200,
+        data
+    })
+})
+//获取所有权限
+router.get('/PerList' ,async (req,res)=>{
+    let data = await PermissionModel.find()
+    res.send({
+        code:200,
+        data
+    })
+})
 module.exports = router;

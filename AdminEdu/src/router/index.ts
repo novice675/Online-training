@@ -5,122 +5,7 @@ import type { RouteConfig } from '../types/interfaces/route'
 
 // 菜单路由
 export const menuRoutes: RouteConfig[] = [
-  {
-    name: 'dashboard',
-    path: 'dashboard',
-    component: () => import('../pages/dashboard.vue'),
-    meta: {
-      roleName: ['teacher', 'student'],
-      menuTitle: '仪表盘',
-      menuIcon: 'dashboard',
-      isLogin: true,
-    }
-  },
-  {
-    name: 'student',
-    path: 'student',
-    component: () => import('../pages/Student.vue'),
-    meta: {
-      roleName: ['teacher'],
-      menuTitle: '学生管理',
-      menuIcon: 'user',
-      isLogin: true,
-    }
-  },
-  {
-    name: 'course',
-    path: 'course',
-    component: () => import('../pages/Course.vue'),
-    meta: {
-      roleName: ['teacher', 'student'],
-      menuTitle: '课程管理',
-      menuIcon: 'book',
-      isLogin: true,
-    },
-    children: [
-      {
-        name: 'courseList',
-        path: 'list',
-        component: () => import('../pages/course/List.vue'),
-        meta: {
-          roleName: ['teacher', 'student'],
-          menuTitle: '课程列表',
-          menuIcon: 'list',
-          isLogin: true,
-        }
-      },
-      {
-        name: 'courseDetail',
-        path: 'detail/:id',
-        component: () => import('../pages/course/Detail.vue'),
-        meta: {
-          roleName: ['teacher', 'student'],
-          menuTitle: '课程详情',
-          menuIcon: 'detail',
-          isLogin: true,
-          hidden: true // 不在菜单中显示
-        }
-      }
-    ]
-  },
-  {
-    name: 'homework',
-    path: 'homework',
-    component: () => import('../pages/Homework.vue'),
-    meta: {
-      roleName: ['teacher', 'student'],
-      menuTitle: '作业管理',
-      menuIcon: 'file',
-      isLogin: true,
-    },
-    children: [
-      {
-        name: 'homeworkList',
-        path: 'list',
-        component: () => import('../pages/homework/List.vue'),
-        meta: {
-          roleName: ['teacher', 'student'],
-          menuTitle: '作业列表',
-          menuIcon: 'list',
-          isLogin: true,
-        }
-      },
-      {
-        name: 'homeworkDetail',
-        path: 'detail/:id',
-        component: () => import('../pages/homework/Detail.vue'),
-        meta: {
-          roleName: ['teacher', 'student'],
-          menuTitle: '作业详情',
-          menuIcon: 'detail',
-          isLogin: true,
-        }
-      },
-      {
-        name: 'homeworkSubmit',
-        path: 'submit/:id',
-        component: () => import('../pages/homework/Submit.vue'),
-        meta: {
-          roleName: ['student'],
-          menuTitle: '提交作业',
-          menuIcon: 'submit',
-          isLogin: true,
-          // hidden: true // 不在菜单中显示
-        }
-      }
-    ]
-  },
-  {
-    name: 'grade',
-    path: 'grade',
-    component: () => import('../pages/Grade.vue'),
-    meta: {
-      roleName: ['teacher', 'student'],
-      menuTitle: '成绩管理',
-      menuIcon: 'chart',
-      isLogin: true,
-    }
-  }
+
 ]
 
 // 路由表
@@ -131,11 +16,6 @@ const router = createRouter({
       name: 'login',
       path: '/login',
       component: () => import('../pages/Login.vue')
-    },
-    {
-      name: '/',
-      path: '/',
-      component: () => import('@/components/V1.vue')
     },
     {
       name: 'index',
