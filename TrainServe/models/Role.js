@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('../db/index');
 
 // 角色表
 const roleSchema = new mongoose.Schema({
