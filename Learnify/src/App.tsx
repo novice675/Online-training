@@ -1,34 +1,88 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { NavBar, TabBar } from 'antd-mobile'
+import {
+  AppOutline,
+  MessageOutline,
+  UnorderedListOutline,
+  UserOutline,
+} from 'antd-mobile-icons'
+import { useNavigate, useLocation, Routes, Route } from 'react-router-dom'
 import './App.css'
 
+// 导入路由配置
+import routes from './router'
+
 function App() {
-  const [count, setCount] = useState(0)
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { pathname } = location
+  
+  // 设置当前激活的标签页
+  const setRouteActive = (value: string) => {
+    navigate(value)
+  }
+
+  // 底部导航栏
+  const tabBarItems = [
+    {
+      key: '/',
+      title: '首页',
+      icon: <AppOutline />,
+    },
+    {
+      key: '/service',
+      title: '服务',
+      icon: <UnorderedListOutline />,
+    },
+    {
+      key: '/organization',
+      title: '组织',
+      icon: <MessageOutline />,
+    },
+    {
+      key: '/me',
+      title: '我',
+      icon: <UserOutline />,
+    },
+  ]
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="app-container">
+      {/* 顶部导航栏 */}
+      <NavBar 
+        backArrow={false}
+        left={<div className="avatar-placeholder"></div>}
+      >
+        智慧园区
+      </NavBar>
+
+      {/* 路由内容区域 */}
+      <div className="content-container">
+        <Routes>
+          {routes.map((route) => (
+            <Route
+              key={route.path}
+              path={route.path}
+              element={route.element}
+            />
+          ))}
+        </Routes>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+
+      {/* 底部导航栏 */}
+      <TabBar 
+        activeKey={pathname} 
+        onChange={value => setRouteActive(value)}
+        className="bottom-tab-bar"
+      >
+        {tabBarItems.map(item => (
+          <TabBar.Item 
+            key={item.key}
+            icon={item.icon}
+            title={item.title} 
+          />
+        ))}
+      </TabBar>
+    </div>
   )
 }
 
