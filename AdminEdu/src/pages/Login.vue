@@ -60,6 +60,9 @@ const handleClick = async () => {
         });
 
         if (res.data.code === 200) {
+            // 先保存到 localStorage（路由守卫会检查这个）
+            localStorage.setItem('user', JSON.stringify(res.data.data));
+            // 再设置到 Pinia store
             userStore.setUserInfo(res.data.data);
             router.push('/index');
         }
