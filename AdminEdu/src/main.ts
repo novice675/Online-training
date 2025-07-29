@@ -9,7 +9,7 @@ import 'element-plus/dist/index.css'
 import myVueplugin from './plugins/vueplugin'
 import Watermark from './plugins/watermark'
 import axios from 'axios'
-axios.defaults.baseURL = 'http://localhost:5000'
+axios.defaults.baseURL = 'http://localhost:3008'
 
 // 创建应用实例
 const app = createApp(App)

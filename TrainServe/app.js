@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/Rbac', RbacRouter);
+app.use('/', RbacRouter);
 
 
 // catch 404 and forward to error handler
