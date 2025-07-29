@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('../db/index');
 
 // 权限表
 const PermissionSchema = new mongoose.Schema({
@@ -12,5 +12,4 @@ const PermissionSchema = new mongoose.Schema({
 
 
 const PermissionModel = mongoose.model('Permissions', PermissionSchema, 'Permissions');
-
 module.exports = PermissionModel
