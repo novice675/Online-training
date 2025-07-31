@@ -7,6 +7,7 @@ var cors = require('cors');
 
 const RbacRouter = require('./routes/RBACinit')
 const LCY = require('./routes/LCY')
+const WYQ = require('./routes/WYQ')
 
 
 var app = express();
@@ -22,9 +23,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/upload',express.static(path.join(__dirname, 'upload')));
 
 app.use('/', RbacRouter);
-app.use('/LCY',LCY)
+// app.use('/LCY',LCY)
+app.use('/WYQ',WYQ)
 
 
 // catch 404 and forward to error handler
