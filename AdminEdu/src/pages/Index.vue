@@ -1,84 +1,111 @@
 <template>
-    <div class="container">
-        <div class="menu" :class="{ 'collapse': isCollapse }">
-            <div class="menu-header">
-                <el-icon class="logo-icon"><Monitor /></el-icon>
-                <h2 v-show="!isCollapse">RBAC 系统</h2>
-            </div>
-            <Menu />
-        </div>
-        <div class="content">
-            <div class="content-header">
-                <div class="left">
-                    <el-icon class="collapse-btn" @click="toggleMenu">
-                        <Fold v-if="!isCollapse" />
-                        <Expand v-else />
+    <div>
+        <header class="headerTop">
+            <h1>智慧校园管理平台</h1>
+            <el-menu :default-active="activeIndex2" class="el-menu-demo" mode="horizontal" background-color="#082c61"
+                text-color="#dddddd" active-text-color="#fff" :ellipsis="false" @select="handleSelect">
+                <el-menu-item index="1">综合态势</el-menu-item>
+                <el-menu-item index="2">运营管理</el-menu-item>
+                <el-menu-item index="3">物业管理</el-menu-item>
+                <el-menu-item index="4">数据可视</el-menu-item>
+                <el-menu-item index="5">配置中心</el-menu-item>
+            </el-menu>
+            <el-dropdown trigger="click">
+                <div class="user-dropdown">
+                    <el-icon color="#fff" :size="30" class="menu-icon">
+                        <Bell />
                     </el-icon>
-                    <el-breadcrumb separator="/">
-                        <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                        <el-breadcrumb-item>当前页面</el-breadcrumb-item>
-                    </el-breadcrumb>
+                    <el-icon color="#fff" :size="30" class="menu-icon">
+                        <User />
+                    </el-icon>
+                    <span class="username">{{ username }}</span>
+                    <el-icon>
+                        <CaretBottom />
+                    </el-icon>
                 </div>
-                <div class="right">
-                    <el-tooltip content="全屏" placement="bottom">
-                        <el-icon class="action-icon" @click="toggleFullScreen">
-                            <FullScreen />
-                        </el-icon>
-                    </el-tooltip>
-                    <el-tooltip content="刷新" placement="bottom">
-                        <el-icon class="action-icon" @click="refreshPage">
-                            <Refresh />
-                        </el-icon>
-                    </el-tooltip>
-                    <el-divider direction="vertical" />
-                    <el-dropdown trigger="click">
-                        <div class="user-dropdown">
-                            <el-avatar :size="32" :src="userAvatar" />
-                            <span class="username">{{ username }}</span>
-                            <el-icon><CaretBottom /></el-icon>
-                        </div>
-                        <template #dropdown>
-                            <el-dropdown-menu>
-                                <el-dropdown-item>
-                                    <el-icon><User /></el-icon>个人信息
-                                </el-dropdown-item>
-                                <el-dropdown-item>
-                                    <el-icon><Setting /></el-icon>修改密码
-                                </el-dropdown-item>
-                                <el-dropdown-item divided @click="handleLogout">
-                                    <el-icon><SwitchButton /></el-icon>退出登录
-                                </el-dropdown-item>
-                            </el-dropdown-menu>
-                        </template>
-                    </el-dropdown>
+                <template #dropdown>
+                    <el-dropdown-menu>
+                        <el-dropdown-item>
+                            <el-icon>
+                                <User />
+                            </el-icon>个人信息
+                        </el-dropdown-item>
+                        <el-dropdown-item>
+                            <el-icon>
+                                <Setting />
+                            </el-icon>修改密码
+                        </el-dropdown-item>
+                        <el-dropdown-item divided @click="handleLogout">
+                            <el-icon>
+                                <SwitchButton />
+                            </el-icon>退出登录
+                        </el-dropdown-item>
+                    </el-dropdown-menu>
+                </template>
+            </el-dropdown>
+        </header>
+
+        <div class="campus-selector">
+            <div class="selector-container">
+                <div class="selector-left">
+                    <span class="selector-label">选择校区:</span>
+                    <el-select v-model="selectedCampus" placeholder="xxxx校区" class="campus-select" clearable>
+                        <el-option label="北京校区" value="beijing" />
+                        <el-option label="上海校区" value="shanghai" />
+                        <el-option label="广州校区" value="guangzhou" />
+                        <el-option label="深圳校区" value="shenzhen" />
+                    </el-select>
+                </div>
+                <div class="selector-right">
+                    <span class="time-display">{{ currentTime }}</span>
                 </div>
             </div>
-            <div class="content-body">
-                <RouterView v-slot="{ Component }">
-                    <transition name="fade" mode="out-in">
-                        <component :is="Component" />
-                    </transition>
-                </RouterView>
+        </div>
+
+        <div class="container">
+            <div class="menu" :class="{ 'collapse': isCollapse }">
+                <Menu />
+            </div>
+            <div class="content">
+                <div class="content-header">
+                    <div class="left">
+                        <el-icon class="collapse-btn" @click="toggleMenu">
+                            <Fold v-if="!isCollapse" />
+                            <Expand v-else />
+                        </el-icon>
+                        <el-breadcrumb separator="/">
+                            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                            <el-breadcrumb-item>当前页面</el-breadcrumb-item>
+                        </el-breadcrumb>
+                    </div>
+                    <div class="right">
+                        <el-divider direction="vertical" />
+                    </div>
+                </div>
+                <div class="content-body">
+                    <RouterView v-slot="{ Component }">
+                        <transition name="fade" mode="out-in">
+                            <component :is="Component" />
+                        </transition>
+                    </RouterView>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
 import Menu from '../components/Menu.vue'
 import { useUserStore } from '../stores/user'
-import { 
-    Fold, 
-    Expand, 
-    FullScreen, 
-    Refresh, 
+import {
+    Fold,
+    Expand,
     CaretBottom,
     User,
     Setting,
-    SwitchButton,
-    Monitor
+    SwitchButton
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
@@ -86,8 +113,12 @@ const router = useRouter()
 const userStore = useUserStore()
 const isCollapse = ref(false)
 const username = ref('管理员')
-const userAvatar = ref('https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png')
-
+const activeIndex2 = ref('1')
+const selectedCampus = ref('')
+const currentTime = ref('')
+const handleSelect = (key: string) => {
+    console.log(key)
+}
 const toggleMenu = () => {
     isCollapse.value = !isCollapse.value
 }
@@ -105,18 +136,77 @@ const refreshPage = () => {
 }
 
 const handleLogout = () => {
-    // 清除本地存储的用户数据
     localStorage.removeItem('user')
-    // 清除用户状态
     userStore.$reset()
-    // 显示退出成功提示
     ElMessage.success('退出登录成功')
-    // 跳转到登录页
     router.push('/login')
 }
+
+// 更新时间函数
+const updateTime = () => {
+    const now = new Date()
+    currentTime.value = now.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+    })
+}
+
+// 组件挂载时启动时间更新
+onMounted(() => {
+    updateTime()
+    setInterval(updateTime, 1000)
+})
 </script>
 
 <style scoped>
+.headerTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 85px;
+    background-color: #082c61;
+}
+
+.headerTop h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fff;
+    margin: 0 32px 0 0;
+}
+
+.el-menu--horizontal {
+    --el-menu-horizontal-height: 85px;
+    --menu-font-size: 20px;
+    --menu-font-weight: 500;
+    background: transparent;
+    border-bottom: none;
+}
+
+/* 菜单项样式 */
+.el-menu--horizontal>.el-menu-item:nth-child(1) {
+    margin-right: auto;
+}
+
+.el-menu--horizontal .el-menu-item {
+    font-size: var(--menu-font-size);
+    font-weight: var(--menu-font-weight);
+}
+
+.menu-icon {
+    margin-right: 6px;
+    /* 或 margin-left，根据需要 */
+    font-size: 18px;
+    /* 可选，调整图标大小 */
+    vertical-align: middle;
+    /* 垂直居中 */
+}
+
 .container {
     display: flex;
     width: 100vw;
@@ -142,45 +232,6 @@ const handleLogout = () => {
     width: 64px;
 }
 
-.menu-header {
-    height: 60px;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease-in-out;
-    white-space: nowrap;
-    overflow: hidden;
-}
-
-.logo-icon {
-    font-size: 24px;
-    margin-right: 12px;
-    color: #409eff;
-    transition: all 0.3s ease-in-out;
-    flex-shrink: 0;
-}
-
-.menu.collapse .logo-icon {
-    margin-right: 0;
-}
-
-.menu-header h2 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #fff;
-    white-space: nowrap;
-    transition: all 0.3s ease-in-out;
-    opacity: 1;
-    transform: translateX(0);
-}
-
-.menu.collapse .menu-header h2 {
-    opacity: 0;
-    transform: translateX(-20px);
-}
-
 .content {
     flex: 1;
     display: flex;
@@ -188,7 +239,7 @@ const handleLogout = () => {
     overflow: hidden;
     transition: all 0.3s ease-in-out;
     position: relative;
-    min-width: 0; /* 防止内容溢出 */
+    min-width: 0;
 }
 
 .content-header {
@@ -208,7 +259,7 @@ const handleLogout = () => {
     display: flex;
     align-items: center;
     gap: 16px;
-    min-width: 0; /* 防止内容溢出 */
+    min-width: 0;
 }
 
 .collapse-btn {
@@ -270,7 +321,7 @@ const handleLogout = () => {
     background-color: #f0f2f5;
     position: relative;
     z-index: 1;
-    height: calc(100vh - 60px); /* 减去header高度 */
+    height: calc(100vh - 60px);
 }
 
 /* 自定义滚动条样式 */
@@ -328,5 +379,85 @@ const handleLogout = () => {
 
 :deep(.el-table__body-wrapper) {
     overflow-x: hidden !important;
+}
+
+/* 校区选择器 - 原生Flexbox布局 */
+.campus-selector {
+    background: linear-gradient(135deg, #415c85 0%, #2c4a7a 100%);
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.selector-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.selector-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.selector-label {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.campus-select {
+    width: 200px;
+}
+
+/* Element Plus 组件样式覆盖 */
+:deep(.campus-select .el-input__wrapper) {
+    background-color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.campus-select .el-input__inner) {
+    color: #333333;
+    font-size: 14px;
+}
+
+:deep(.campus-select .el-input__inner::placeholder) {
+    color: #999999;
+}
+
+.time-display {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 500;
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+}
+
+/* 移动端响应式 */
+@media (max-width: 768px) {
+    .selector-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+
+    .selector-left {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .campus-select {
+        width: 100%;
+    }
+
+    .time-display {
+        text-align: center;
+    }
 }
 </style>
