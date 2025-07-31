@@ -5,11 +5,8 @@ import {
   UnorderedListOutline,
   UserOutline,
 } from 'antd-mobile-icons'
-import { useNavigate, useLocation, Routes, Route } from 'react-router-dom'
+import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import './App.css'
-
-// 导入路由配置
-import routes from './router'
 
 function App() {
   const navigate = useNavigate()
@@ -57,15 +54,7 @@ function App() {
 
       {/* 路由内容区域 */}
       <div className="content-container">
-        <Routes>
-          {routes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={route.element}
-            />
-          ))}
-        </Routes>
+        <Outlet />
       </div>
 
       {/* 底部导航栏 */}
