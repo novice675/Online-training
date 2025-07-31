@@ -4,10 +4,41 @@ const menjinModel = require('../models/menjin');
 
 
 router.get('/list', async (req, res) => {
-    const data = await menjinModel.find()
+    const {
+        page,
+        size,
+        name,
+        bianhao,
+        status,
+        Person
+    } = req.query;
+
+    const tj = {};
+    if (name) {
+        tj.name = RegExp(name)
+    }
+    if (bianhao) {
+        tj.bianhao = RegExp(bianhao)
+    }
+    if (status) {
+        tj.status = status;
+    }
+    if (Person) {
+        tj.Person = RegExp(Person)
+    }
+
+
+    const [data, total] = await Promise.all([
+        menjinModel.find(tj)
+            .skip((page-1)*size)
+            .limit(parseInt(size)),
+        menjinModel.countDocuments(tj)
+    ]);
+
     res.send({
         code: 200,
         msg: '获取成功',
+        total,
         data
     });
 });
@@ -32,7 +63,7 @@ router.get('/detail/:id', async (req, res) => {
 // 添加门禁设备
 router.post('/add', async (req, res) => {
     const data = req.body;
-    const index = await menjinModel.findOne({ deviceNumber: data.deviceNumber });
+    const index = await menjinModel.findOne({ bianhao: data.bianhao });
     if (index) {
         return res.send({
             code: 400,
@@ -51,10 +82,9 @@ router.post('/add', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
     const { id } = req.params;
     const upData = req.body;
-    // 如果修改设备编号，检查是否与其他设备重复
-    if (upData.deviceNumber) {
+    if (upData.bianhao) {
         const index = await menjinModel.findOne({
-            deviceNumber: upData.deviceNumber,
+            bianhao: upData.bianhao,
             _id: { $ne: id }
         });
         if (index) {
@@ -84,7 +114,7 @@ router.put('/update/:id', async (req, res) => {
 });
 
 // 删除单个门禁设备
-router.delete('/delete/:id', async (req, res) => {
+router.delete('/del/:id', async (req, res) => {
     const { id } = req.params;
     const deletedDevice = await menjinModel.findByIdAndDelete(id);
     if (!deletedDevice) {
@@ -101,7 +131,7 @@ router.delete('/delete/:id', async (req, res) => {
 });
 
 // 批量删除门禁设备
-router.delete('/batchDelete', async (req, res) => {
+router.delete('/AllDel', async (req, res) => {
     const { ids } = req.body;
 
     if (!ids || !Array.isArray(ids) || ids.length === 0) {

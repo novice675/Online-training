@@ -2,26 +2,26 @@ const mongoose = require('mongoose');
 
 // 智能门禁表
 const menjinSchema = new mongoose.Schema({
-    deviceName: {
+    name: {
         type: String,
         required: true
     },                    // 设备名称
-    deviceNumber: {
+    bianhao: {
         type: String,
         required: true,
         unique: true
     },                    // 设备编号
-    deviceModel: String,  // 设备型号
-    runningStatus: {
+    menModel: String,  // 设备型号
+    status: {
         type: String,
-        enum: ['正常', '故障', '维护中', '离线'],
+        enum: ['正常', '离线', '报警', '禁用'],
         default: '正常'
     },                    // 运行状态
-    followUpPerson: String, // 跟进人
-    contactInfo: String,    // 联系方式
-    installLocation: String, // 安装位置
-    sceneImage: String,     // 现场图片
-    deviceImage: String,    // 设备图片
+    Person: String, // 跟进人
+    plone: String,    // 联系方式
+    location: String, // 安装位置
+    Image: String,     // 现场图片
+    imgs: String,    // 设备图片
     createTime: {
         type: Date,
         default: Date.now

@@ -16,7 +16,7 @@ mongoose.connect('mongodb+srv://mariadigo45566:sJj2QDWGxaBpltgW@cluster0.ke8hvn6
 function generateMenjinData() {
     const deviceTypes = ['围墙门禁', '通道门禁', '展示门禁', '车库门禁', '办公门禁', '会议室门禁'];
     const deviceModels = ['ISIS-MJ-400', 'ISIS-MJ-600', 'ISCS-MJ-600', 'ZK-ACCESS-2024', 'HK-SMART-2023', 'TC-GATE-2024', 'DS-ACCESS-2023', 'SEC-PRO-2024'];
-    const statusOptions = ['正常', '故障', '维护中', '离线'];
+    const statusOptions = ['正常', '离线', '报警', '禁用'];
     const followUpPersons = ['张三', '李四', '王五', '赵六', '孙七', '周八', '吴九', '郑十', '刘一', '陈二', '杨三', '黄四', '朱五', '林六', '何七', '罗八'];
     const buildings = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2'];
     const floors = ['一层', '二层', '三层', '四层', '五层', '六层', '七层', '八层', '九层', '十层', '十一层', '十二层'];
@@ -40,15 +40,15 @@ function generateMenjinData() {
         const phoneNumber = `138${String(Math.floor(Math.random() * 90000000) + 10000000)}`;
         
         const device = {
-            deviceName: deviceType,
-            deviceNumber: deviceNumber,
-            deviceModel: deviceModel,
-            runningStatus: status,
-            followUpPerson: followUpPerson,
-            contactInfo: phoneNumber,
-            installLocation: `${building}栋${floor}${area}`,
-            sceneImage: `/images/scene/${deviceType.toLowerCase()}_${i}.jpg`,
-            deviceImage: `/images/device/${deviceModel.toLowerCase().replace(/-/g, '_')}.jpg`
+            name: deviceType,
+            bianhao: deviceNumber,
+            menModel: deviceModel,
+            status: status,
+            Person: followUpPerson,
+            plone: phoneNumber,
+            location: `${building}栋${floor}${area}`,
+            Image: `/images/scene/${deviceType.toLowerCase()}_${i}.jpg`,
+            imgs: `/images/device/${deviceModel.toLowerCase().replace(/-/g, '_')}.jpg`
         };
 
         menjinData.push(device);
@@ -79,8 +79,24 @@ async function insertMenjinData() {
         console.log('开始插入智能门禁数据...');
         
         // 清空现有数据（可选）
-        // await Menjin.deleteMany({});
-        // console.log('已清空现有数据');
+        await Menjin.deleteMany({});
+        console.log('已清空现有数据');
+        
+        // 删除旧的索引（如果存在）
+        try {
+            await Menjin.collection.dropIndex('deviceNumber_1');
+            console.log('已删除旧的 deviceNumber 索引');
+        } catch (error) {
+            if (error.code === 27) {
+                console.log('旧索引不存在，跳过删除');
+            } else {
+                console.log('删除旧索引时出错:', error.message);
+            }
+        }
+        
+        // 确保新的索引存在
+        await Menjin.collection.createIndex({ bianhao: 1 }, { unique: true });
+        console.log('已创建 bianhao 唯一索引');
         
         // 插入新数据
         const result = await Menjin.insertMany(menjinData);
@@ -88,7 +104,7 @@ async function insertMenjinData() {
         
         // 只显示前10条数据，避免输出过多
         result.slice(0, 10).forEach((device, index) => {
-            console.log(`${index + 1}. ${device.deviceName} - 设备编号: ${device.deviceNumber} - 状态: ${device.runningStatus}`);
+            console.log(`${index + 1}. ${device.name} - 设备编号: ${device.bianhao} - 状态: ${device.status}`);
         });
         
         if (result.length > 10) {

@@ -8,6 +8,7 @@ var cors = require('cors');
 const RbacRouter = require('./routes/RBACinit')
 const LCY = require('./routes/LCY')
 const WYQ = require('./routes/WYQ')
+const Menjin = require('./routes/Menjin')
 
 
 var app = express();
@@ -28,6 +29,7 @@ app.use('/upload',express.static(path.join(__dirname, 'upload')));
 app.use('/', RbacRouter);
 // app.use('/LCY',LCY)
 app.use('/WYQ',WYQ)
+app.use('/menjin',Menjin)
 
 
 // catch 404 and forward to error handler

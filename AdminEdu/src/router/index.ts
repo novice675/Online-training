@@ -1,6 +1,6 @@
 // 创建路由对象
 import { createRouter, createWebHashHistory, type RouteLocationNormalizedGeneric, type RouteRecordRaw } from "vue-router";
-import { useUserStore } from '../stores/user'
+
 import type { RouteConfig } from '../types/interfaces/route'
 
 // 菜单路由
@@ -178,9 +178,9 @@ export const menuRoutes: RouteConfig[] = [
         }
       },
       {
-        name: 'smartAccessControl',
-        path: 'smartAccessControl',
-        component: () => import('../pages/property/SmartAccessControl.vue'),
+        name: 'menjin',
+        path: 'menjin',
+        component: () => import('../pages/property/Menjin.vue'),
         meta: {
           roleName: ['teacher', 'student'],
           menuTitle: '智能门禁管理',
@@ -283,6 +283,11 @@ const router = createRouter({
         isLogin: true
       }
     },
+    {
+      name: 'menjin ',
+      path: '/menjin',
+      component: () => import('../pages/property/Menjin.vue')
+    }
   ]
 });
 
