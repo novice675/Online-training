@@ -176,6 +176,17 @@ export const menuRoutes: RouteConfig[] = [
           menuIcon: 'chart',
           isLogin: true,
         }
+      },
+      {
+        name: 'smartAccessControl',
+        path: 'smartAccessControl',
+        component: () => import('../pages/property/SmartAccessControl.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '智能门禁管理',
+          menuIcon: 'lock',
+          isLogin: true,
+        }
       }
     ]
   },
