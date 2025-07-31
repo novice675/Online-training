@@ -64,7 +64,7 @@ const handleClick = async () => {
             localStorage.setItem('user', JSON.stringify(res.data.data));
             // 再设置到 Pinia store
             userStore.setUserInfo(res.data.data);
-            router.push('/index');
+            router.push('/home');
         }
     } catch (error) {
         console.error('登录失败:', error);
