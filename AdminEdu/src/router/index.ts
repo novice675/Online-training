@@ -121,6 +121,75 @@ export const menuRoutes: RouteConfig[] = [
       isLogin: true,
     }
   },
+  {
+    name: 'property',
+    path: 'property',
+    component: () => import('../pages/property/index.vue'),
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '物业管理',
+      menuIcon: 'chart',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'propertyHome',
+        path: 'propertyHome',
+        component: () => import('../pages/property/Home.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '物业总览',
+          menuIcon: 'chart',
+          isLogin: true,
+        }
+      },
+      
+      {
+        name: 'propertyAd',
+        path: 'propertyAd',
+        component: () => import('../pages/property/People-Ad.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '访客管理',
+          menuIcon: 'chart',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'propertyGo',
+        path: 'propertyGo',
+        component: () => import('../pages/property/People-go.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '访客进出管理',
+          menuIcon: 'chart',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'propertyPeople',
+        path: 'propertyPeople',
+        component: () => import('../pages/property/People.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '访客信息登记',
+          menuIcon: 'chart',
+          isLogin: true,
+        }
+      }
+    ]
+  },
+  {
+    name: 'visitorChart3D',
+    path: 'visitorChart3D',
+    component: () => import('../pages/property/VisitorChart3D.vue'),
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '数据可视',
+      menuIcon: 'chart',
+      isLogin: true,
+    }
+  },
   // 运营管理的菜单
 
   // 物业管理的菜单
