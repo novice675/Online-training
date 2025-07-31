@@ -143,7 +143,6 @@ export const menuRoutes: RouteConfig[] = [
           isLogin: true,
         }
       },
-      
       {
         name: 'propertyAd',
         path: 'propertyAd',
@@ -191,11 +190,11 @@ export const menuRoutes: RouteConfig[] = [
     }
   },
   // 运营管理的菜单
-
   // 物业管理的菜单
   {
     name: 'estate-building',
     path: 'building',
+    children: [],
     component: () => import('@/pages/home/Estate/Estate.vue'),
     meta: {
       roleName: ['teacher'],
@@ -205,11 +204,8 @@ export const menuRoutes: RouteConfig[] = [
       isLogin: true,
     }
   },
-
   // 数据可视的菜单
-
   // 配置中心的菜单
-
 ]
 
 // 路由表
@@ -238,29 +234,71 @@ const router = createRouter({
           name: 'Operation',
           path: 'Operation',
           component: () => import('@/pages/home/Operation/Operation.vue'),
+          children: [
+            {
+              name: 'OperationMenu',
+              path: 'OperationMenu',
+              component: () => import('@/pages/home/Operation/OperationMenu/OperationMenu.vue'),
+              children: [],
+              meta: {  // 配置路由一些额外的信息
+                isLogin: true
+              },
+            }
+          ],
         },
         {
           // 物业管理
           name: 'Estate',
           path: 'Estate',
+          // redirect: 'Estate/EstateMenu',
           component: () => import('@/pages/home/Estate/Estate.vue'),
+          children: [
+            {
+              name: 'EstateMenu',
+              path: 'EstateMenu',
+              component: () => import('@/pages/home/Estate/EstateMenu/EstateMenu.vue'),
+              children: [],
+              meta: {  // 配置路由一些额外的信息
+                isLogin: true
+              },
+            }
+          ],
         },
         {
           // 可视数据
           name: 'VisualData',
           path: 'VisualData',
           component: () => import('@/pages/home/VisualData/VisualData.vue'),
+          children: [
+            {
+              name: 'VisualDataMenu',
+              path: 'VisualDataMenu',
+              component: () => import('@/pages/home/VisualData/VisualDataMenu/VisualDataMenu.vue'),
+              children: [],
+              meta: {  // 配置路由一些额外的信息
+                isLogin: true
+              },
+            }
+          ],
         },
         {
           // 配置中心
           name: 'Configuration',
           path: 'Configuration',
           component: () => import('@/pages/home/Configuration/Configuration.vue'),
+          children: [
+            {
+              name: 'ConfigurationMenu',
+              path: 'ConfigurationMenu',
+              component: () => import('@/pages/home/Configuration/ConfigurationMenu/ConfigurationMenu.vue'),
+              children: [],
+              meta: {  // 配置路由一些额外的信息
+                isLogin: true
+              },
+            }
+          ],
         },
       ],
-      meta: {  // 配置路由一些额外的信息
-        isLogin: true
-      },
     },
     {
       name: 'index',
@@ -275,11 +313,10 @@ const router = createRouter({
   ]
 });
 
-// 获取用户登录后，有权限访问的路由
+// // 获取用户登录后，有权限访问的路由
 // const getOwnRouters = () => {
 //   const userStore = useUserStore();
 //   const userRoles = userStore.roleName || [];
-
 //   // 递归过滤路由，包括子路由
 //   const filterRoutes = (routes: RouteConfig[]): RouteConfig[] => {
 //     return routes.filter(route => {
@@ -301,17 +338,17 @@ const router = createRouter({
 //   return filterRoutes(menuRoutes);
 // }
 
-// 判断路由是否已经存在 返回布尔值
+// // 判断路由是否已经存在 返回布尔值
 // const hasRouter = (to: RouteLocationNormalizedGeneric) => {
 //   return router.hasRoute(to.name as string);
 // }
 
 
-// 判断用户访问的路由，是否是自己有权限访问的路由
+// // 判断用户访问的路由，是否是自己有权限访问的路由
 // const isOwnRouter = (to: RouteLocationNormalizedGeneric) => {
 //   const routes = getOwnRouters();
 //   // 递归检查路由权限，拼接完整路径
-//   const checkRoutePermission = (routes: RouteConfig[], parentPath = '/home'): boolean => {
+//   const checkRoutePermission = (routes: RouteConfig[], parentPath = '/index'): boolean => {
 //     return routes.some(route => {
 //       // 拼接当前路由的完整路径
 //       const fullPath = parentPath.endsWith('/') ? parentPath + route.path : parentPath + '/' + route.path;
@@ -331,7 +368,7 @@ const router = createRouter({
 // };
 
 
-// 路由守卫
+// // 路由守卫
 // router.beforeEach((to, _, next) => {
 //   // 从 localStorage 中获取持久化的用户数据
 //   const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -342,84 +379,83 @@ const router = createRouter({
 //     return;
 //   }
 
-// // 如果用户已登录，且访问的是受控路由区域
-// if (userData.username && to.path.startsWith('/home')) {
-//   // 获取用户有权限访问的路由配置
-//   const ownRoutes = getOwnRouters();
+//   // 如果用户已登录，且访问的是受控路由区域
+//   if (userData.username && to.path.startsWith('/home')) {
+//     // 获取用户有权限访问的路由配置
+//     const ownRoutes = getOwnRouters();
 
-//   // 检查这些路由是否都已经添加到路由系统中
-//   const hasRoutes = ownRoutes.every(route => router.hasRoute(route.name as string));
+//     // 检查这些路由是否都已经添加到路由系统中
+//     const hasRoutes = ownRoutes.every(route => router.hasRoute(route.name as string));
 
-//   if (!hasRoutes) {
-//     // 清除所有动态添加的路由
-//     router.getRoutes().forEach(route => {
-//       if (route.name && route.name !== 'index' && route.name !== 'home') {
-//         router.removeRoute(route.name);
-//       }
-//     });
-
-//     // 递归添加路由及其子路由
-//     const addRoutes = (routes: RouteConfig[]) => {
-//       routes.forEach(route => {
-//         if (!router.hasRoute(route.name as string)) {
-//           const routeConfig: RouteRecordRaw = {
-//             name: route.name,
-//             path: route.path,
-//             component: route.component,
-//             meta: route.meta,
-//             children: []
-//           };
-
-//           // 如果有子路由，递归添加
-//           if (route.children && route.children.length > 0) {
-//             routeConfig.children = route.children.map(child => {
-//               const childRoute = {
-//                 name: child.name,
-//                 path: child.path,
-//                 component: child.component,
-//                 meta: child.meta,
-//                 children: child.children
-//               } as RouteRecordRaw;
-//               if (child.redirect) {
-//                 childRoute.redirect = child.redirect;
-//               }
-//               return childRoute;
-//             });
-//           }
-//           router.addRoute('home', routeConfig);
+//     if (!hasRoutes) {
+//       // 清除所有动态添加的路由
+//       router.getRoutes().forEach(route => {
+//         if (route.name && route.name !== 'index' && route.name !== 'home' && route.name !== 'login') {
+//           router.removeRoute(route.name);
 //         }
 //       });
-//     };
 
-//     addRoutes(ownRoutes);
-//     next({ ...to, replace: true });
+//       // 递归添加路由及其子路由
+//       const addRoutes = (routes: RouteConfig[], parentName = 'index') => {
+//         routes.forEach(route => {
+//           if (!router.hasRoute(route.name as string)) {
+//             const routeConfig: RouteRecordRaw = {
+//               name: route.name,
+//               path: route.path,
+//               component: route.component,
+//               meta: route.meta,
+//               children: []
+//             };
+
+//             // 如果有子路由，递归添加
+//             if (route.children && route.children.length > 0) {
+//               routeConfig.children = route.children.map(child => {
+//                 const childRoute = {
+//                   name: child.name,
+//                   path: child.path,
+//                   component: child.component,
+//                   meta: child.meta,
+//                   children: child.children
+//                 } as RouteRecordRaw;
+//                 if (child.redirect) {
+//                   childRoute.redirect = child.redirect;
+//                 }
+//                 return childRoute;
+//               });
+//             }
+//             router.addRoute(parentName, routeConfig);
+//           }
+//         });
+//       };
+//       addRoutes(ownRoutes);
+//       next({ ...to, replace: true });
+//       return;
+//     }
+//   }
+
+//   // 权限检查：如果系统中不存在这个路由，并且该路由是用户没有权限访问的路由，就进入404页面
+//   if (!hasRouter(to) && !isOwnRouter(to)) {
+//     // 如果目标路径已经是404页面，直接放行
+//     if (to.path === '/404') {
+//       next();
+//       return;
+//     }
+
+//     // 确保404路由存在（只添加一次）
+//     if (!router.hasRoute('404')) {
+//       router.addRoute({
+//         name: '404',
+//         path: '/404',
+//         component: () => import('../pages/404.vue')
+//       });
+//     }
+//     // 跳转到404页面
+//     next('/404');
 //     return;
 //   }
-// }
 
-// // 权限检查：如果系统中不存在这个路由，并且该路由是用户没有权限访问的路由，就进入404页面
-// if (!hasRouter(to) && !isOwnRouter(to)) {
-//   // 如果目标路径已经是404页面，直接放行
-//   if (to.path === '/404') {
-//     next();
-//     return;
-//   }
-
-//   // 确保404路由存在（只添加一次）
-//   if (!router.hasRoute('404')) {
-//     router.addRoute({
-//       name: '404',
-//       path: '/404',
-//       component: () => import('../pages/404.vue')
-//     });
-//   }
-//   // 跳转到404页面
-//   next('/404');
-//   return;
-// }
-
-// // 其他情况，用户正常访问路由
-// next();
+//   // 其他情况，用户正常访问路由
+//   next();
 // });
 
 export default router
