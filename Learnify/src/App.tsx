@@ -25,6 +25,7 @@ const AddButton = () => (
       // lineHeight:'20px'
       transform:'translateY(-12px)'
     }}
+   
   >
     <span style={{transform:'translateY(-4px)'}}>+</span>
   </div>
@@ -77,9 +78,7 @@ function App() {
           key="add"
           icon={<AddButton />}
           title=""
-          onClick={() => {
-            console.log('点击加号')
-          }}
+          onClick={()=>{navigate('/sendmement')}}
           // style={{marginBottom:'25px'}}
         />
         <TabBar.Item 

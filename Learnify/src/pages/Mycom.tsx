@@ -77,8 +77,9 @@ const PersonalInfo = () => {
           borderRadius: 12,
           padding: 12,
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
-          backgroundImage: "url(/images/1.png)",
+          backgroundImage: "url(images/1.png)",
           height: "150px",
+        //   color:'white'
         }}
       >
         <div
@@ -148,15 +149,17 @@ const PersonalInfo = () => {
         gap={15}
         style={{ marginTop: "15px", marginBottom: "15px" }}
       >
-        <Grid.Item className={styles["grid-demo-item-block"]}>
+        <Grid.Item  onClick={() => {
+            navigate("/phones");
+          }} className={styles["grid-demo-item-block"]}>
           <div style={{ textAlign: "center" }}>
             <img src="/dayed/1.png" alt="" className={styles.img} />
-            员工通信录
+            员工通讯录
           </div>
         </Grid.Item>
         <Grid.Item
           onClick={() => {
-            navigate("/visitor");
+            navigate("/visitors");
           }}
           className={styles["grid-demo-item-block"]}
         >
@@ -196,16 +199,16 @@ const PersonalInfo = () => {
         gap={15}
         style={{ marginTop: "15px", marginBottom: "15px" }}
       >
-        <Grid.Item className={styles["grid-demo-item-block"]}>
+        <Grid.Item  onClick={() => {
+            navigate("/visitors");
+          }} className={styles["grid-demo-item-block"]}>
           <div style={{ textAlign: "center" }}>
             <img src="/dayed/3.png" alt="" className={styles.img} />
             访客记录
           </div>
         </Grid.Item>
         <Grid.Item
-          onClick={() => {
-            navigate("/visitor");
-          }}
+         
           className={styles["grid-demo-item-block"]}
         >
           <div style={{ textAlign: "center" }}>

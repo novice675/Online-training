@@ -95,17 +95,101 @@ router.get("/company", async (req, res) => {
 });
 
 router.get("/comitem", async (req, res) => {
-    console.log(req.query); // 输出查询参数
-    const {_id}=req.query
-    console.log(_id);
-    
-    const item = await Company.findOne(req.query)
-    console.log(item);
-    
-    res.send({
-      code: 200,
-      item,
-    });
+  console.log(req.query); // 输出查询参数
+  const { _id } = req.query;
+  console.log(_id);
+  const item = await Company.findOne(req.query);
+  // 不加筛选条件默认返回第一条
+  console.log(item);
+
+  res.send({
+    code: 200,
+    item,
   });
+});
+
+router.get("/employee", async (req, res) => {
+  const {comid}= req.query;
+  console.log(comid);
+
+  const list = await Employee.find({ company_id: comid });
+  console.log(list);
+  
+  res.send({
+    code: 200,
+    list,
+  });
+});
+
+router.get("/visitors", async (req, res) => {
+  const { comid ,day} = req.query;
+  console.log(comid);
+    const time=new Date(`${day}T16:00:00.000+00:00`)
+    console.log(time);
+    
+  const list = await Visitor.find({ company_id: comid,time:time });
+  console.log(list);
+
+  res.send({
+    code: 200,
+    list,
+  });
+});
+
+router.post("/addmoment", async (req, res) => {
+  console.log(req.body);
+  await Moment.create(req.body);
+  res.send({
+    code: 200,
+  });
+});
+
+router.get("/moment", async (req, res) => {
+  let list=await Moment.aggregate([
+    // {$match:{}},
+    {
+        $lookup:{
+            from:'employee',
+            foreignField:"_id",
+            localField:"user_id",
+            as:"employee",
+            pipeline:[{$project:{picture:1,name:1}}]
+        }
+    },
+    {
+        $lookup:{
+            from:"visitor",
+            localField:"user_id",
+            foreignField:"_id",
+            as:"visitor",
+            pipeline:[{$project:{picture:1,name:1}}]
+        }
+    },
+    {
+        $addFields:{
+            picture:{
+                $cond:{
+                    if:{$eq:["$type","员工"]},
+                    then:{$arrayElemAt:["$employee.picture",0]},
+                    else:{$arrayElemAt:["$visitor.picture",0]}
+                }
+            }
+        }
+    },
+    // {
+    //     $project:{
+    //         employee:0,
+    //         visitor:0
+    //     }
+    // }
+
+  ])
+  console.log(list);
+  
+  res.send({
+    code: 200,
+    list
+  });
+});
 
 module.exports = router
