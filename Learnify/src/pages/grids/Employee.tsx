@@ -1,9 +1,18 @@
 // 个人信息页面组件
-import React from "react";
-import { Form, Input, Button, ImageUploader, NavBar } from "antd-mobile";
-import { UploadOutline } from "antd-mobile-icons";
+import React, { useEffect, useState } from "react";
+import { Form, Input, Button, ImageUploader, NavBar, Toast } from "antd-mobile";
+import { UploadOutline,EnvironmentOutline ,AppOutline } from "antd-mobile-icons";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import http from "../../utils/axios";
+interface Com {
+  name?: string;
+  inaddress?: string;
+  type?: string;
+  logo?: string;
+  house?: string;
+  outaddress?: string;
+  _id?:string
+}
 const PersonalInfo = () => {
   // 表单初始值
   const initialValues = {
@@ -44,43 +53,87 @@ const PersonalInfo = () => {
     console.log(res);
     
     if(res.code==200){
-      navigate("/company_done")
+      navigate("/employee_done")
     }else{
       throw new Error("addcomem错误")
     }
   }
+  const [item,setitem]=useState<Com>({})
+  const getitem=async()=>{
+    const id=query.get('id')
+    let res=await http.get('/WYQ/comitem',{_id:id})
+    if(res.code==200){
+      setitem(res.item)
+    }else{
+      Toast.show({
+        icon:'warning',
+        content:'企业id传递错误请联系客服'
+      })
+    }
+  }
+  useEffect(()=>{
+    getitem()
+  },[])
   return (
     <div style={{ background: "#f5f5f5", minHeight: "100vh" }}>
       {/* 顶部导航栏 */}
       <NavBar
         back="返回"
         onBack={() => {
-          navigate(-2);
+          navigate(-1);
         }}
       >
-        企业登记
+        人员入驻
       </NavBar>
 
-      {/* 步骤指示条 */}
       <div
         style={{
-          display: "flex",
-          justifyContent: "space-around",
-          margin: "16px 0",
+          background: "#fff",
+          borderRadius: 12,
+          padding: 12,
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+          backgroundImage: "url(/images/1.png)",
+          height:'150px'
         }}
       >
-        <div style={{ textAlign: "center", color: "#1677ff" }}>
-          <div>✔</div>
-          <div style={{ fontSize: 12 }}>企业信息</div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <img
+            src={item.logo}
+            alt="logo"
+            style={{ width: 45, height: 45, borderRadius: "50%" }}
+          />
+          {/* <div
+            style={{ color: "#1677ff", fontSize: 14, marginRight: "13px" }}
+            onClick={() => navigate(`/employee/company/${index}`)}
+          >
+            详情
+          </div> */}
         </div>
-        <div style={{ textAlign: "center", color: "#1677ff" }}>
-          <div style={{ fontWeight: "bold" }}>2</div>
-          <div style={{ fontSize: 12 }}>个人信息</div>
+
+        <div style={{ fontSize: 16, fontWeight: 500, marginTop: 8 }}>
+          <AppOutline />
+          {item.name}
         </div>
-        <div style={{ textAlign: "center", color: "#ccc" }}>
-          <div>3</div>
-          <div style={{ fontSize: 12 }}>登记成功</div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginTop: 6,
+            // color: "#666",
+            fontSize: 12,
+          }}
+        >
+          <EnvironmentOutline style={{ marginRight: 4 }} />
+          {item.outaddress}
         </div>
+
       </div>
 
       {/* 表单区域 */}
@@ -89,12 +142,7 @@ const PersonalInfo = () => {
         layout="horizontal"
         initialValues={initialValues}
         footer={
-          <Button
-            onClick={addcomem}
-            block
-            color="primary"
-            type="submit"
-          >
+          <Button onClick={addcomem} block color="primary" type="submit">
             提交
           </Button>
         }
@@ -214,10 +262,6 @@ const PersonalInfo = () => {
           }}
         >
           提示: 请保持五官清晰，以方便系统标准识别
-          <br />
-          <span style={{ color: "#1677ff" }}>
-            *申请企业入驻的用户将成为企业首位管理员
-          </span>
         </div>
       </Form>
     </div>

@@ -9,29 +9,13 @@ const RegisterSuccess = () => {
   return (
     <div style={{ background: '#fff', minHeight: '100vh' }}>
       {/* 顶部导航栏 */}
-      <NavBar back="返回" onBack={()=>{navigate(-3)}}>企业登记</NavBar>
-
-      {/* 步骤条 */}
-      <div style={{ display: 'flex', justifyContent: 'space-around', margin: '24px 0' }}>
-        <div style={{ textAlign: 'center', color: '#1677ff' }}>
-          <div>✔</div>
-          <div style={{ fontSize: 12 }}>企业信息</div>
-        </div>
-        <div style={{ textAlign: 'center', color: '#1677ff' }}>
-          <div>✔</div>
-          <div style={{ fontSize: 12 }}>个人信息</div>
-        </div>
-        <div style={{ textAlign: 'center', color: '#1677ff' }}>
-          <div style={{ fontWeight: 'bold' }}>3</div>
-          <div style={{ fontSize: 12 }}>登记成功</div>
-        </div>
-      </div>
+      <NavBar back="返回" onBack={()=>{navigate(-3)}}>人员入驻</NavBar>
 
       {/* 成功图标与文字 */}
       <div style={{ textAlign: 'center', marginTop: 80 }}>
         <CheckCircleFill style={{ fontSize: 64, color: 'green' }} />
         <div style={{ marginTop: 16, fontSize: 16, color: '#666' }}>
-          企业信息已经登记完成。
+          人员入驻已经登记完成。
         </div>
       </div>
 

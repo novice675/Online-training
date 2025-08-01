@@ -7,7 +7,14 @@ import Main from "../pages/Main";
 import Company from "../pages/grids/Company";
 import Company_em from '../pages/grids/Company_em'
 import Company_done from '../pages/grids/Company_done'
-
+import Visitor from '../pages/grids/Visitor'
+import Visitor_done from "../pages/grids/Visitor_done";
+import Employee from "../pages/grids/Employee";
+import Employee_com from "../pages/grids/Employee_com";
+import Employee_done from "../pages/grids/Employee_done";
+import Mima from "../pages/grids/Mima";
+import Mycom from '../pages/Mycom'
+import Haoni from "../pages/grids/Haoni"
 const App = React.lazy(() => import("../App"));
 const Login = React.lazy(() => import("../pages/Login"));
 
@@ -39,7 +46,7 @@ const routes = createBrowserRouter([
     children: [
       { path: "/shou", element: <Shou></Shou> },
       {
-        path: "/service",
+        path: "/serve",
         element: <Serve />,
       },
       {
@@ -58,6 +65,15 @@ const routes = createBrowserRouter([
   {path:'/company',element:<Company></Company>},
   {path:'/company_em',element:<Company_em></Company_em>},
   {path:'/company_done',element:<Company_done></Company_done>},
+  {path:'/visitor',element:<Visitor></Visitor>},
+  {path:'/visitor_done',element:<Visitor_done></Visitor_done>},
+  {path:'/employee',element:<Employee></Employee>},
+  {path:'/employee_com',element:<Employee_com></Employee_com>},
+  {path:'/employee_done',element:<Employee_done></Employee_done>},
+  { path: "/mima", element: <Mima></Mima> },
+  { path: "/mycom", element: <Mycom></Mycom> },
+  { path: "/haoni", element: <Haoni></Haoni> },
+  
 ]);
 
 export default routes;
