@@ -5,207 +5,58 @@ import type { RouteConfig } from '../types/interfaces/route'
 
 // 菜单路由
 export const menuRoutes: RouteConfig[] = [
+  // 物业管理菜单
   {
-    name: 'dashboard',
-    path: 'dashboard',
-    component: () => import('../pages/dashboard.vue'),
+    name: 'Overview',
+    path: 'Overview',
+    component: () => import('@/pages/home/Estate/EstateMenu/EstateMenu.vue'),
     meta: {
       roleName: ['teacher', 'student'],
-      menuTitle: '仪表盘',
+      menuTitle: '物业总览',
       menuIcon: 'dashboard',
+      parentModule: 'Estate',
       isLogin: true,
     }
   },
   {
-    name: 'student',
-    path: 'student',
-    component: () => import('../pages/Student.vue'),
-    meta: {
-      roleName: ['teacher'],
-      menuTitle: '学生管理',
-      menuIcon: 'user',
-      isLogin: true,
-    }
-  },
-  {
-    name: 'course',
-    path: 'course',
-    component: () => import('../pages/Course.vue'),
+    name: 'Visitor',
+    path: 'Visitor',
+    component: () => import('@/pages/home/Estate/EstateMenu/Visitor/Visitor.vue'),
     meta: {
       roleName: ['teacher', 'student'],
-      menuTitle: '课程管理',
+      menuTitle: '访客管理',
       menuIcon: 'book',
+      parentModule: 'Estate',
       isLogin: true,
     },
     children: [
       {
         name: 'courseList',
         path: 'list',
-        component: () => import('../pages/course/List.vue'),
+        component: () => import('@/pages/home/Estate/EstateMenu/Visitor/List.vue'),
         meta: {
           roleName: ['teacher', 'student'],
-          menuTitle: '课程列表',
+          menuTitle: '访客信息登记',
           menuIcon: 'list',
+          parentModule: 'index',
           isLogin: true,
         }
       },
       {
         name: 'courseDetail',
         path: 'detail/:id',
-        component: () => import('../pages/course/Detail.vue'),
+        component: () => import('@/pages/home/Estate/EstateMenu/Visitor/Detail.vue'),
         meta: {
           roleName: ['teacher', 'student'],
-          menuTitle: '课程详情',
+          menuTitle: '访客进出记录',
           menuIcon: 'detail',
+          parentModule: 'index',
           isLogin: true,
-          hidden: true // 不在菜单中显示
+          hidden: true
         }
       }
     ]
-  },
-  {
-    name: 'homework',
-    path: 'homework',
-    component: () => import('../pages/Homework.vue'),
-    meta: {
-      roleName: ['teacher', 'student'],
-      menuTitle: '作业管理',
-      menuIcon: 'file',
-      isLogin: true,
-    },
-    children: [
-      {
-        name: 'homeworkList',
-        path: 'list',
-        component: () => import('../pages/homework/List.vue'),
-        meta: {
-          roleName: ['teacher', 'student'],
-          menuTitle: '作业列表',
-          menuIcon: 'list',
-          isLogin: true,
-        }
-      },
-      {
-        name: 'homeworkDetail',
-        path: 'detail/:id',
-        component: () => import('../pages/homework/Detail.vue'),
-        meta: {
-          roleName: ['teacher', 'student'],
-          menuTitle: '作业详情',
-          menuIcon: 'detail',
-          isLogin: true,
-        }
-      },
-      {
-        name: 'homeworkSubmit',
-        path: 'submit/:id',
-        component: () => import('../pages/homework/Submit.vue'),
-        meta: {
-          roleName: ['student'],
-          menuTitle: '提交作业',
-          menuIcon: 'submit',
-          isLogin: true,
-          // hidden: true // 不在菜单中显示
-        }
-      }
-    ]
-  },
-  {
-    name: 'grade',
-    path: 'grade',
-    component: () => import('../pages/Grade.vue'),
-    meta: {
-      roleName: ['teacher', 'student'],
-      menuTitle: '成绩管理',
-      menuIcon: 'chart',
-      isLogin: true,
-    }
-  },
-  {
-    name: 'property',
-    path: 'property',
-    component: () => import('../pages/property/index.vue'),
-    meta: {
-      roleName: ['teacher', 'student'],
-      menuTitle: '物业管理',
-      menuIcon: 'chart',
-      isLogin: true,
-    },
-    children: [
-      {
-        name: 'propertyHome',
-        path: 'propertyHome',
-        component: () => import('../pages/property/Home.vue'),
-        meta: {
-          roleName: ['teacher', 'student'],
-          menuTitle: '物业总览',
-          menuIcon: 'chart',
-          isLogin: true,
-        }
-      },
-      {
-        name: 'propertyAd',
-        path: 'propertyAd',
-        component: () => import('../pages/property/People-Ad.vue'),
-        meta: {
-          roleName: ['teacher', 'student'],
-          menuTitle: '访客管理',
-          menuIcon: 'chart',
-          isLogin: true,
-        }
-      },
-      {
-        name: 'propertyGo',
-        path: 'propertyGo',
-        component: () => import('../pages/property/People-go.vue'),
-        meta: {
-          roleName: ['teacher', 'student'],
-          menuTitle: '访客进出管理',
-          menuIcon: 'chart',
-          isLogin: true,
-        }
-      },
-      {
-        name: 'propertyPeople',
-        path: 'propertyPeople',
-        component: () => import('../pages/property/People.vue'),
-        meta: {
-          roleName: ['teacher', 'student'],
-          menuTitle: '访客信息登记',
-          menuIcon: 'chart',
-          isLogin: true,
-        }
-      }
-    ]
-  },
-  {
-    name: 'visitorChart3D',
-    path: 'visitorChart3D',
-    component: () => import('../pages/property/VisitorChart3D.vue'),
-    meta: {
-      roleName: ['teacher', 'student'],
-      menuTitle: '数据可视',
-      menuIcon: 'chart',
-      isLogin: true,
-    }
-  },
-  // 运营管理的菜单
-  // 物业管理的菜单
-  {
-    name: 'estate-building',
-    path: 'building',
-    children: [],
-    component: () => import('@/pages/home/Estate/Estate.vue'),
-    meta: {
-      roleName: ['teacher'],
-      menuTitle: '物业总览',
-      menuIcon: 'office-building',
-      parentModule: 'estate',
-      isLogin: true,
-    }
-  },
-  // 数据可视的菜单
-  // 配置中心的菜单
+  }
 ]
 
 // 路由表
@@ -221,7 +72,7 @@ const router = createRouter({
       name: 'home',
       path: '/home',
       component: () => import('@/pages/home/main.vue'),
-      redirect: '/home/situation',
+      // redirect: '/home/situation',
       children: [
         {
           // 综合态势
@@ -233,6 +84,7 @@ const router = createRouter({
           // 运营管理
           name: 'Operation',
           path: 'Operation',
+          // redirect: '/home/Operation/OperationMenu',
           component: () => import('@/pages/home/Operation/Operation.vue'),
           children: [
             {
@@ -250,7 +102,7 @@ const router = createRouter({
           // 物业管理
           name: 'Estate',
           path: 'Estate',
-          // redirect: 'Estate/EstateMenu',
+          // redirect: '/home/Estate/EstateMenu',
           component: () => import('@/pages/home/Estate/Estate.vue'),
           children: [
             {
@@ -268,6 +120,7 @@ const router = createRouter({
           // 可视数据
           name: 'VisualData',
           path: 'VisualData',
+          // redirect: '/home/VisualData/VisualDataMenu',
           component: () => import('@/pages/home/VisualData/VisualData.vue'),
           children: [
             {
@@ -285,6 +138,7 @@ const router = createRouter({
           // 配置中心
           name: 'Configuration',
           path: 'Configuration',
+          // redirect: '/home/Configuration/ConfigurationMenu',
           component: () => import('@/pages/home/Configuration/Configuration.vue'),
           children: [
             {

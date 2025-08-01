@@ -1,6 +1,6 @@
 <template>
   <div>
-    EstateMenu
+    EstateMenu图表
   </div>
 </template>
 

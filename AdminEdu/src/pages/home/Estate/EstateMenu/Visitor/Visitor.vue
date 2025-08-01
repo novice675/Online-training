@@ -1,7 +1,5 @@
 <template>
-  <div>
-    ConfigurationMenu
-  </div>
+  <div>visitor页面</div>
 </template>
 
 <script>

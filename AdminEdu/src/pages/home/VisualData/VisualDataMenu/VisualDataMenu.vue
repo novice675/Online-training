@@ -1,6 +1,6 @@
 <template>
   <div>
-    EstateMenu
+    VisualDataMenu
   </div>
 </template>
 
