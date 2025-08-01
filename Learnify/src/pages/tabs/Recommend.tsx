@@ -5,7 +5,7 @@ export default function Recommend() {
   const navigate=useNavigate()
   const items = ["/images/3.png", "/images/2.png", "/images/1.png"];
   return (
-    <div>
+    <div style={{backgroundColor:'white'}}>
       <Swiper autoplay loop>
         {items.map((src, index) => (
           <Swiper.Item key={index}>
@@ -20,40 +20,40 @@ export default function Recommend() {
             可租房源
           </div>
         </Grid.Item>
-        <Grid.Item className={styles['grid-demo-item-block']}>
+        <Grid.Item onClick={()=>{navigate('/visitor')}} className={styles['grid-demo-item-block']}>
           <div style={{textAlign:'center'}}>
             <img src="/2.png" alt="" className={styles.img}/>
-            公寓入驻
-          </div>
-        </Grid.Item>
-        <Grid.Item className={styles['grid-demo-item-block']}>
-          <div style={{textAlign:'center'}}>
-            <img src="3.png" alt="" className={styles.img}/>
             访客登记
           </div>
         </Grid.Item>
         <Grid.Item className={styles['grid-demo-item-block']}>
           <div style={{textAlign:'center'}}>
+            <img src="3.png" alt="" className={styles.img}/>
+            政策申报
+          </div>
+        </Grid.Item>
+        <Grid.Item onClick={()=>{navigate('/company')}} className={styles['grid-demo-item-block']}>
+          <div style={{textAlign:'center'}}>
             <img src="4.png" alt="" className={styles.img}/>
-            圈子活动
+            企业入驻
           </div>
         </Grid.Item>
         <Grid.Item className={styles['grid-demo-item-block']}>
           <div style={{textAlign:'center'}}>
             <img src="5.png" alt="" className={styles.img}/>
-            政策申报
+            公寓入住
           </div>
         </Grid.Item>
         <Grid.Item className={styles['grid-demo-item-block']}>
           <div style={{textAlign:'center'}}>
             <img src="6.png" alt="" className={styles.img}/>
-            场地预约
+            圈子活动
           </div>
         </Grid.Item>
-        <Grid.Item onClick={()=>{navigate('/company')}} className={styles['grid-demo-item-block']}>
+        <Grid.Item  className={styles['grid-demo-item-block']}>
           <div style={{textAlign:'center'}}>
             <img src="7.png" alt="" className={styles.img}/>
-            企业入驻
+            场地预约
           </div>
         </Grid.Item>
         <Grid.Item className={styles['grid-demo-item-block']}>

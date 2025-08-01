@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, Input, Button, ImageUploader, NavBar,  } from 'antd-mobile';
 import { UploadOutline } from 'antd-mobile-icons';
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
-axios.defaults.baseURL='http://localhost:3008'
+import { Toast } from 'antd-mobile';
+import http from '../../utils/axios';
 const Company = () => {
   // 表单初始值
   const initialValues = {
@@ -12,19 +12,44 @@ const Company = () => {
     house: '',
     type: '',
     outaddress:'',
-    logo:'',
+    logo:[] as string[],
   };
   const navigate=useNavigate()
   const submit=async()=>{
     let values=await form.validateFields()
     console.log(values);
-  
-    let res=await axios.post('/WYQ/addcom',values)
-    if(res.data.code==200){
-      console.log('ok');
+    values.logo=values?.logo[0]?.url||''
+    let res=await http.post('/WYQ/addcom',values)
+    if(res.code==200){
+      console.log(res.id,'id');
+      
+      navigate(`/company_em?id=${res.id}`)
+    }else if (res.code==400){
+      Toast.show({
+        icon:'fail',
+        content:"企业名字已被占用"
+      })
     }
   }
-  const [form] = Form.useForm()
+  const [form] = Form.useForm();
+  const uploadlogo = async (file:File) => {
+    console.log(file, "file");
+    const formData = new FormData();
+    formData.append("file", file);
+    let res: { code: number; url: string  } = await http.post(
+      "/WYQ/comupload",
+      formData
+    );
+    if (res.code == 200) {
+      // seturl(res.data.url)
+      return Promise.resolve({
+        url: res.url,
+      });
+    } else {
+      throw new Error("上传失败");
+    }
+  };
+  
   return (
     <div style={{ background: "#f5f5f5", minHeight: "100vh" }}>
       {/* 顶部导航栏 */}
@@ -97,8 +122,8 @@ const Company = () => {
           <Input placeholder="请输入所属行业" />
         </Form.Item>
 
-        <Form.Item name="building" label="入驻楼宇">
-          <Input placeholder="请输入入驻楼宇" />
+        <Form.Item name="outaddress" label="企业地址">
+          <Input placeholder="请输入企业地址" />
         </Form.Item>
 
         <div
@@ -111,21 +136,9 @@ const Company = () => {
           企业logo
         </div>
 
-        <Form.Item name="license">
+        <Form.Item name="logo">
           <ImageUploader
-            upload={async (file) => {
-              console.log(file, "file");
-              const formData = new FormData();
-              formData.append("file", file);
-              let res:{data:{code:number,url:string}} = await axios.post("/WYQ/comupload", formData);
-              if (res.data.code == 200) {
-                return Promise.resolve({
-                  url: res.data.url,
-                });
-              }else{
-                throw new Error('上传失败')
-              }
-            }}
+            upload={uploadlogo}
             maxCount={1}
             accept="image/*"
           >
