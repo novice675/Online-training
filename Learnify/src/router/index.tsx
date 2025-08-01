@@ -15,6 +15,9 @@ import Employee_done from "../pages/grids/Employee_done";
 import Mima from "../pages/grids/Mima";
 import Mycom from '../pages/Mycom'
 import Haoni from "../pages/grids/Haoni"
+import Phones from "../pages/grids/Phones";
+import Visitors from "../pages/grids/Visitors";
+import Sendmement from "../pages/Sendmement";
 const App = React.lazy(() => import("../App"));
 const Login = React.lazy(() => import("../pages/Login"));
 
@@ -73,6 +76,10 @@ const routes = createBrowserRouter([
   { path: "/mima", element: <Mima></Mima> },
   { path: "/mycom", element: <Mycom></Mycom> },
   { path: "/haoni", element: <Haoni></Haoni> },
+  { path: "/phones", element: <Phones></Phones> },
+  { path: "/visitors", element: <Visitors></Visitors> },
+  { path: "/sendmement", element: <Sendmement></Sendmement> },
+
   
 ]);
 

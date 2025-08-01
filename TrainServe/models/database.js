@@ -30,7 +30,11 @@ let EmployeeSchema = new mongoose.Schema({
   sfz: String,      // 身份证号
   email: String,    // 邮箱
   weixin: String,   // 微信号
-  picture: String   // 人脸照片
+  picture: String,   // 人脸照片
+  role:{
+    type:"String",
+    default:"员工"
+  }
 })
 
 //  * 访客表 Visitor
@@ -45,7 +49,11 @@ let VisitorSchema = new mongoose.Schema({
   },
   time: Date,       // 到访时间
   carcode: String,  // 车牌号
-  cartype: String   // 车辆类型
+  cartype: String,   // 车辆类型
+  role:{
+    type:"String",
+    default:"访客"
+  }
 })
 
 /**
@@ -58,10 +66,22 @@ let MomentSchema = new mongoose.Schema({
     },
     title: String,     // 标题
     content: [String],     // 图片数组，存储图片 URL 列表
-    zan: Number,       // 点赞数
-    eye: Number,       // 浏览数
-    star: Number,      // 收藏数
-    time: Date,        // 发布时间
+    zan: {
+      type:Number,
+      default:123
+    },       // 点赞数
+    eye: {
+      type:Number,
+      default:123
+    },       // 浏览数
+    star: {
+      type:Number,
+      default:123
+    },      // 收藏数
+    time: {
+      type:Date,
+      default:()=>new Date()
+    },        // 发布时间
     type: String       // 身份类型，'employee' 或 'visitor'
   })
   

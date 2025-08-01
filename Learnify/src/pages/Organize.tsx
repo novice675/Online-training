@@ -19,15 +19,14 @@ interface Com {
 }
 const PersonalInfo = () => {
   const navigate = useNavigate();
-  const { search } = useLocation();
-  const query = new URLSearchParams(search);
-
   const [item, setitem] = useState<Com>({});
   const getitem = async () => {
-    const id = query.get("id");
-    console.log(id,'3333333');
+    // const id = query.get("id");
+    const com_id=localStorage.getItem('com_id')
+    const role=localStorage.getItem('role')
+    console.log(com_id,role,'3333333');
     
-    let res = await http.get("/WYQ/comitem", { _id: id });
+    let res = await http.get("/WYQ/comitem", { _id: com_id });
     if (res.code == 200) {
       setitem(res.item);
     } else {
