@@ -99,9 +99,9 @@
           <el-table-column prop="Person" label="跟进人" width="100" />
           <el-table-column prop="plone" label="联系方式" width="150" />
           <el-table-column prop="location" label="安装位置" width="150" />
-          <el-table-column prop="createTime" label="创建时间" width="160">
+          <el-table-column prop="operationTime" label="运行时间" width="160">
             <template #default="{ row }">
-              {{ formatDate(row.createTime) }}
+              {{ formatDateOnly(row.operationTime) }}
             </template>
           </el-table-column>
           <el-table-column label="操作" width="200" fixed="right">
@@ -265,6 +265,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Plus, Delete, Refresh, Search } from "@element-plus/icons-vue";
 import TableLayout from "@/components/TableLayout.vue";
@@ -318,6 +319,9 @@ const multipleSelection = ref<alonefrom[]>([]);
 const page = ref<number>(1);
 const size = ref<number>(10);
 const total = ref<number>(0);
+
+// 路由
+const router = useRouter();
 
 const searchForm = reactive<showfrom>({
   name: "",
@@ -392,6 +396,11 @@ const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleString("zh-CN");
 };
 
+const formatDateOnly = (dateStr: string) => {
+  if (!dateStr) return "-";
+  return new Date(dateStr).toLocaleDateString("zh-CN");
+};
+
 const fetchData = async () => {
   loading.value = true;
     // 构建查询参数
@@ -444,12 +453,8 @@ const handleSelectionChange = (val: any[]) => {
 };
 
 const add = () => {
-  isEdit.value = false;
-  Ids.value = "";
-  resetForm();
-  // 自动生成设备编号
-  formData.bianhao = generateDeviceNumber();
-  dialogVisible.value = true;
+  // 跳转到新增设备页面
+  router.push('/property/deviceAdd');
 };
 
 const aloneFn = async (row: any) => {

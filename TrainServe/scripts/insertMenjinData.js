@@ -33,11 +33,19 @@ function generateMenjinData() {
         const deviceModel = deviceModels[Math.floor(Math.random() * deviceModels.length)];
         const status = statusOptions[Math.floor(Math.random() * statusOptions.length)];
         
-        // 生成设备编号，格式如 ISS20200816
-        const deviceNumber = `ISS2020${String(800 + i).padStart(4, '0')}`;
+        // 生成设备编号，格式：年份+月+日+编号，如：20250803001
+        // 年份在2022年到当前年份之间随机选择
+        const currentYear = new Date().getFullYear();
+        const randomYear = Math.floor(Math.random() * (currentYear - 2022 + 1)) + 2022;
+        const randomMonth = Math.floor(Math.random() * 12) + 1;
+        const randomDay = Math.floor(Math.random() * 28) + 1;
+        const deviceNumber = `${randomYear}${String(randomMonth).padStart(2, '0')}${String(randomDay).padStart(2, '0')}${String(i).padStart(3, '0')}`;
         
         // 生成手机号
         const phoneNumber = `138${String(Math.floor(Math.random() * 90000000) + 10000000)}`;
+        
+        // 运行时间与设备编号的日期保持一致
+        const operationDate = new Date(randomYear, randomMonth - 1, randomDay); // 月份从0开始，所以要减1
         
         const device = {
             name: deviceType,
@@ -47,6 +55,7 @@ function generateMenjinData() {
             Person: followUpPerson,
             plone: phoneNumber,
             location: `${building}栋${floor}${area}`,
+            operationTime: operationDate,
             Image: `/images/scene/${deviceType.toLowerCase()}_${i}.jpg`,
             imgs: `/images/device/${deviceModel.toLowerCase().replace(/-/g, '_')}.jpg`
         };

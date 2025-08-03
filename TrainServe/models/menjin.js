@@ -20,6 +20,10 @@ const menjinSchema = new mongoose.Schema({
     Person: String, // 跟进人
     plone: String,    // 联系方式
     location: String, // 安装位置
+    operationTime: {
+        type: Date,
+        default: Date.now
+    },                  // 运行时间
     Image: String,     // 现场图片
     imgs: String,    // 设备图片
     createTime: {

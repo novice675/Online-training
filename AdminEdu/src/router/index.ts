@@ -287,6 +287,11 @@ const router = createRouter({
       name: 'menjin ',
       path: '/menjin',
       component: () => import('../pages/property/Menjin.vue')
+    },
+    {
+      name: 'deviceAdd',
+      path: '/deviceAdd',
+      component: () => import('../pages/property/DeviceAdd.vue')
     }
   ]
 });
