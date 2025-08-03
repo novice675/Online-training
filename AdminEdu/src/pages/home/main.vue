@@ -56,7 +56,7 @@
                         <el-option label="深圳校区" value="shenzhen" />
                     </el-select>
                 </div>
-                <div class="selector-right">
+                <div>
                     <span class="time-display">{{ currentTime }}</span>
                 </div>
             </div>
@@ -80,11 +80,11 @@ import { ElMessage } from 'element-plus'
 const router = useRouter()
 const userStore = useUserStore()
 const username = ref('管理员')
-const activeIndex2 = ref('/home/Situation')
+const activeIndex2 = ref('Situation')
 const selectedCampus = ref('')
 const currentTime = ref('')
 const handleSelect = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
+    console.log(key, keyPath)
 }
 const handleLogout = () => {
     localStorage.removeItem('user')
@@ -118,6 +118,7 @@ onMounted(() => {
 .headerTop {
     display: flex;
     align-items: center;
+    min-width: 1200px;
     justify-content: space-between;
     padding: 0 20px;
     height: 85px;
@@ -343,14 +344,14 @@ onMounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
 }
 
 .selector-left {
     display: flex;
     align-items: center;
+    /* gap 属性主要用于控制容器内项目之间的间距 */
     gap: 15px;
-    flex: 1;
+    flex: 1
 }
 
 .selector-label {

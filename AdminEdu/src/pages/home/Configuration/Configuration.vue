@@ -4,6 +4,7 @@
             <Menu />
         </div>
         <div class="content">
+            <!-- 修改路由出口，确保能正确显示子路由 -->
             <RouterView v-slot="{ Component }">
                 <transition name="fade" mode="out-in">
                     <component :is="Component" />

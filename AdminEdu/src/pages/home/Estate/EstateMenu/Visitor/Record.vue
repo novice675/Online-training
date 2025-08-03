@@ -1,7 +1,5 @@
 <template>
-  <div>
-    物业总览
-  </div>
+  <div>访客信息记录</div>
 </template>
 
 <script>

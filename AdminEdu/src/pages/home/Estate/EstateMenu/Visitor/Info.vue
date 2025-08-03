@@ -1,5 +1,5 @@
 <template>
-  <div>visitor页面</div>
+  <div>访客信息登记</div>
 </template>
 
 <script>
