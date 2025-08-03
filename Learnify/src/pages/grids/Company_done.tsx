@@ -1,4 +1,3 @@
-// 登记成功页面组件
 import React from 'react';
 import { Button, NavBar } from 'antd-mobile';
 import { CheckCircleFill } from 'antd-mobile-icons';
@@ -10,7 +9,7 @@ const RegisterSuccess = () => {
   return (
     <div style={{ background: '#fff', minHeight: '100vh' }}>
       {/* 顶部导航栏 */}
-      <NavBar back="返回" onBack={()=>{navigate('/shou')}}>企业登记</NavBar>
+      <NavBar back="返回" onBack={()=>{navigate(-3)}}>企业登记</NavBar>
 
       {/* 步骤条 */}
       <div style={{ display: 'flex', justifyContent: 'space-around', margin: '24px 0' }}>
@@ -41,7 +40,7 @@ const RegisterSuccess = () => {
         <Button
           color='success'
           fill='outline'
-          onClick={() => navigate('/shou')}
+          onClick={() => navigate(-3)}
           style={{ width: 100 }}
         >
           返回

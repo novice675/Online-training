@@ -3,10 +3,10 @@ import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // 创建请求实例
 const instance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api', // 从环境变量获取基础URL
+  baseURL: import.meta.env.VITE_API_URL || '/http://localhost:3008/', // 从环境变量获取基础URL
   timeout: 15000, // 请求超时时间
   headers: {
-    'Content-Type': 'application/json',
+    // 'Content-Type': 'application/json',
   },
 });
 
@@ -60,7 +60,7 @@ instance.interceptors.response.use(
       }
     } else {
       // 网络错误或请求被取消
-      console.error('网络错误或请求被取消');
+      console.error('网络错误或请求被取消',error);
     }
     return Promise.reject(error);
   }
@@ -74,8 +74,8 @@ const http = {
    * @param params 请求参数
    * @param config 请求配置
    */
-  get<T = any>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
-    return instance.get(url, { params, ...config });
+  get<T = any,P=Record<string,any>>(url: string, params?: P, config?: AxiosRequestConfig): Promise<T> {
+    return instance.get(url, { params:params, ...config });
   },
 
   /**
