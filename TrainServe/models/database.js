@@ -82,14 +82,37 @@ let MomentSchema = new mongoose.Schema({
       type:Date,
       default:()=>new Date()
     },        // 发布时间
-    type: String       // 身份类型，'employee' 或 'visitor'
+    type: String       // 身份类型，'员工' 或 '访客'
   })
+
+let CommentSchema=new mongoose.Schema({
+  moment_id:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'Moment'  //动态的id
+  },
+  time:{
+    type:Date,
+    default:()=>new Date()
+  },
+  user_id:{
+    type:mongoose.Schema.Types.ObjectId,
+    required:true
+  },
+  content:String,
+  pid:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'Comment',
+    default:null
+  },    //评论上级的id
+  type:String //发布评论的人的role
+})
   
 
 // 导出三个模型
 module.exports = {
-    Company: mongoose.model('Company', CompanySchema, 'company'),         // 集合名固定为 company
-    Employee: mongoose.model('Employee', EmployeeSchema, 'employee'),          // 集合名固定为 employee
-    Visitor: mongoose.model('Visitor', VisitorSchema, 'visitor')  ,       // 集合名固定为 visitor
-    Moment:mongoose.model('Moment', MomentSchema, 'moment')
-  }
+  Company: mongoose.model("Company", CompanySchema, "company"), // 集合名固定为 company
+  Employee: mongoose.model("Employee", EmployeeSchema, "employee"), // 集合名固定为 employee
+  Visitor: mongoose.model("Visitor", VisitorSchema, "visitor"), // 集合名固定为 visitor
+  Moment: mongoose.model("Moment", MomentSchema, "moment"),
+  Comment: mongoose.model("Comment", CommentSchema, "comment"),
+};

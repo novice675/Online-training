@@ -1,4 +1,4 @@
-const {Company,Employee,Visitor,Moment}=require('../models/database')
+const {Company,Employee,Visitor,Moment,Comment}=require('../models/database')
 const mongoose=require('mongoose')
 var express = require('express')
 var multiparty=require('multiparty')
@@ -176,20 +176,113 @@ router.get("/moment", async (req, res) => {
             }
         }
     },
-    // {
-    //     $project:{
-    //         employee:0,
-    //         visitor:0
-    //     }
-    // }
-
   ])
   console.log(list);
-  
   res.send({
     code: 200,
     list
   });
 });
 
+
+router.get("/comment", async (req, res) => {
+  const {moment_id}=req.query
+  console.log(moment_id);
+  let list=await Comment.aggregate([
+    {
+      $match:{moment_id:new mongoose.Types.ObjectId(moment_id)}
+    },
+    {
+      $lookup:{
+        from:'employee',
+        foreignField:'_id',
+        localField:'user_id',
+        as:'employee'
+      }
+    },
+    {
+      $lookup:{
+        from:'visitor',
+        foreignField:'_id',
+        localField:'user_id',
+        as:'visitor'
+      }
+    },
+    {
+      $addFields:{
+        user:{
+          $cond:[
+            {$eq:['$type','员工']},
+            {$arrayElemAt:["$employee",0]},
+            {$arrayElemAt:['$visitor',0]}
+          ]
+        }
+      }
+    }
+  ])
+  console.log(list,'list');
+
+  let commentmap={}
+  let toplevel=[]
+  list.forEach(i=>{
+    i.replies=[]
+    commentmap[i._id.toString()]=i
+    if(!i.pid){
+      toplevel.push(i)
+    }
+  })
+  list.forEach(i=>{
+    if(i.pid){
+      const pcomment=commentmap[i.pid.toString()]
+      if(pcomment){
+        i.pname=pcomment.user.name
+        pcomment.replies.push(i)
+        console.log(pcomment,'pcomment');
+        
+      }else{
+        console.log(`${i._id}子评论找不到对应的父评论`);
+        
+      }
+    }
+  })
+  console.log(toplevel,'toplevel');
+  console.log(toplevel[0].replies[0].replies.length,999);
+  
+  res.send({
+    code: 200,
+    list:toplevel
+  });
+});
+
+
+router.post("/addcomment", async (req, res) => {
+  // console.log(req.body,'comment');
+  await Comment.create(req.body);
+  res.send({
+    code: 200,
+  });
+});
+
+router.delete('/delcomment',async(req,res)=>{
+  console.log(req.query._id);
+  const {_id}=req.query
+  const didel=async(id)=>{
+    let delcomments=await Comment.find({pid:id})
+    console.log(delcomments);
+    if(delcomments.length){
+      for(let i of delcomments){
+        await didel(i._id)
+        console.log("删除了id为",i._id);
+        
+      }
+    }
+    await Comment.deleteOne({_id:id})
+    console.log("删除了当前");
+
+  }
+  await didel(_id)
+  res.send({
+    code:200
+  })  
+})
 module.exports = router
