@@ -8,39 +8,40 @@ import {
 import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import './App.css'
 
+// 自定义加号按钮样式
+const AddButton = () => (
+  <div
+    style={{
+      width: '48px',
+      height: '48px',
+      backgroundColor: '#A0C4FF',
+      borderRadius: '50%',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      fontSize: '32px',
+      color: '#fff',
+      boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+      // lineHeight:'20px'
+      transform:'translateY(-12px)'
+    }}
+   
+  >
+    <span style={{transform:'translateY(-4px)'}}>+</span>
+  </div>
+)
+
 function App() {
   const navigate = useNavigate()
   const location = useLocation()
   const { pathname } = location
-  
+
   // 设置当前激活的标签页
   const setRouteActive = (value: string) => {
+    // 中间加号不跳转
+    if (value === 'add') return
     navigate(value)
   }
-
-  // 底部导航栏
-  const tabBarItems = [
-    {
-      key: '/',
-      title: '首页',
-      icon: <AppOutline />,
-    },
-    {
-      key: '/service',
-      title: '服务',
-      icon: <UnorderedListOutline />,
-    },
-    {
-      key: '/organization',
-      title: '组织',
-      icon: <MessageOutline />,
-    },
-    {
-      key: '/me',
-      title: '我',
-      icon: <UserOutline />,
-    },
-  ]
 
   return (
     <div className="app-container">
@@ -63,13 +64,33 @@ function App() {
         onChange={value => setRouteActive(value)}
         className="bottom-tab-bar"
       >
-        {tabBarItems.map(item => (
-          <TabBar.Item 
-            key={item.key}
-            icon={item.icon}
-            title={item.title} 
-          />
-        ))}
+        <TabBar.Item 
+          key="/"
+          icon={<AppOutline />}
+          title="首页" 
+        />
+        <TabBar.Item 
+          key="/serve"
+          icon={<UnorderedListOutline />}
+          title="服务" 
+        />
+        <TabBar.Item 
+          key="add"
+          icon={<AddButton />}
+          title=""
+          onClick={()=>{navigate('/sendmement')}}
+          // style={{marginBottom:'25px'}}
+        />
+        <TabBar.Item 
+          key="/organization"
+          icon={<MessageOutline />}
+          title="组织" 
+        />
+        <TabBar.Item 
+          key="/me"
+          icon={<UserOutline />}
+          title="我" 
+        />
       </TabBar>
     </div>
   )
