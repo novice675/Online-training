@@ -235,7 +235,18 @@ const router = createRouter({
     // }
   ]
 });
-
+const parentNameMap: Record<string, string> = {
+  '/home/Operation': 'Operation',
+  '/home/Estate': 'Estate',
+  '/home/VisualData': 'VisualData',
+  '/home/Configuration': 'Configuration'
+};
+const getParentName = (path: string) => {
+  for (const key in parentNameMap) {
+    if (path.startsWith(key)) return parentNameMap[key];
+  }
+  return 'home';
+};
 // 获取用户登录后，有权限访问的路由
 const getOwnRouters = () => {
   const userStore = useUserStore();
@@ -288,11 +299,8 @@ const isOwnRouter = (to: RouteLocationNormalizedGeneric) => {
   }
 
   const routes = getOwnRouters();
-  let parentPath = '/home';
-  if (to.path.startsWith('/home/Operation')) parentPath = '/home/Operation';
-  else if (to.path.startsWith('/home/Estate')) parentPath = '/home/Estate';
-  else if (to.path.startsWith('/home/VisualData')) parentPath = '/home/VisualData';
-  else if (to.path.startsWith('/home/Configuration')) parentPath = '/home/Configuration';
+  // 使用 getParentName 替换原有 parentPath 判断
+  const parentPath = getParentName(to.path);
 
   // 递归检查路由权限，拼接完整路径
   const checkRoutePermission = (routes: RouteConfig[], parentPath: string): boolean => {
@@ -310,7 +318,6 @@ const isOwnRouter = (to: RouteLocationNormalizedGeneric) => {
       return false;
     });
   };
-
   return checkRoutePermission(routes, parentPath);
 };
 
@@ -324,14 +331,6 @@ router.beforeEach((to, _, next) => {
     next('/login');
     return;
   }
-
-  const getParentName = (path: string) => {
-    if (path.startsWith('/home/Operation')) return 'Operation';
-    if (path.startsWith('/home/Estate')) return 'Estate';
-    if (path.startsWith('/home/VisualData')) return 'VisualData';
-    if (path.startsWith('/home/Configuration')) return 'Configuration';
-    return 'home';
-  };
 
   // 如果用户已登录，且访问的是受控路由区域
   if (userData.username && to.path.startsWith('/home')) {
