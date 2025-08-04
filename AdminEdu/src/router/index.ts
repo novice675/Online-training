@@ -1,6 +1,6 @@
 // 创建路由对象
 import { createRouter, createWebHashHistory, type RouteLocationNormalizedGeneric, type RouteRecordRaw } from "vue-router";
-
+import { useUserStore } from '@/stores/user'
 import type { RouteConfig } from '../types/interfaces/route'
 
 // 菜单路由
@@ -223,16 +223,16 @@ const router = createRouter({
         },
       ],
     },
-    {
-      name: 'menjin ',
-      path: '/menjin',
-      component: () => import('../pages/property/Menjin.vue')
-    },
-    {
-      name: 'deviceAdd',
-      path: '/deviceAdd',
-      component: () => import('../pages/property/DeviceAdd.vue')
-    }
+    // {
+    //   name: 'menjin ',
+    //   path: '/menjin',
+    //   component: () => import('../pages/property/Menjin.vue')
+    // },
+    // {
+    //   name: 'deviceAdd',
+    //   path: '/deviceAdd',
+    //   component: () => import('../pages/property/DeviceAdd.vue')
+    // }
   ]
 });
 
