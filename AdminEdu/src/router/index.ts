@@ -32,7 +32,7 @@ export const menuRoutes: RouteConfig[] = [
       {
         name: 'zhang',
         path: 'zhang',
-        component: () => import('@/pages/Operation/OperationMenu/Zhang.vue'),
+        component: () => import('@/pages/Operation/OperationMenu/zhang.vue'),
         meta: {
           roleName: ['teacher', 'student'],
           menuTitle: '文章发布管理',
@@ -54,6 +54,20 @@ export const menuRoutes: RouteConfig[] = [
         }
       },
     ]
+  },
+  // 文章详情页面（不在菜单中显示）
+  {
+    name: 'xiang',
+    path: 'xiang/:id',
+    component: () => import('@/pages/Operation/OperationMenu/xiang.vue'),
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '文章详情',
+      menuIcon: 'document',
+      parentModule: 'Operation',
+      isLogin: true,
+      hideInMenu: true
+    }
   },
   // 物业管理菜单
   {
