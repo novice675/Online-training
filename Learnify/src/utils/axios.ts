@@ -103,8 +103,8 @@ const http = {
    * @param url 请求地址
    * @param config 请求配置
    */
-  delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    return instance.delete(url, config);
+  delete<T = any,P=Record<string,any>>(url: string,params?:P, config?: AxiosRequestConfig): Promise<T> {
+    return instance.delete(url, {params:params,...config});
   },
 
   /**

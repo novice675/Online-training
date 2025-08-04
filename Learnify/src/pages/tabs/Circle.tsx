@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import http from "../../utils/axios";
 import { Toast } from "antd-mobile";
+import { useNavigate } from "react-router-dom";
 
 interface Mo {
   _id: string;
@@ -18,6 +19,7 @@ interface Mo {
 }
 export default function Circle() {
   const [moments, setmoment] = useState<Mo[]>([]);
+  const navigate=useNavigate()
   const getlist = async () => {
     let res = await http.get("/WYQ/moment");
     if (res.code == 200) {
@@ -111,7 +113,7 @@ export default function Circle() {
         }}
       >
         <div>👍 {item.zan}</div>
-        <div>👁 {item.eye}</div>
+        <div onClick={()=>{navigate(`/comment?moid=${item._id}`)}} style={{color:'black'}}>👁 {item.eye}</div>
         <div>⭐ {item.star}</div>
       </div>
     </div>
