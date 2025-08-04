@@ -15,31 +15,15 @@ router.post('/addcom', async (req, res) => {
     let re=await Company.create(req.body)
     console.log(re);
     res.send({
-<<<<<<< HEAD
-        code: 200,
-        msg: "添加成功"
-    })
-
-=======
         code:200,
         msg:"添加成功",
         id:re._id
     })
->>>>>>> 65cba66f0a0758c368188de3960e821b25a51497
 })
 
 // addcom的图片上传
 router.post('/comupload', (req, res) => {
     console.log(req.body);
-<<<<<<< HEAD
-    const form = new multiparty.Form()
-    form.uploadDir = '/upload'
-    form.parse(req, (err, fields, files) => {
-        console.log(err, fields, files, 3);
-
-    })
-
-=======
     const form=new multiparty.Form()
     form.uploadDir='upload'
     form.parse(req,(err,fields,files)=>{
@@ -51,7 +35,6 @@ router.post('/comupload', (req, res) => {
             url:url
         })
     })
->>>>>>> 65cba66f0a0758c368188de3960e821b25a51497
 })
 
 // addcom_em
