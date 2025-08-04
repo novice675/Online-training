@@ -2,8 +2,8 @@
     <div>
         <header class="headerTop">
             <h1>智慧校园管理平台</h1>
-            <el-menu :default-active="activeIndex2" class="el-menu-demo" mode="horizontal" background-color="#082c61"
-                text-color="#dddddd" active-text-color="#fff" :ellipsis="false" @select="handleSelect" router>
+            <el-menu :key="activeIndex2" :default-active="activeIndex2" class="el-menu-demo" mode="horizontal" background-color="#082c61"
+                text-color="#dddddd" active-text-color="#fff" :ellipsis="false" @select="handleSelect">
                 <el-menu-item index="Situation">综合态势</el-menu-item>
                 <el-menu-item index="Operation">运营管理</el-menu-item>
                 <el-menu-item index="Estate">物业管理</el-menu-item>
@@ -66,9 +66,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '../../stores/user'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useUserStore } from '../stores/user'
 import {
     CaretBottom,
     User,
@@ -78,13 +78,51 @@ import {
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
 const username = ref('管理员')
-const activeIndex2 = ref('Situation')
+
+// 根据当前路由动态计算激活的导航项
+const activeIndex2 = computed(() => {
+    const path = route.path
+    if (path.includes('/Operation')) return 'Operation'
+    if (path.includes('/Estate')) return 'Estate'
+    if (path.includes('/VisualData')) return 'VisualData'
+    if (path.includes('/Configuration')) return 'Configuration'
+    if (path.includes('/situation')) return 'Situation'
+    return 'Situation' // 默认值
+})
 const selectedCampus = ref('')
 const currentTime = ref('')
 const handleSelect = (key: string, keyPath: string[]) => {
-    console.log(key, keyPath)
+    console.log('顶部导航点击:', key, keyPath)
+    console.log('当前路径:', route.path)
+    
+    // 根据选中的菜单项跳转到对应的模块默认总览页面
+    const routeMap: Record<string, string> = {
+        'Situation': '/home/situation',
+        'Operation': '/home/Operation/OperationOverview',
+        'Estate': '/home/Estate/Overview', 
+        'VisualData': '/home/VisualData/DataAnalysis',
+        'Configuration': '/home/Configuration/SystemConfig'
+    }
+    
+    if (routeMap[key]) {
+        console.log('🎯 即将跳转到:', routeMap[key])
+        console.log('📍 当前激活导航:', activeIndex2.value)
+        try {
+            router.push(routeMap[key])
+            console.log('📤 跳转命令已发送')
+            // 使用 nextTick 确保路由更新后再检查状态
+            setTimeout(() => {
+                console.log('✨ 跳转后激活导航:', activeIndex2.value)
+            }, 100)
+        } catch (error) {
+            console.error('❌ 跳转失败:', error)
+        }
+    } else {
+        console.warn('⚠️ 未找到对应的路由映射:', key)
+    }
 }
 const handleLogout = () => {
     localStorage.removeItem('user')

@@ -1,5 +1,7 @@
 <template>
-  <div>访客信息登记</div>
+  <div>
+    VisualDataMenu123123
+  </div>
 </template>
 
 <script>

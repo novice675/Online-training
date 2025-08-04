@@ -3,13 +3,63 @@ import { createRouter, createWebHashHistory, type RouteLocationNormalizedGeneric
 import { useUserStore } from '@/stores/user'
 import type { RouteConfig } from '../types/interfaces/route'
 
-// 菜单路由
+// 菜单路由 - 按模块分类
 export const menuRoutes: RouteConfig[] = [
+  // 运营管理菜单
+  {
+    name: 'OperationOverview',
+    path: 'OperationOverview',
+    component: () => import('@/pages/Operation/OperationOverview.vue'),
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '运营总览',
+      menuIcon: 'dashboard',
+      parentModule: 'Operation',
+      isLogin: true,
+    }
+  },
+  {
+    name: 'ContentManagement',
+    path: 'ContentManagement',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '内容管理',
+      menuIcon: 'book',
+      parentModule: 'Operation',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'zhang',
+        path: 'zhang',
+        component: () => import('@/pages/Operation/OperationMenu/Zhang.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '文章发布管理',
+          menuIcon: 'list',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'ping',
+        path: 'ping',
+        component: () => import('@/pages/Operation/OperationMenu/ping.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '内容评论管理',
+          menuIcon: 'list',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+    ]
+  },
   // 物业管理菜单
   {
     name: 'Overview',
     path: 'Overview',
-    component: () => import('@/pages/home/Estate/EstateMenu/EstateMenu.vue'),
+    component: () => import('@/pages/Estate/EstateMenu/EstateMenu.vue'),
     meta: {
       roleName: ['teacher', 'student'],
       menuTitle: '物业总览',
@@ -32,7 +82,7 @@ export const menuRoutes: RouteConfig[] = [
       {
         name: 'Info',
         path: 'Info',
-        component: () => import('@/pages/home/Estate/EstateMenu/Visitor/Info.vue'),
+        component: () => import('@/pages/Estate/EstateMenu/Visitor/Info.vue'),
         meta: {
           roleName: ['teacher', 'student'],
           menuTitle: '访客信息登记',
@@ -44,7 +94,7 @@ export const menuRoutes: RouteConfig[] = [
       {
         name: 'Record',
         path: 'Record',
-        component: () => import('@/pages/home/Estate/EstateMenu/Visitor/Record.vue'),
+        component: () => import('@/pages/Estate/EstateMenu/Visitor/Record.vue'),
         meta: {
           roleName: ['teacher', 'student'],
           menuTitle: '访客进出记录',
@@ -69,7 +119,7 @@ export const menuRoutes: RouteConfig[] = [
       {
         name: 'CarInfo',
         path: 'CarInfo',
-        component: () => import('@/pages/home/Estate/EstateMenu/Vehicle/CarInfo.vue'),
+        component: () => import('@/pages/Estate/EstateMenu/Vehicle/CarInfo.vue'),
         meta: {
           roleName: ['teacher', 'student'],
           menuTitle: '车辆信息管理',
@@ -81,7 +131,7 @@ export const menuRoutes: RouteConfig[] = [
       {
         name: 'CarRecord',
         path: 'CarRecord',
-        component: () => import('@/pages/home/Estate/EstateMenu/Vehicle/CarRecord.vue'),
+        component: () => import('@/pages/Estate/EstateMenu/Vehicle/CarRecord.vue'),
         meta: {
           roleName: ['teacher', 'student'],
           menuTitle: '车辆进出记录',
@@ -91,6 +141,56 @@ export const menuRoutes: RouteConfig[] = [
         }
       },
     ]
+  },
+  // 数据可视管理菜单
+  {
+    name: 'DataAnalysis',
+    path: 'DataAnalysis',
+    component: () => import('@/pages/VisualData/VisualDataMenu/VisualDataMenu.vue'),
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '数据分析',
+      menuIcon: 'chart',
+      parentModule: 'VisualData',
+      isLogin: true,
+    }
+  },
+  {
+    name: 'baobiao',
+    path: 'baobiao',
+    component: () => import('@/pages/VisualData/VisualDataMenu/baobiao.vue'),
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '报表中心',
+      menuIcon: 'file',
+      parentModule: 'VisualData',
+      isLogin: true,
+    }
+  },
+  // 配置中心菜单
+  {
+    name: 'SystemConfig',
+    path: 'SystemConfig',
+    component: () => import('@/pages/Configuration/ConfigurationMenu/ConfigurationMenu.vue'),
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '系统配置',
+      menuIcon: 'dashboard',
+      parentModule: 'Configuration',
+      isLogin: true,
+    }
+  },
+  {
+    name: 'user',
+    path: 'user',
+    component: () => import('@/pages/Configuration/ConfigurationMenu/user.vue'),
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '用户配置',
+      menuIcon: 'user',
+      parentModule: 'Configuration',
+      isLogin: true,
+    }
   }
 ]
 
@@ -111,35 +211,25 @@ const router = createRouter({
     {
       name: 'home',
       path: '/home',
-      component: () => import('@/pages/home/main.vue'),
+      component: () => import('@/pages/main.vue'),
       redirect: '/home/situation',
       children: [
         {
           // 综合态势
           name: 'situation',
           path: 'situation',
-          component: () => import('@/pages/home/Situation/Situation.vue')
+          component: () => import('@/pages/Situation/Situation.vue')
         },
         {
           // 运营管理
           name: 'Operation',
           path: 'Operation',
-          component: () => import('@/pages/home/Operation/Operation.vue'),
-          // redirect: '/home/Operation/OperationMenu',
+          component: () => import('@/pages/Operation/Operation.vue'),
           children: [
             {
               path: '',
               name: "OperationDefault",
-              redirect: 'OperationMenu'
-            },
-            {
-              name: 'OperationMenu',
-              path: 'OperationMenu',
-              component: () => import('@/pages/home/Operation/OperationMenu/OperationMenu.vue'),
-              children: [],
-              meta: {  // 配置路由一些额外的信息
-                isLogin: true
-              },
+              redirect: 'OperationOverview'
             },
           ],
         },
@@ -147,18 +237,18 @@ const router = createRouter({
           // 物业管理
           name: 'Estate',
           path: 'Estate',
-          component: () => import('@/pages/home/Estate/Estate.vue'),
+          component: () => import('@/pages/Estate/Estate.vue'),
           // redirect: '/home/Estate/EstateMenu',
           children: [
             {
               path: '',
               name: "EstateDefault",
-              redirect: 'EstateMenu'
+              redirect: 'Overview'
             },
             {
               name: 'EstateMenu',
               path: 'EstateMenu',
-              component: () => import('@/pages/home/Estate/EstateMenu/EstateMenu.vue'),
+              component: () => import('@/pages/Estate/EstateMenu/EstateMenu.vue'),
               children: [],
               meta: {  // 配置路由一些额外的信息
                 isLogin: true
@@ -167,7 +257,7 @@ const router = createRouter({
             {
               name: 'Equipment',
               path: 'Equipment',
-              component: () => import('@/pages/home/Estate/EstateMenu/Equipment/Equipment.vue'),
+              component: () => import('@/pages/Estate/EstateMenu/Equipment/Equipment.vue'),
               children: [],
               meta: {  // 配置路由一些额外的信息
                 isLogin: true
@@ -179,18 +269,18 @@ const router = createRouter({
           // 可视数据
           name: 'VisualData',
           path: 'VisualData',
-          component: () => import('@/pages/home/VisualData/VisualData.vue'),
+          component: () => import('@/pages/VisualData/VisualData.vue'),
           // redirect: '/home/VisualData/VisualDataMenu',
           children: [
             {
               path: '',
               name: "VisualDataDefault",
-              redirect: 'VisualDataMenu'
+              redirect: 'DataAnalysis'
             },
             {
               name: 'VisualDataMenu',
               path: 'VisualDataMenu',
-              component: () => import('@/pages/home/VisualData/VisualDataMenu/VisualDataMenu.vue'),
+              component: () => import('@/pages/VisualData/VisualDataMenu/VisualDataMenu.vue'),
               children: [],
               meta: {  // 配置路由一些额外的信息
                 isLogin: true
@@ -202,18 +292,18 @@ const router = createRouter({
           // 配置中心
           name: 'Configuration',
           path: 'Configuration',
-          component: () => import('@/pages/home/Configuration/Configuration.vue'),
+          component: () => import('@/pages/Configuration/Configuration.vue'),
           // redirect: '/home/Configuration/ConfigurationMenu',
           children: [
             {
               path: '',
               name: "ConfigurationDefault",
-              redirect: 'ConfigurationMenu'
+              redirect: 'SystemConfig'
             },
             {
               name: 'ConfigurationMenu',
               path: 'ConfigurationMenu',
-              component: () => import('@/pages/home/Configuration/ConfigurationMenu/ConfigurationMenu.vue'),
+              component: () => import('@/pages/Configuration/ConfigurationMenu/ConfigurationMenu.vue'),
               children: [],
               meta: {  // 配置路由一些额外的信息
                 isLogin: true
@@ -222,17 +312,7 @@ const router = createRouter({
           ],
         },
       ],
-    },
-    // {
-    //   name: 'menjin ',
-    //   path: '/menjin',
-    //   component: () => import('../pages/property/Menjin.vue')
-    // },
-    // {
-    //   name: 'deviceAdd',
-    //   path: '/deviceAdd',
-    //   component: () => import('../pages/property/DeviceAdd.vue')
-    // }
+    }
   ]
 });
 const parentNameMap: Record<string, string> = {
@@ -288,42 +368,62 @@ const hasRouter = (to: RouteLocationNormalizedGeneric) => {
 const isOwnRouter = (to: RouteLocationNormalizedGeneric) => {
   // 检查是否是主路由中的路径
   const mainRoutes = ['/', '/login', '/home', '/home/situation',
-    '/home/Operation', '/home/Operation/OperationMenu',
-    '/home/Estate', '/home/Estate/EstateMenu',
-    '/home/VisualData', '/home/VisualData/VisualDataMenu',
-    '/home/Configuration', '/home/Configuration/ConfigurationMenu'
+    '/home/Operation', '/home/Operation/OperationOverview', '/home/Operation/OperationMenu',
+    '/home/Estate', '/home/Estate/Overview', '/home/Estate/EstateMenu',
+    '/home/VisualData', '/home/VisualData/DataAnalysis', '/home/VisualData/VisualDataMenu',
+    '/home/Configuration', '/home/Configuration/SystemConfig', '/home/Configuration/ConfigurationMenu'
   ];
+  
+  // 特别处理：允许所有主模块路径（包括重定向目标）
+  const moduleBasePaths = [
+    '/home/Operation',
+    '/home/Estate',
+    '/home/VisualData', 
+    '/home/Configuration'
+  ];
+  
+  if (moduleBasePaths.some(path => to.path.startsWith(path))) {
+    return true;
+  }
 
   if (mainRoutes.includes(to.path)) {
     return true;
   }
 
   const routes = getOwnRouters();
-  // 使用 getParentName 替换原有 parentPath 判断
-  const parentPath = getParentName(to.path);
-
-  // 递归检查路由权限，拼接完整路径
-  const checkRoutePermission = (routes: RouteConfig[], parentPath: string): boolean => {
+  
+  // 递归检查路由权限
+  const checkRoutePermission = (routes: RouteConfig[], basePath = '/home'): boolean => {
     return routes.some(route => {
-      // 拼接当前路由的完整路径
-      const fullPath = parentPath.endsWith('/') ? parentPath + route.path : parentPath + '/' + route.path;
-      // 精确匹配
+      // 根据路由的parentModule构建基础路径
+      const moduleBasePath = `/home/${route.meta?.parentModule || 'home'}`;
+      const fullPath = `${moduleBasePath}/${route.path}`;
+      
+      // 精确匹配当前路由
       if (to.path === fullPath) {
         return true;
       }
+      
       // 检查子路由
       if (route.children && route.children.length > 0) {
-        return checkRoutePermission(route.children, fullPath);
+        return route.children.some(child => {
+          const childPath = `${fullPath}/${child.path}`;
+          return to.path === childPath;
+        });
       }
+      
       return false;
     });
   };
-  return checkRoutePermission(routes, parentPath);
+  
+  return checkRoutePermission(routes);
 };
 
 
 // 路由守卫
 router.beforeEach((to, _, next) => {
+  console.log('🚦 路由守卫 - 准备跳转到:', to.path);
+  
   // 从 localStorage 中获取持久化的用户数据
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
   // 限定除了登录页面之外，所有页面未登录不能访问
@@ -384,7 +484,11 @@ router.beforeEach((to, _, next) => {
         });
       };
       ownRoutes.forEach(route => {
-        addRoutes([route], getParentName('/home/' + route.path));
+        // 根据路由的parentModule属性确定父路由名称
+        const parentName = (route.meta && typeof route.meta.parentModule === 'string') 
+          ? route.meta.parentModule 
+          : 'home';
+        addRoutes([route], parentName);
       });
       next({ ...to, replace: true });
       return;
@@ -392,7 +496,11 @@ router.beforeEach((to, _, next) => {
   }
 
   // 权限检查：如果系统中不存在这个路由，并且该路由是用户没有权限访问的路由，就进入404页面
-  if (!hasRouter(to) && !isOwnRouter(to)) {
+  const routerExists = hasRouter(to);
+  const hasPermission = isOwnRouter(to);
+  console.log('🔍 权限检查 - 路由存在:', routerExists, '有权限:', hasPermission);
+  
+  if (!routerExists && !hasPermission) {
     // 如果目标路径已经是404页面，直接放行
     if (to.path === '/404') {
       next();
@@ -403,7 +511,7 @@ router.beforeEach((to, _, next) => {
       router.addRoute({
         name: '404',
         path: '/404',
-        component: () => import('../pages/404.vue')
+        component: () => import('@/pages/404.vue')
       });
     }
     // 跳转到404页面
@@ -411,6 +519,7 @@ router.beforeEach((to, _, next) => {
     return;
   }
   // 其他情况，用户正常访问路由
+  console.log('✅ 路由守卫 - 允许访问:', to.path);
   next();
 });
 

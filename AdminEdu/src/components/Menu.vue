@@ -2,7 +2,7 @@
   <el-menu :default-active="activeMenu" class="el-menu-vertical" :collapse="isCollapse" @select="handleSelect"
     background-color="#304156" text-color="#bfcbd9" active-text-color="#409eff">
     <!-- 处理没有子路由的菜单项 -->
-    <el-menu-item v-for="route in menuItemsWithoutChildren" :key="route.path" :index="'/index/' + route.path">
+    <el-menu-item v-for="route in menuItemsWithoutChildren" :key="route.path" :index="getMenuIndex(route)">
       <el-icon>
         <component :is="getIcon(route.meta?.menuIcon || 'dashboard')" />
       </el-icon>
@@ -10,7 +10,7 @@
     </el-menu-item>
 
     <!-- 处理有子路由的菜单项 -->
-    <el-sub-menu v-for="route in menuItemsWithChildren" :key="route.path" :index="'/index/' + route.path">
+    <el-sub-menu v-for="route in menuItemsWithChildren" :key="route.path" :index="getMenuIndex(route)">
       <template #title>
         <el-icon>
           <component :is="getIcon(route.meta?.menuIcon || 'dashboard')" />
@@ -19,7 +19,7 @@
       </template>
 
       <el-menu-item v-for="child in visibleChildren(route)" :key="child.path"
-        :index="'/index/' + route.path + '/' + child.path">
+        :index="getChildMenuIndex(route, child)">
         <el-icon>
           <component :is="getIcon(child.meta?.menuIcon || 'dashboard')" />
         </el-icon>
@@ -66,6 +66,16 @@ const activeMenu = computed(() => {
   return route.path
 })
 
+// 获取当前模块名称
+const getCurrentModule = computed(() => {
+  const path = route.path
+  if (path.includes('/Operation')) return 'Operation'
+  if (path.includes('/Estate')) return 'Estate'
+  if (path.includes('/VisualData')) return 'VisualData'
+  if (path.includes('/Configuration')) return 'Configuration'
+  return 'home'
+})
+
 // 检查路由是否有效
 const isValidRoute = (route: any): route is RouteConfig => {
   return route &&
@@ -74,11 +84,20 @@ const isValidRoute = (route: any): route is RouteConfig => {
     'roleName' in route.meta
 }
 
-// 获取用户有权限的菜单路由
+// 获取用户有权限的菜单路由 - 根据当前模块过滤
 const filteredMenuRoutes = computed(() => {
   const userRoles = userStore.roleName || []
+  const currentModule = getCurrentModule.value
+  
   const routes = menuRoutes.filter(isValidRoute)
-  return routes.filter(route =>
+  
+  // 首先根据模块过滤
+  const moduleRoutes = routes.filter(route => 
+    route.meta.parentModule === currentModule
+  )
+  
+  // 然后根据权限过滤
+  return moduleRoutes.filter(route =>
     route.meta.roleName.some(role => userRoles.includes(role))
   )
 })
@@ -103,6 +122,18 @@ const visibleChildren = (route: RouteConfig) => {
   return route.children.filter(child =>
     isValidRoute(child) && !child.meta.hidden
   )
+}
+
+// 生成菜单项的index - 构建完整路径
+const getMenuIndex = (route: RouteConfig) => {
+  const currentModule = getCurrentModule.value
+  return `/home/${currentModule}/${route.path}`
+}
+
+// 生成子菜单项的index
+const getChildMenuIndex = (parentRoute: RouteConfig, childRoute: RouteConfig) => {
+  const currentModule = getCurrentModule.value
+  return `/home/${currentModule}/${parentRoute.path}/${childRoute.path}`
 }
 
 // 处理菜单选择
