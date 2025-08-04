@@ -373,15 +373,15 @@ const isOwnRouter = (to: RouteLocationNormalizedGeneric) => {
     '/home/VisualData', '/home/VisualData/DataAnalysis', '/home/VisualData/VisualDataMenu',
     '/home/Configuration', '/home/Configuration/SystemConfig', '/home/Configuration/ConfigurationMenu'
   ];
-  
+
   // 特别处理：允许所有主模块路径（包括重定向目标）
   const moduleBasePaths = [
     '/home/Operation',
     '/home/Estate',
-    '/home/VisualData', 
+    '/home/VisualData',
     '/home/Configuration'
   ];
-  
+
   if (moduleBasePaths.some(path => to.path.startsWith(path))) {
     return true;
   }
@@ -391,19 +391,19 @@ const isOwnRouter = (to: RouteLocationNormalizedGeneric) => {
   }
 
   const routes = getOwnRouters();
-  
+
   // 递归检查路由权限
   const checkRoutePermission = (routes: RouteConfig[], basePath = '/home'): boolean => {
     return routes.some(route => {
       // 根据路由的parentModule构建基础路径
       const moduleBasePath = `/home/${route.meta?.parentModule || 'home'}`;
       const fullPath = `${moduleBasePath}/${route.path}`;
-      
+
       // 精确匹配当前路由
       if (to.path === fullPath) {
         return true;
       }
-      
+
       // 检查子路由
       if (route.children && route.children.length > 0) {
         return route.children.some(child => {
@@ -411,11 +411,11 @@ const isOwnRouter = (to: RouteLocationNormalizedGeneric) => {
           return to.path === childPath;
         });
       }
-      
+
       return false;
     });
   };
-  
+
   return checkRoutePermission(routes);
 };
 
@@ -423,7 +423,7 @@ const isOwnRouter = (to: RouteLocationNormalizedGeneric) => {
 // 路由守卫
 router.beforeEach((to, _, next) => {
   console.log('🚦 路由守卫 - 准备跳转到:', to.path);
-  
+
   // 从 localStorage 中获取持久化的用户数据
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
   // 限定除了登录页面之外，所有页面未登录不能访问
@@ -485,8 +485,8 @@ router.beforeEach((to, _, next) => {
       };
       ownRoutes.forEach(route => {
         // 根据路由的parentModule属性确定父路由名称
-        const parentName = (route.meta && typeof route.meta.parentModule === 'string') 
-          ? route.meta.parentModule 
+        const parentName = (route.meta && typeof route.meta.parentModule === 'string')
+          ? route.meta.parentModule
           : 'home';
         addRoutes([route], parentName);
       });
@@ -499,7 +499,7 @@ router.beforeEach((to, _, next) => {
   const routerExists = hasRouter(to);
   const hasPermission = isOwnRouter(to);
   console.log('🔍 权限检查 - 路由存在:', routerExists, '有权限:', hasPermission);
-  
+
   if (!routerExists && !hasPermission) {
     // 如果目标路径已经是404页面，直接放行
     if (to.path === '/404') {
