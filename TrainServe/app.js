@@ -7,6 +7,7 @@ var cors = require('cors');
 
 const RbacRouter = require('./routes/RBACinit')
 const LCY = require('./routes/LCY')
+const LCYchat = require('./routes/LCYchat')
 
 
 var app = express();
@@ -25,6 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', RbacRouter);
 app.use('/LCY',LCY)
+app.use('/LCYchat',LCYchat)
 
 
 // catch 404 and forward to error handler

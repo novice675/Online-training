@@ -33,7 +33,7 @@ export default function Shou() {
   ]
 
   return (
-    <div>
+    <div className="shou-container">
       <Tabs 
         activeKey={activeTab} 
         onChange={setActiveTab}
@@ -41,7 +41,9 @@ export default function Shou() {
       >
         {tabs.map(tab => (
           <Tabs.Tab title={tab.title} key={tab.key}>
-            {tab.content}
+            <div className="tab-content-wrapper">
+              {tab.content}
+            </div>
           </Tabs.Tab>
         ))}
       </Tabs>
