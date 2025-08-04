@@ -1,45 +1,75 @@
 <template>
     <div>
-        <div class="container">
-            <div class="menu" :class="{ 'collapse': isCollapse }">
-                <Menu />
-            </div>
-            <div class="content">
-                <div class="content-header">
-                    <div class="left">
-                        <el-icon class="collapse-btn" @click="toggleMenu">
-                            <Fold v-if="!isCollapse" />
-                            <Expand v-else />
-                        </el-icon>
-                        <el-breadcrumb separator="/">
-                            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                            <el-breadcrumb-item>当前页面</el-breadcrumb-item>
-                        </el-breadcrumb>
-                    </div>
-                    <div class="right">
-                        <el-divider direction="vertical" />
-                    </div>
+        <header class="headerTop">
+            <h1>智慧校园管理平台</h1>
+            <el-menu :default-active="activeIndex2" class="el-menu-demo" mode="horizontal" background-color="#082c61"
+                text-color="#dddddd" active-text-color="#fff" :ellipsis="false" @select="handleSelect" router>
+                <el-menu-item index="Situation">综合态势</el-menu-item>
+                <el-menu-item index="Operation">运营管理</el-menu-item>
+                <el-menu-item index="Estate">物业管理</el-menu-item>
+                <el-menu-item index="VisualData">数据可视</el-menu-item>
+                <el-menu-item index="Configuration">配置中心</el-menu-item>
+            </el-menu>
+            <el-dropdown trigger="click">
+                <div class="user-dropdown">
+                    <el-icon color="#fff" :size="30" class="menu-icon">
+                        <Bell />
+                    </el-icon>
+                    <el-icon color="#fff" :size="30" class="menu-icon">
+                        <User />
+                    </el-icon>
+                    <span class="username">{{ username }}</span>
+                    <el-icon>
+                        <CaretBottom />
+                    </el-icon>
                 </div>
-                <div class="content-body">
-                    <RouterView v-slot="{ Component }">
-                        <transition name="fade" mode="out-in">
-                            <component :is="Component" />
-                        </transition>
-                    </RouterView>
+                <template #dropdown>
+                    <el-dropdown-menu>
+                        <el-dropdown-item>
+                            <el-icon>
+                                <User />
+                            </el-icon>个人信息
+                        </el-dropdown-item>
+                        <el-dropdown-item>
+                            <el-icon>
+                                <Setting />
+                            </el-icon>修改密码
+                        </el-dropdown-item>
+                        <el-dropdown-item divided @click="handleLogout">
+                            <el-icon>
+                                <SwitchButton />
+                            </el-icon>退出登录
+                        </el-dropdown-item>
+                    </el-dropdown-menu>
+                </template>
+            </el-dropdown>
+        </header>
+
+        <div class="campus-selector">
+            <div class="selector-container">
+                <div class="selector-left">
+                    <span class="selector-label">选择校区:</span>
+                    <el-select v-model="selectedCampus" placeholder="xxxx校区" class="campus-select" clearable>
+                        <el-option label="北京校区" value="beijing" />
+                        <el-option label="上海校区" value="shanghai" />
+                        <el-option label="广州校区" value="guangzhou" />
+                        <el-option label="深圳校区" value="shenzhen" />
+                    </el-select>
+                </div>
+                <div>
+                    <span class="time-display">{{ currentTime }}</span>
                 </div>
             </div>
         </div>
+        <router-view></router-view>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
-import { RouterView, useRouter } from 'vue-router'
-import Menu from '../components/Menu/SituationMenu.vue'
-import { useUserStore } from '../stores/user'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '../../stores/user'
 import {
-    Fold,
-    Expand,
     CaretBottom,
     User,
     Setting,
@@ -49,30 +79,13 @@ import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const userStore = useUserStore()
-const isCollapse = ref(false)
 const username = ref('管理员')
-const activeIndex2 = ref('1')
+const activeIndex2 = ref('Situation')
 const selectedCampus = ref('')
 const currentTime = ref('')
-const handleSelect = (key: string) => {
-    console.log(key)
+const handleSelect = (key: string, keyPath: string[]) => {
+    console.log(key, keyPath)
 }
-const toggleMenu = () => {
-    isCollapse.value = !isCollapse.value
-}
-
-const toggleFullScreen = () => {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen()
-    } else {
-        document.exitFullscreen()
-    }
-}
-
-const refreshPage = () => {
-    window.location.reload()
-}
-
 const handleLogout = () => {
     localStorage.removeItem('user')
     userStore.$reset()
@@ -105,6 +118,7 @@ onMounted(() => {
 .headerTop {
     display: flex;
     align-items: center;
+    min-width: 1200px;
     justify-content: space-between;
     padding: 0 20px;
     height: 85px;
@@ -330,14 +344,14 @@ onMounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
 }
 
 .selector-left {
     display: flex;
     align-items: center;
+    /* gap 属性主要用于控制容器内项目之间的间距 */
     gap: 15px;
-    flex: 1;
+    flex: 1
 }
 
 .selector-label {

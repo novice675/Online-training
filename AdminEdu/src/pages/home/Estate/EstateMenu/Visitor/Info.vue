@@ -1,5 +1,5 @@
 <template>
-  <div>张三爱上李四</div>
+  <div>访客信息登记</div>
 </template>
 
 <script>

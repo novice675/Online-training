@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import type { UserState } from '../types/interfaces/user'
-import { ref } from 'vue'
 
 // 定义 actions 的类型
 interface UserActions {
@@ -15,7 +14,6 @@ export const useUserStore = defineStore<'user', UserState, {}, UserActions>('use
         menuPermissions: [],
         buttonPermissions: []
     }),
-    
     actions: {
         // 设置用户信息
         setUserInfo(userInfo: UserState) {

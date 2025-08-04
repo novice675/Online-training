@@ -1,9 +1,11 @@
+
 const {Company,Employee,Visitor,Moment,Comment}=require('../models/database')
 const mongoose=require('mongoose')
+
 var express = require('express')
-var multiparty=require('multiparty')
+var multiparty = require('multiparty')
 var router = express.Router()
-router.post('/addcom',async (req,res)=>{
+router.post('/addcom', async (req, res) => {
     console.log(req.body);
     const exists = await Company.findOne({ name: req.body.name });
     if (exists) {
@@ -22,7 +24,7 @@ router.post('/addcom',async (req,res)=>{
 })
 
 // addcom的图片上传
-router.post('/comupload',(req,res)=>{
+router.post('/comupload', (req, res) => {
     console.log(req.body);
     const form=new multiparty.Form()
     form.uploadDir='upload'

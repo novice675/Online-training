@@ -5,11 +5,13 @@ import router from './router'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import ElementPlus from 'element-plus'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
 import myVueplugin from './plugins/vueplugin'
 import Watermark from './plugins/watermark'
 import axios from 'axios'
 axios.defaults.baseURL = 'http://localhost:3008'
+
 
 // 创建应用实例
 const app = createApp(App)
@@ -34,6 +36,9 @@ app.use(myVueplugin)
 
 // 注册水印插件
 app.use(Watermark)
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+    app.component(key, component)
+}
 
 // 挂载应用
 app.mount('#app')
