@@ -54,6 +54,43 @@ export const menuRoutes: RouteConfig[] = [
         }
       },
     ]
+  },
+  {
+    name: 'Vehicle',
+    path: 'Vehicle',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '车辆管理',
+      menuIcon: 'book',
+      parentModule: 'Estate',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'CarInfo',
+        path: 'CarInfo',
+        component: () => import('@/pages/home/Estate/EstateMenu/Vehicle/CarInfo.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '车辆信息管理',
+          menuIcon: 'list',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'CarRecord',
+        path: 'CarRecord',
+        component: () => import('@/pages/home/Estate/EstateMenu/Vehicle/CarRecord.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '车辆进出记录',
+          menuIcon: 'list',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+    ]
   }
 ]
 
@@ -61,6 +98,11 @@ export const menuRoutes: RouteConfig[] = [
 const router = createRouter({
   history: createWebHashHistory(),//路由模式 
   routes: [
+    {
+      name: '',
+      path: '/',
+      redirect: '/login'
+    },
     {
       name: 'login',
       path: '/login',
@@ -87,6 +129,7 @@ const router = createRouter({
           children: [
             {
               path: '',
+              name: "OperationDefault",
               redirect: 'OperationMenu'
             },
             {
@@ -109,6 +152,7 @@ const router = createRouter({
           children: [
             {
               path: '',
+              name: "EstateDefault",
               redirect: 'EstateMenu'
             },
             {
@@ -140,6 +184,7 @@ const router = createRouter({
           children: [
             {
               path: '',
+              name: "VisualDataDefault",
               redirect: 'VisualDataMenu'
             },
             {
@@ -162,6 +207,7 @@ const router = createRouter({
           children: [
             {
               path: '',
+              name: "ConfigurationDefault",
               redirect: 'ConfigurationMenu'
             },
             {
@@ -285,12 +331,13 @@ router.beforeEach((to, _, next) => {
     const hasRoutes = ownRoutes.every(route => router.hasRoute(route.name as string));
     if (!hasRoutes) {
       // 清除所有动态添加的路由
-      const staticRouteNames = ['index', 'home', 'login', 'situation', 'Operation', 'Estate', 'VisualData', 'Configuration'];
+      const staticRouteNames = ['home', 'login', 'situation', 'Operation', 'Estate', 'VisualData', 'Configuration'];
       router.getRoutes().forEach(route => {
         if (route.name && !staticRouteNames.includes(route.name as string)) {
           router.removeRoute(route.name);
         }
       });
+      const mainRouteNames = ['home', 'Operation', 'Estate', 'VisualData', 'Configuration'];
       const addRoutes = (routes: RouteConfig[], parentName = 'home') => {
         routes.forEach(route => {
           if (!router.hasRoute(route.name as string)) {
@@ -321,8 +368,8 @@ router.beforeEach((to, _, next) => {
             }
             router.addRoute(parentName, routeConfig);
           }
-          // 递归时用 route.name 作为 parentName
-          if (route.children && route.children.length > 0) {
+          // 只在主路由名下递归添加
+          if (route.children && route.children.length > 0 && mainRouteNames.includes(route.name as string)) {
             addRoutes(route.children, route.name as string);
           }
         });
