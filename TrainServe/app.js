@@ -9,7 +9,6 @@ const RbacRouter = require('./routes/RBACinit')
 // const LCY = require('./routes/LCY')
 const WYQ = require('./routes/WYQ')
 const Menjin = require('./routes/Menjin')
-const Wen = require('./routes/Wenzhang')
 const HeTong = require('./routes/HeTong')
 const KeHu = require('./routes/KeHu')
 
@@ -33,7 +32,6 @@ app.use('/', RbacRouter);
 // app.use('/LCY',LCY)
 app.use('/WYQ',WYQ)
 app.use('/menjin',Menjin)
-app.use('/wen', Wen)
 app.use('/hetong', HeTong)
 app.use('/kehu', KeHu)
 

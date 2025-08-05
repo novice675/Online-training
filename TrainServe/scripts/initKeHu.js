@@ -1,11 +1,8 @@
 const mongoose = require('mongoose');
 const KeHu = require('../models/KeHu');
 
-// 连接数据库
-mongoose.connect('mongodb://127.0.0.1:27017/training', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+// 使用主应用的数据库连接配置
+require('../db/index');
 
 // 测试客户数据
 const kehuData = [
@@ -23,7 +20,8 @@ const kehuData = [
     budgetMax: 80000,
     purpose: '总部办公',
     interestedProperty: 'A1楼1001-1005',
-    remarks: '大型互联网企业，需要开放式办公环境'
+    remarks: '大型互联网企业，需要开放式办公环境',
+    intentLevel: '高'
   },
   {
     name: '腾讯科技有限公司',
@@ -39,7 +37,8 @@ const kehuData = [
     budgetMax: 100000,
     purpose: '研发中心',
     interestedProperty: 'B1楼整层',
-    remarks: '腾讯分公司，对办公环境要求较高'
+    remarks: '腾讯分公司，对办公环境要求较高',
+    intentLevel: '高'
   },
   {
     name: '华为技术有限公司',
@@ -55,7 +54,8 @@ const kehuData = [
     budgetMax: 60000,
     purpose: '销售办公',
     interestedProperty: 'C1楼801-810',
-    remarks: '通信设备领域知名企业'
+    remarks: '通信设备领域知名企业',
+    intentLevel: '高'
   },
   {
     name: '美团网络科技',
@@ -71,7 +71,8 @@ const kehuData = [
     budgetMax: 40000,
     purpose: '客服中心',
     interestedProperty: 'D1楼501-506',
-    remarks: '外卖平台，需要大量客服工位'
+    remarks: '外卖平台，需要大量客服工位',
+    intentLevel: '中'
   },
   {
     name: '字节跳动科技',
@@ -87,7 +88,8 @@ const kehuData = [
     budgetMax: 120000,
     purpose: '创意办公',
     interestedProperty: 'A2楼全层',
-    remarks: '短视频领域独角兽企业，需要创意办公空间'
+    remarks: '短视频领域独角兽企业，需要创意办公空间',
+    intentLevel: '高'
   },
   {
     name: '小米科技有限公司',
@@ -103,7 +105,8 @@ const kehuData = [
     budgetMax: 50000,
     purpose: '产品展示',
     interestedProperty: 'B2楼601-608',
-    remarks: '智能手机和生态链产品展示中心'
+    remarks: '智能手机和生态链产品展示中心',
+    intentLevel: '中'
   },
   {
     name: '滴滴出行科技',
@@ -119,7 +122,8 @@ const kehuData = [
     budgetMax: 40000,
     purpose: '运营中心',
     interestedProperty: 'C2楼701-706',
-    remarks: '网约车平台，需要24小时运营空间'
+    remarks: '网约车平台，需要24小时运营空间',
+    intentLevel: '中'
   },
   {
     name: '京东物流集团',
@@ -135,7 +139,8 @@ const kehuData = [
     budgetMax: 30000,
     purpose: '配送中心',
     interestedProperty: 'D2楼401-404',
-    remarks: '电商物流，需要货物暂存区域'
+    remarks: '电商物流，需要货物暂存区域',
+    intentLevel: '低'
   },
   {
     name: '百度在线网络',
@@ -151,7 +156,8 @@ const kehuData = [
     budgetMax: 70000,
     purpose: 'AI研发',
     interestedProperty: 'A1楼1201-1210',
-    remarks: '人工智能领域领军企业，需要高端研发环境'
+    remarks: '人工智能领域领军企业，需要高端研发环境',
+    intentLevel: '高'
   },
   {
     name: '网易游戏娱乐',
@@ -167,7 +173,8 @@ const kehuData = [
     budgetMax: 35000,
     purpose: '游戏开发',
     interestedProperty: 'B1楼901-905',
-    remarks: '游戏开发工作室，需要安静的开发环境'
+    remarks: '游戏开发工作室，需要安静的开发环境',
+    intentLevel: '低'
   }
 ];
 

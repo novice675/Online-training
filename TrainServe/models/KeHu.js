@@ -107,6 +107,6 @@ keHuSchema.pre('findOneAndUpdate', function(next) {
   next();
 });
 
-const KeHu = mongoose.model('KeHu', keHuSchema);
+const KeHu = mongoose.model('KeHu', keHuSchema,'kehu');
 
 module.exports = KeHu;

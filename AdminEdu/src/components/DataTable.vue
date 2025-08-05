@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-export interface Column {
+export interface TableColumn {
   prop?: string
   label?: string
   type?: 'selection' | 'index' | 'actions' | string
@@ -89,6 +89,9 @@ export interface Column {
   showOverflowTooltip?: boolean
   slot?: string // 自定义插槽名称
 }
+
+// 为了向后兼容也导出Column类型
+export type Column = TableColumn
 
 
 
@@ -100,7 +103,7 @@ export interface Pagination {
 
 interface Props {
   data: any[]
-  columns: Column[]
+  columns: TableColumn[]
   loading?: boolean
   showSelection?: boolean
   showActions?: boolean

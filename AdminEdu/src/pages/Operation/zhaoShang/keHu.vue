@@ -312,13 +312,16 @@ const filterFields = [
 
 // 表格列配置
 const columns: TableColumn[] = [
+  { type: 'selection', width: 55 },
+  { type: 'index', label: '序号', width: 60 },
   { prop: 'name', label: '客户名称', minWidth: 150, showOverflowTooltip: true },
   { prop: 'intentLevel', label: '意向等级', width: 100, slot: 'intentLevel' },
   { prop: 'level', label: '客户等级', width: 100, slot: 'level' },
   { prop: 'status', label: '跟进状态', width: 100, slot: 'status' },
   { prop: 'followPerson', label: '跟进人', width: 120 },
   { prop: 'createTime', label: '新增时间', width: 120, slot: 'createTime' },
-  { prop: 'updateTime', label: '最近跟进时间', width: 140, slot: 'updateTime' }
+  { prop: 'updateTime', label: '最近跟进时间', width: 140, slot: 'updateTime' },
+  { type: 'actions', label: '操作', width: 150, fixed: 'right' }
 ]
 
 // 工具函数
