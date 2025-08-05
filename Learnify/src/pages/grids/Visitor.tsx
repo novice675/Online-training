@@ -40,7 +40,8 @@ const Visitor = () => {
   const addvisitor=async()=>{
     let values=await form.validateFields()
     values.picture=values?.picture[0]?.url||''
-    let res=await http.post('/WYQ/addvisitor',{...values,showtime:showtime})
+    console.log(showtime)
+    let res=await http.post('/WYQ/addvisitor',{...values,time:showtime})
     if(res.code==200){
       navigate("/visitor_done")
     }else if (res.code==400){

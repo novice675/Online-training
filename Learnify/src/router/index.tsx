@@ -1,5 +1,3 @@
-
-
 import React from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import Shou from "../pages/Shou";
@@ -21,6 +19,8 @@ import Phones from "../pages/grids/Phones";
 import Visitors from "../pages/grids/Visitors";
 import Sendmement from "../pages/Sendmement";
 import Comment from "../pages/Comment";
+import Middle from "../pages/Middle";
+import Visitors_detail from "../pages/grids/Visitors_detail";
 import AutoChat from '../pages/chat/AutoChat';
 const App = React.lazy(() => import("../App"));
 const Login = React.lazy(() => import("../pages/Login"));
@@ -83,12 +83,12 @@ const routes = createBrowserRouter([
   { path: "/visitors", element: <Visitors></Visitors> },
   { path: "/sendmement", element: <Sendmement></Sendmement> },
   { path: "/comment", element: <Comment></Comment> },
+  { path: "/middle", element: <Middle></Middle> },
+  { path: "/visitors_detail", element: <Visitors_detail></Visitors_detail> },
   {
     path: '/autochat',
     element: <AutoChat />,
   },
-
-  
 ]);
 
 export default routes;
