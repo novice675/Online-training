@@ -32,6 +32,8 @@ app.use('/', RbacRouter);
 // app.use('/LCY',LCY)
 app.use('/WYQ',WYQ)
 app.use('/menjin',Menjin)
+app.use('/vehicle',Vehicle)
+app.use('/wen', Wen)
 
 
 // catch 404 and forward to error handler
