@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const { ChatSession, Message } = require('../db/chat');
+const { ChatSession, Message } = require('../models/chat');
 const axios = require('axios');
 
 // 通义千问API配置

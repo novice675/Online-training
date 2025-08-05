@@ -1,4 +1,4 @@
-const mongoose = require('./index');
+const mongoose = require('../db/index');
 const Schema = mongoose.Schema;
 
 // 定义渲染类型的枚举值
@@ -6,6 +6,25 @@ const RENDER_TYPES = {
   TEXT_ONLY: 'TEXT_ONLY',       // 纯文字样式
   IMAGE_FULL: 'IMAGE_FULL',     // 大图图文样式
   IMAGE_RIGHT: 'IMAGE_RIGHT'    // 右侧小图/头像样式
+};
+
+// 定义文章类型的枚举值
+const ARTICLE_TYPES = {
+  ARTICLE: '文章',
+  VIDEO: '视频'
+};
+
+// 定义频道的枚举值
+const CHANNELS = {
+  RECOMMEND: '推荐',
+  POLICY: '政策'
+};
+
+// 定义审核状态的枚举值
+const STATUS_TYPES = {
+  PENDING: '未审核',
+  APPROVED: '审核成功',
+  REJECTED: '审核失败'
 };
 
 // 新闻数据模型
@@ -16,6 +35,44 @@ const newsSchema = new Schema({
     required: true,
     trim: true,
     index: true // 用于标题搜索优化
+  },
+  
+  // 文章类型（必选，只能是文章或视频）
+  articleType: {
+    type: String,
+    required: true,
+    enum: Object.values(ARTICLE_TYPES),
+    index: true
+  },
+  
+  // 视频地址（可选，仅当articleType为视频时使用）
+  video: {
+    type: String,
+    trim: true,
+    default: null
+  },
+  
+  // 频道（必选，只能是推荐或政策）
+  channel: {
+    type: String,
+    required: true,
+    enum: Object.values(CHANNELS),
+    index: true
+  },
+  
+  // 关键词数组（可选）
+  keywords: [{
+    type: String,
+    trim: true
+  }],
+  
+  // 审核状态（必选，默认未审核）
+  status: {
+    type: String,
+    required: true,
+    enum: Object.values(STATUS_TYPES),
+    default: STATUS_TYPES.PENDING,
+    index: true
   },
   
   // 渲染类型（必选，使用枚举约束）
@@ -87,13 +144,16 @@ const newsSchema = new Schema({
 });
 
 // 创建索引以优化查询性能
-newsSchema.index({ title: 'text', tags: 'text' }); // 全文搜索索引
+newsSchema.index({ title: 'text', tags: 'text', keywords: 'text' }); // 全文搜索索引
 
 let News = mongoose.model('news', newsSchema,'news');
 
-// 导出模型和渲染类型枚举
+// 导出模型和枚举
 module.exports = {
   News,
-  RENDER_TYPES
+  RENDER_TYPES,
+  ARTICLE_TYPES,
+  CHANNELS,
+  STATUS_TYPES
 };
 

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('../db/index');
 
 // 聊天消息模式
 const messageSchema = new mongoose.Schema({

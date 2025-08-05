@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const {News} = require('../db/news')
+const {News} = require('../models/news')
 
 // 获取新闻列表接口
 router.get('/news', async (req, res) => {
