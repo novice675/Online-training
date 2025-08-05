@@ -10,6 +10,8 @@ const RbacRouter = require('./routes/RBACinit')
 const WYQ = require('./routes/WYQ')
 const Menjin = require('./routes/Menjin')
 const Wen = require('./routes/Wenzhang')
+const HeTong = require('./routes/HeTong')
+const KeHu = require('./routes/KeHu')
 
 
 var app = express();
@@ -32,6 +34,8 @@ app.use('/', RbacRouter);
 app.use('/WYQ',WYQ)
 app.use('/menjin',Menjin)
 app.use('/wen', Wen)
+app.use('/hetong', HeTong)
+app.use('/kehu', KeHu)
 
 
 // catch 404 and forward to error handler

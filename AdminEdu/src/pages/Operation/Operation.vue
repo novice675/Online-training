@@ -24,9 +24,8 @@ const isCollapse = ref(false)
 .container {
     display: flex;
     width: 100vw;
-    height: 100vh;
+    height: calc(100vh - 145px);
     background-color: #f0f2f5;
-    overflow: hidden;
 }
 
 .menu {
@@ -50,7 +49,8 @@ const isCollapse = ref(false)
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     transition: all 0.3s ease-in-out;
     position: relative;
     min-width: 0;
