@@ -13,6 +13,8 @@ const Menjin = require('./routes/Menjin')
 const HeTong = require('./routes/HeTong')
 const KeHu = require('./routes/KeHu')
 const Vehicle = require('./routes/Vehicle')
+const Ping = require('./routes/Ping')
+const ZuHuXinXi = require('./routes/ZuHuXinXi')
 
 
 
@@ -39,6 +41,8 @@ app.use('/menjin',Menjin)
 app.use('/hetong', HeTong)
 app.use('/kehu', KeHu)
 app.use('/vehicle',Vehicle)
+app.use('/ping', Ping)
+app.use('/zuhuxinxi', ZuHuXinXi)
 
 
 // catch 404 and forward to error handler

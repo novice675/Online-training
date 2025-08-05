@@ -3,9 +3,7 @@
     <PageHeader 
       title="文章发布管理"
       :show-add="false"
-      :show-batch-delete="true"
-      :selected-count="selectedRows.length"
-      @batch-delete="handleBatchDelete"
+      :show-batch-delete="false"
     />
 
     <FilterPanel 
@@ -20,7 +18,6 @@
       :columns="columns"
       :loading="loading"
       :pagination="pagination"
-      @selection-change="handleSelectionChange"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
     >
@@ -31,28 +28,27 @@
       </template>
 
       <template #channel="{ row }">
-        <span>{{ row.channel || '-' }}</span>
+        <el-tag :type="getChannelTagType(row.channel)">{{ row.channel || '-' }}</el-tag>
           </template>
 
-      <template #type="{ row }">
-        <el-tag :type="getTypeTagType(row.type)">{{ row.type }}</el-tag>
+      <template #articleType="{ row }">
+        <el-tag :type="getArticleTypeTagType(row.articleType)">{{ row.articleType }}</el-tag>
           </template>
         
-      <template #keywords="{ row }">
-            <span class="keywords">{{ row.keywords || '-' }}</span>
+      <template #status="{ row }">
+        <el-tag :type="getStatusTagType(row.status)">{{ row.status }}</el-tag>
           </template>
         
-      <template #publisher>
-            <span>管理员</span>
+      <template #author="{ row }">
+        <span>{{ row.author || '管理员' }}</span>
           </template>
         
       <template #publishTime="{ row }">
-            <span>{{ formatDate(row.published_at || row.created_at) }}</span>
+        <span>{{ formatDate(row.publishTime || row.createdAt) }}</span>
           </template>
 
       <template #actions="{ row }">
         <el-button link type="primary" @click="handleView(row)">详细</el-button>
-        <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
       </template>
     </DataTable>
 
@@ -69,20 +65,28 @@ import DataTable from '@/components/DataTable.vue'
 import type { Column } from '@/components/DataTable.vue'
 import { useCrud } from '@/composables/useCrud'
 
-import { wenList, deleteWen, batchDeleteWen } from '@/api/auth'
+import { wenList } from '@/api/auth'
 
 const router = useRouter()
 
 interface ArticleData {
   _id?: string
   title: string
+  articleType: string
   channel: string
-  type: string
-  keywords: string
-  content: string
-  published_at?: string
-  created_at?: string
-  updated_at?: string
+  status: string
+  renderType: string
+  tags: string[]
+  keywords: string[]
+  author?: string
+  publishTime?: string
+  likeCount?: number
+  coverImage?: string
+  rightImage?: string
+  detailContent: string
+  detailImages?: string[]
+  createdAt?: string
+  updatedAt?: string
 }
 
 
@@ -90,21 +94,15 @@ interface ArticleData {
 const {
   tableData,
   loading,
-  selectedRows,
   pagination,
   filterForm,
   fetchList,
   handleSearch,
   handleReset,
   handleSizeChange,
-  handleCurrentChange,
-  handleSelectionChange,
-  handleDelete,
-  handleBatchDelete
+  handleCurrentChange
 } = useCrud<ArticleData>({
   listApi: wenList,
-  deleteApi: deleteWen,
-  batchDeleteApi: batchDeleteWen,
   pageSize: 10
 })
 
@@ -116,29 +114,58 @@ const filterFields = [
     placeholder: '请输入文章标题'
   },
   {
-    key: 'type',
+    key: 'articleType',
     label: '文章类型',
     type: 'select' as const,
     placeholder: '请选择文章类型',
     options: [
-      { label: '图文', value: '图文' },
-      { label: '视频', value: '视频' },
-      { label: '音频', value: '音频' }
+      { label: '文章', value: '文章' },
+      { label: '视频', value: '视频' }
+    ]
+  },
+  {
+    key: 'channel',
+    label: '发布频道',
+    type: 'select' as const,
+    placeholder: '请选择发布频道',
+    options: [
+      { label: '推荐', value: '推荐' },
+      { label: '政策', value: '政策' }
+    ]
+  },
+  {
+    key: 'status',
+    label: '审核状态',
+    type: 'select' as const,
+    placeholder: '请选择审核状态',
+    options: [
+      { label: '未审核', value: '未审核' },
+      { label: '审核成功', value: '审核成功' },
+      { label: '审核失败', value: '审核失败' }
+    ]
+  },
+  {
+    key: 'renderType',
+    label: '渲染类型',
+    type: 'select' as const,
+    placeholder: '请选择渲染类型',
+    options: [
+      { label: '纯文字', value: 'TEXT_ONLY' },
+      { label: '大图图文', value: 'IMAGE_FULL' },
+      { label: '右侧小图', value: 'IMAGE_RIGHT' }
     ]
   }
 ]
 
 const columns: Column[] = [
-  { type: 'selection', width: 55 },
   { type: 'index', label: '序号', width: 60 },
   { prop: 'title', label: '文章标题', minWidth: 200, slot: 'title' },
-  { prop: 'channel', label: '发布渠道', width: 120 },
   { prop: 'channel', label: '发布频道', width: 120, slot: 'channel' },
-  { prop: 'type', label: '文章类型', width: 100, slot: 'type' },
-  { prop: 'keywords', label: '关键词', width: 150, slot: 'keywords' },
-  { prop: 'publisher', label: '发布人', width: 100, slot: 'publisher' },
-  { prop: 'published_at', label: '发布时间', width: 120, slot: 'publishTime' },
-  { type: 'actions', label: '操作', width: 180, fixed: 'right' }
+  { prop: 'articleType', label: '文章类型', width: 100, slot: 'articleType' },
+  { prop: 'status', label: '审核状态', width: 100, slot: 'status' },
+  { prop: 'author', label: '作者', width: 100, slot: 'author' },
+  { prop: 'publishTime', label: '发布时间', width: 120, slot: 'publishTime' },
+  { type: 'actions', label: '操作', width: 120, fixed: 'right' }
 ]
 
 
@@ -157,14 +184,36 @@ const formatDate = (dateStr: string | undefined): string => {
   return new Date(dateStr).toLocaleDateString('zh-CN')
 }
 
-const getTypeTagType = (type: string): string => {
-  switch (type) {
-    case '图文':
+const getChannelTagType = (channel: string): string => {
+  switch (channel) {
+    case '推荐':
+      return 'primary'
+    case '政策':
+      return 'success'
+    default:
+      return 'info'
+  }
+}
+
+const getArticleTypeTagType = (articleType: string): string => {
+  switch (articleType) {
+    case '文章':
       return 'primary'
     case '视频':
       return 'success'
-    case '音频':
+    default:
+      return 'info'
+  }
+}
+
+const getStatusTagType = (status: string): string => {
+  switch (status) {
+    case '审核成功':
+      return 'success'
+    case '未审核':
       return 'warning'
+    case '审核失败':
+      return 'danger'
     default:
       return 'info'
   }

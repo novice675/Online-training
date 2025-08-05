@@ -60,36 +60,33 @@ export const allDelMenjin = (ids = []) => {
 
 
 
-// 获取文章列表
+// ==================== 新闻文章管理相关接口 ====================
+
+// 获取新闻列表（管理端）
 export const wenList = (params = {}) => {
-    return api.get('/wen/list', { params })
+    return api.get('/LCY/admin/news', { params })
 }
 
-// 添加文章
-export const addWen = (data = {}) => {
-    return api.post('/wen/add', data)
-}
-
-// 获取文章详情
+// 获取新闻详情（管理端）
 export const wenDetail = (id) => {
-    return api.get(`/wen/detail/${id}`)
+    return api.get(`/LCY/admin/news/${id}`)
 }
 
-// 更新文章
-export const updateWen = (id, data = {}) => {
-    return api.put(`/wen/update/${id}`, data)
-}
-
-// 删除单个文章
+// 删除单个新闻
 export const deleteWen = (id) => {
-    return api.delete(`/wen/delete/${id}`)
+    return api.delete(`/LCY/news/${id}`)
 }
 
-// 批量删除文章
+// 批量删除新闻
 export const batchDeleteWen = (ids = []) => {
-    return api.delete('/wen/batch-delete', {
+    return api.delete('/LCY/news/batch', {
         data: { ids }
     })
+}
+
+// 更新新闻审核状态
+export const updateNewsStatus = (id, data) => {
+    return api.put(`/LCY/admin/news/${id}/status`, data)
 }
 
 // 文件上传
@@ -181,6 +178,48 @@ export const batchDeleteKehu = (ids = []) => {
 // 获取客户统计信息
 export const kehuStats = (params = {}) => {
     return api.get('/kehu/stats/overview', { params })
+}
+
+// ==================== 租户信息相关接口 ====================
+
+// 获取租户信息列表
+export const zuhuList = (params = {}) => {
+    return api.get('/zuhuxinxi', { params })
+}
+
+// 获取租户信息详情
+export const zuhuDetail = (id) => {
+    return api.get(`/zuhuxinxi/${id}`)
+}
+
+// 添加租户信息
+export const addZuhu = (data = {}) => {
+    return api.post('/zuhuxinxi', data)
+}
+
+// 更新租户信息
+export const updateZuhu = (id, data = {}) => {
+    return api.put(`/zuhuxinxi/${id}`, data)
+}
+
+// 删除租户信息
+export const deleteZuhu = (id) => {
+    return api.delete(`/zuhuxinxi/${id}`)
+}
+
+// 批量删除租户信息
+export const batchDeleteZuhu = (ids = []) => {
+    return api.delete('/zuhuxinxi/batch', { data: { ids } })
+}
+
+// 获取合同列表
+export const getContracts = (params = {}) => {
+    return api.get('/zuhuxinxi/contracts', { params })
+}
+
+// 获取租户统计信息
+export const zuhuStats = (params = {}) => {
+    return api.get('/zuhuxinxi/stats/overview', { params })
 }
 
 export default api 

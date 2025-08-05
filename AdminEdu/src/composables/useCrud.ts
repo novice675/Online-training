@@ -66,8 +66,8 @@ export function useCrud<T = any>(options: CrudOptions<T>) {
       
       const response = await options.listApi(queryParams)
       if (response.data.code === 200) {
-        tableData.value = response.data.data
-        pagination.total = response.data.total
+        tableData.value = response.data.data.list || response.data.data
+        pagination.total = response.data.data.total || response.data.total
       } else {
         ElMessage.error(response.data.msg || '获取列表失败')
       }

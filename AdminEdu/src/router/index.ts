@@ -106,6 +106,44 @@ export const menuRoutes: RouteConfig[] = [
       },
     ]
   },
+  // 租户管理菜单
+  {
+    name: 'TenantManagement',
+    path: 'TenantManagement',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '租户管理',
+      menuIcon: 'building',
+      parentModule: 'Operation',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'ZuHuXinXi',
+        path: 'ZuHuXinXi',
+        component: () => import('@/pages/Operation/ZuHu/ZuHuXinXi.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '租户信息管理',
+          menuIcon: 'office-building',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'ZuHuPeople',
+        path: 'ZuHuPeople',
+        component: () => import('@/pages/Operation/ZuHu/ZuHuPeople.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '租户人员管理',
+          menuIcon: 'user-group',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+    ]
+  },
   // 文章详情页面（不在菜单中显示）
   {
     name: 'xiang',

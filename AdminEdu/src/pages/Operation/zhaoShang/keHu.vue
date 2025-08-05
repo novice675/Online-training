@@ -3,6 +3,8 @@
     <!-- 页面头部 -->
     <PageHeader 
       title="客户信息管理"
+      :show-add="true"
+      :show-batch-delete="true"
       :selected-count="selectedRows.length"
       add-text="新增"
       @add="handleAdd"
@@ -180,7 +182,7 @@
   </template>
   
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import PageHeader from '@/components/PageHeader.vue'
 import FilterPanel from '@/components/FilterPanel.vue'
@@ -220,6 +222,21 @@ interface CustomerData {
 
 
 const router = useRouter()
+
+// 表单引用和验证规则  
+const formRef = ref()
+const formRules = {
+  name: [{ required: true, message: '请输入客户名称', trigger: 'blur' }],
+  phone: [{ required: true, message: '请输入联系方式', trigger: 'blur' }],
+  level: [{ required: true, message: '请选择客户等级', trigger: 'change' }],
+  industry: [{ required: true, message: '请输入所属行业', trigger: 'blur' }],
+  status: [{ required: true, message: '请选择跟进状态', trigger: 'change' }],
+  followPerson: [{ required: true, message: '请输入跟进人姓名', trigger: 'blur' }],
+  contactPhone: [{ required: true, message: '请输入跟进人联系方式', trigger: 'blur' }]
+}
+
+// 对话框标题
+const dialogTitle = computed(() => isEdit.value ? '编辑客户信息' : '新增客户信息')
 
 // 使用CRUD Composable
 const {
@@ -342,6 +359,11 @@ const getIntentLevelType = (level: string): string => {
 // 自定义查看方法（详情页面跳转）
 const handleView = (row: CustomerData): void => {
   handleEdit(row) // 复用编辑方法
+}
+
+// 对话框关闭处理
+const handleDialogClose = (): void => {
+  formRef.value?.clearValidate()
 }
 
 // 生命周期
