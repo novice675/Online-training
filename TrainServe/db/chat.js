@@ -51,7 +51,6 @@ chatSessionSchema.pre('save', function(next) {
 });
 
 // 创建索引
-chatSessionSchema.index({ sessionId: 1 });
 chatSessionSchema.index({ userId: 1 });
 chatSessionSchema.index({ createdAt: -1 });
 

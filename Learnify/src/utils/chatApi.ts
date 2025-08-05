@@ -37,6 +37,9 @@ export interface ChatHistoryResponse {
   data: {
     sessionId: string;
     messages: ChatMessage[];
+    hasMore: boolean;
+    total: number;
+    currentPage: number;
   };
 }
 
@@ -69,12 +72,12 @@ class ChatAPI {
   }
 
   // 获取聊天历史记录
-  async getChatHistory(sessionId: string, userId: string): Promise<ChatHistoryResponse> {
-    console.log(userId);
+  async getChatHistory(sessionId: string, userId: string, page: number = 1, limit: number = 10): Promise<ChatHistoryResponse> {
+    console.log('获取历史记录:', { userId, page, limit });
     
     try {
       const response = await axios.get(`${this.baseURL}/history/${sessionId}`, {
-       userId
+        userId, page, limit
       });
       return response;
     } catch (error) {

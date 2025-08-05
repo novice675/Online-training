@@ -102,9 +102,9 @@ async function checkContentSafety(message) {
 router.get('/history/:sessionId', async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const { userId } = req.query;
+    const { userId, page = 1, limit = 10 } = req.query;
     
-    console.log('获取历史记录请求:', { sessionId, userId });
+    console.log('获取历史记录请求:', { sessionId, userId, page, limit });
 
     const session = await ChatSession.findOne({ 
       sessionId: sessionId,
@@ -119,19 +119,49 @@ router.get('/history/:sessionId', async (req, res) => {
         success: true,
         data: {
           sessionId: sessionId,
-          messages: []
+          messages: [],
+          hasMore: false,
+          total: 0
         }
       });
     }
 
-    console.log('找到会话，消息数量:', session.messages.length);
-    console.log('消息内容:', session.messages);
+    // 计算分页
+    const totalMessages = session.messages.length;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = totalMessages - (pageNum * limitNum); // 从最新消息开始，倒序分页
+    
+    let messages = [];
+    let hasMore = false;
+    
+    if (skip <= 0) {
+      // 获取所有消息（第一页或消息数量少于limit）
+      messages = session.messages.slice(0, limitNum);
+      hasMore = totalMessages > limitNum;
+    } else {
+      // 获取指定页的消息
+      const startIndex = Math.max(0, skip);
+      const endIndex = Math.max(0, skip + limitNum);
+      messages = session.messages.slice(startIndex, endIndex);
+      hasMore = startIndex > 0;
+    }
+
+    console.log('分页结果:', { 
+      total: totalMessages, 
+      currentPage: pageNum, 
+      messagesCount: messages.length, 
+      hasMore 
+    });
 
     res.json({
       success: true,
       data: {
         sessionId: session.sessionId,
-        messages: session.messages
+        messages: messages,
+        hasMore: hasMore,
+        total: totalMessages,
+        currentPage: pageNum
       }
     });
   } catch (error) {

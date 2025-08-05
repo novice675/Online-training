@@ -8,6 +8,9 @@ export default function AutoChat() {
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [inputError, setInputError] = useState('')
+  const [hasMore, setHasMore] = useState(false)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
   const [sessionId, setSessionId] = useState<string>(() => {
     return sessionStorage.getItem('sessionId') || ''
   })
@@ -37,7 +40,7 @@ export default function AutoChat() {
           console.log('用户ID:', userId)
           
           try {
-            const historyResponse = await chatAPI.getChatHistory(sessionId, userId)
+            const historyResponse = await chatAPI.getChatHistory(sessionId, userId, 1, 10)
             console.log('历史记录响应:', historyResponse)
             console.log('历史记录数据:', historyResponse.data)
             console.log('消息数组:', historyResponse.data.messages)
@@ -45,6 +48,8 @@ export default function AutoChat() {
             if (historyResponse.data.messages && historyResponse.data.messages.length > 0) {
               console.log('设置历史消息到状态:', historyResponse.data.messages)
               setMessages(historyResponse.data.messages)
+              setHasMore(historyResponse.data.hasMore)
+              setCurrentPage(historyResponse.data.currentPage)
             } else {
               // 历史记录为空，添加欢迎消息
               console.log('历史记录为空，添加欢迎消息')
@@ -161,6 +166,42 @@ export default function AutoChat() {
     })
   }
 
+  // 加载更多历史消息
+  const loadMoreMessages = async () => {
+    if (isLoadingMore || !hasMore || !sessionId) return
+
+    setIsLoadingMore(true)
+    try {
+      const nextPage = currentPage + 1
+      const historyResponse = await chatAPI.getChatHistory(sessionId, userId, nextPage, 10)
+      
+      if (historyResponse.data.messages && historyResponse.data.messages.length > 0) {
+        // 记录当前滚动位置
+        const messagesContainer = document.querySelector(`.${styles.messagesContainer}`)
+        const scrollTop = messagesContainer?.scrollTop || 0
+        const scrollHeight = messagesContainer?.scrollHeight || 0
+        
+        // 将新消息添加到现有消息的前面（因为是最旧的消息）
+        setMessages(prev => [...historyResponse.data.messages, ...prev])
+        setHasMore(historyResponse.data.hasMore)
+        setCurrentPage(nextPage)
+        
+        // 在下一个渲染周期中恢复滚动位置
+        setTimeout(() => {
+          if (messagesContainer) {
+            const newScrollHeight = messagesContainer.scrollHeight
+            const heightDifference = newScrollHeight - scrollHeight
+            messagesContainer.scrollTop = scrollTop + heightDifference
+          }
+        }, 0)
+      }
+    } catch (error) {
+      console.error('加载更多消息失败:', error)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }
+
   return (
     <div className={styles.chatContainer}>
       {/* 头部 */}
@@ -179,6 +220,19 @@ export default function AutoChat() {
 
       {/* 消息列表 */}
       <div className={styles.messagesContainer}>
+        {/* 加载更多按钮 */}
+        {hasMore && (
+          <div className={styles.loadMoreContainer}>
+            <button 
+              onClick={loadMoreMessages}
+              disabled={isLoadingMore}
+              className={styles.loadMoreButton}
+            >
+              {isLoadingMore ? '加载中...' : '加载更多历史消息'}
+            </button>
+          </div>
+        )}
+        
         {messages.map((message, index) => (
           <div
             key={index}
