@@ -101,15 +101,6 @@ const filteredMenuRoutes = computed(() => {
     route.meta.roleName.some(role => userRoles.includes(role)) &&
     !route.meta.hideInMenu
   )
-  
-  // 调试信息
-  console.log('菜单过滤调试:', {
-    currentModule,
-    allRoutes: routes.map(r => ({ name: r.name, hideInMenu: r.meta.hideInMenu, parentModule: r.meta.parentModule })),
-    moduleRoutes: moduleRoutes.map(r => ({ name: r.name, hideInMenu: r.meta.hideInMenu })),
-    finalRoutes: finalRoutes.map(r => ({ name: r.name, title: r.meta.menuTitle }))
-  })
-  
   return finalRoutes
 })
 

@@ -22,14 +22,14 @@ const vehicleSchema = new mongoose.Schema({
     vehicleType: {
         type: String,
         required: true,
-        enum: ['包月车', '临时车']
+        enum: ['包月车', '临时车', '周区车']
     },
     startTime: {
-        type: Date,
+        type: mongoose.Schema.Types.Mixed,  // 修改为Mixed类型，支持字符串和Date
         required: true
     },
     endTime: {
-        type: Date,
+        type: mongoose.Schema.Types.Mixed,  // 修改为Mixed类型，支持字符串和Date
         required: true
     },
     createdAt: {
@@ -43,11 +43,12 @@ const vehicleSchema = new mongoose.Schema({
 });
 
 // 更新时间中间件
-vehicleSchema.pre('save', function(next) {
+vehicleSchema.pre('save', function (next) {
     this.updatedAt = Date.now();
     next();
 });
 
-const VehicleModel = mongoose.model('Vehicle', vehicleSchema, 'Vehicle');
+// 尝试不同的集合名称
+const VehicleModel = mongoose.model('Vehicles', vehicleSchema, 'Vehicles');
 
 module.exports = VehicleModel; 

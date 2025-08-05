@@ -7,64 +7,121 @@
         <h2>车辆信息管理</h2>
       </div>
       <div class="action-buttons">
-        <el-button type="primary" @click="handleAdd">新增</el-button>
-        <el-button type="warning" :disabled="multipleSelection.length === 0"
-          @click="handleBatchDelete">批量删除</el-button>
+        <el-button type="primary" @click="handleAdd" :icon="Plus">新增车辆</el-button>
+        <el-button type="danger" :disabled="multipleSelection.length === 0" @click="handleBatchDelete" :icon="Delete">
+          批量删除 ({{ multipleSelection.length }})
+        </el-button>
       </div>
     </div>
 
     <!-- 搜索区域 -->
     <div class="search-area">
       <el-form :inline="true" :model="searchForm" class="search-form">
-        <el-form-item label="车牌号码：">
-          <el-input v-model="searchForm.licensePlate" placeholder="请输入车牌号码" clearable />
+        <el-form-item label="车牌号码">
+          <el-input v-model="searchForm.licensePlate" placeholder="请输入车牌号码" clearable :prefix-icon="Search"
+            style="width: 200px" />
         </el-form-item>
-        <el-form-item label="联系方式：">
-          <el-input v-model="searchForm.contactWay" placeholder="请输入联系方式" clearable />
+        <el-form-item label="联系方式">
+          <el-input v-model="searchForm.contactWay" placeholder="请输入联系方式" clearable :prefix-icon="Phone"
+            style="width: 200px" />
         </el-form-item>
-        <el-form-item label="车辆类型：">
-          <el-select v-model="searchForm.vehicleType" placeholder="请选择" clearable>
-            <el-option label="包月车" value="包月车" />
+        <!-- 搜索区域的车辆类型选择框 -->
+        <el-form-item label="车辆类型">
+          <el-select v-model="searchForm.vehicleType" placeholder="请选择" clearable style="width: 150px">
+            <el-option label="请选择" value="" />
             <el-option label="临时车" value="临时车" />
+            <el-option label="包月车" value="包月车" />
+            <el-option label="周区车" value="周区车" />
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="resetSearch">重置</el-button>
+          <el-button type="primary" @click="handleSearch" :icon="Search">查询</el-button>
+          <el-button @click="resetSearch" :icon="Refresh">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
 
     <!-- 表格区域 -->
     <div class="table-area">
+      <div class="table-header">
+        <div class="table-info">
+          <span class="info-text">共找到 <strong>{{ total }}</strong> 条记录</span>
+        </div>
+      </div>
+
       <el-table :data="tableData" border stripe style="width: 100%" v-loading="loading"
-        @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="ownerName" label="车主姓名" align="center" />
-        <el-table-column prop="contactWay" label="联系方式" align="center" />
-        <el-table-column prop="licensePlate" label="车牌号码" align="center" />
-        <el-table-column prop="vehicleModel" label="车辆型号" align="center" />
-        <el-table-column prop="vehicleType" label="车辆类型" align="center">
+        @selection-change="handleSelectionChange" :header-cell-style="{ backgroundColor: '#f8f9fa', color: '#495057' }">
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column prop="ownerName" label="车主姓名" align="center" width="120">
           <template #default="{ row }">
-            <el-tag :type="row.vehicleType === '包月车' ? 'success' : 'warning'">
-              {{ row.vehicleType }}
-            </el-tag>
+            <div class="owner-info">
+              <el-avatar :size="32" :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${row.ownerName}`" />
+              <span class="owner-name">{{ row.ownerName }}</span>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column prop="startTime" label="开始时间" align="center">
+        <el-table-column prop="contactWay" label="联系方式" align="center" width="130">
           <template #default="{ row }">
-            {{ formatDate(row.startTime) }}
+            <div class="contact-info">
+              <el-icon>
+                <Phone />
+              </el-icon>
+              <span>{{ row.contactWay }}</span>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column prop="endTime" label="结束时间" align="center">
+        <el-table-column prop="licensePlate" label="车牌号码" align="center" width="120">
           <template #default="{ row }">
-            {{ formatDate(row.endTime) }}
+            <div class="license-plate">
+              {{ row.licensePlate }}
+            </div>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" align="center">
+        <el-table-column prop="vehicleModel" label="车辆型号" align="center" min-width="180">
           <template #default="{ row }">
-            <el-button type="primary" size="small" @click="handleEdit(row)">详情</el-button>
-            <el-button type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+            <div class="vehicle-model">
+              <el-icon>
+                <CaretRight />
+              </el-icon>
+              <span>{{ row.vehicleModel }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="vehicleType" label="车辆类型" align="center" width="120">
+          <template #default="{ row }">
+            <span class="vehicle-type-text">{{ row.vehicleType }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="startTime" label="开始时间" align="center" width="120">
+          <template #default="{ row }">
+            <div class="date-info">
+              <el-icon>
+                <Calendar />
+              </el-icon>
+              <span>{{ formatDate(row.startTime) }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="endTime" label="结束时间" align="center" width="120">
+          <template #default="{ row }">
+            <div class="date-info">
+              <el-icon>
+                <Calendar />
+              </el-icon>
+              <span>{{ formatDate(row.endTime) }}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="180" align="center" fixed="right">
+          <template #default="{ row }">
+            <div class="action-buttons-cell">
+              <el-button type="primary" size="small" @click="handleEdit(row)" :icon="View">
+                详情
+              </el-button>
+              <el-button type="danger" size="small" @click="handleDelete(row)" :icon="Delete">
+                删除
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -73,52 +130,48 @@
     <!-- 分页区域 -->
     <div class="pagination-area">
       <div class="pagination-info">
-        共 {{ total }} 条
+        <span>共 {{ total }} 条记录，当前第 {{ currentPage }} 页</span>
       </div>
       <el-pagination v-model="currentPage" :current-page="currentPage" :page-size="pageSize"
-        :page-sizes="[10, 20, 30, 50]" layout="sizes, prev, pager, next, jumper" :total="total"
-        @size-change="handleSizeChange" @current-change="handleCurrentChange" />
-      <div class="pagination-goto">
-        到第
-        <el-input v-model="goToPage" class="page-input" />
-        页
-        <el-button size="small" @click="handleGoToPage">确定</el-button>
-      </div>
+        :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next, jumper" :total="total"
+        @size-change="handleSizeChange" @current-change="handleCurrentChange" background />
     </div>
 
     <!-- 新增/编辑对话框 -->
-    <el-dialog v-model="dialogVisible" :title="dialogType === 'add' ? '新增车辆' : '车辆详情'" width="600px">
-      <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
+    <el-dialog v-model="dialogVisible" :title="dialogType === 'add' ? '新增车辆' : '车辆详情'" width="700px"
+      :close-on-click-modal="false">
+      <el-form :model="form" :rules="rules" ref="formRef" label-width="100px" class="vehicle-form">
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="车主姓名" prop="ownerName">
-              <el-input v-model="form.ownerName" placeholder="请输入车主姓名" />
+              <el-input v-model="form.ownerName" placeholder="请输入车主姓名" :prefix-icon="User" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="联系方式" prop="contactWay">
-              <el-input v-model="form.contactWay" placeholder="请输入联系方式" />
+              <el-input v-model="form.contactWay" placeholder="请输入联系方式" :prefix-icon="Phone" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="车牌号码" prop="licensePlate">
-              <el-input v-model="form.licensePlate" placeholder="请输入车牌号码" />
+              <el-input v-model="form.licensePlate" placeholder="请输入车牌号码" style="text-transform: uppercase" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="车辆型号" prop="vehicleModel">
-              <el-input v-model="form.vehicleModel" placeholder="请输入车辆型号" />
+              <el-input v-model="form.vehicleModel" placeholder="请输入车辆型号" :prefix-icon="CaretRight" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="车辆类型" prop="vehicleType">
-              <el-select v-model="form.vehicleType" placeholder="请选择车辆类型" style="width: 100%">
-                <el-option label="包月车" value="包月车" />
+              <el-select v-model="form.vehicleType" placeholder="请选择车辆类型" style="width: 100%" clearable>
                 <el-option label="临时车" value="临时车" />
+                <el-option label="包月车" value="包月车" />
+                <el-option label="周区车" value="周区车" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -126,21 +179,25 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="开始时间" prop="startTime">
-              <el-date-picker v-model="form.startTime" type="date" placeholder="选择开始时间" style="width: 100%" />
+              <el-date-picker v-model="form.startTime" type="date" placeholder="选择开始时间" style="width: 100%"
+                format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="结束时间" prop="endTime">
-              <el-date-picker v-model="form.endTime" type="date" placeholder="选择结束时间" style="width: 100%" />
+              <el-date-picker v-model="form.endTime" type="date" placeholder="选择结束时间" style="width: 100%"
+                format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
       <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleSubmit" v-if="dialogType === 'add'">确定</el-button>
-        </span>
+        <div class="dialog-footer">
+          <el-button @click="dialogVisible = false" :icon="Close">取消</el-button>
+          <el-button type="primary" @click="handleSubmit" v-if="dialogType === 'add'" :icon="Check">
+            确定
+          </el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -149,13 +206,17 @@
 <script lang="ts" setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, FormInstance } from 'element-plus'
-import axios from '../../../../utils/axios'
+import {
+  Plus, Delete, Search, Refresh, Phone, User, CaretRight,
+  Calendar, Close, Check
+} from '@element-plus/icons-vue'
+import axios from "axios"
 
-// 搜索表单
+// 搜索表单 - 修改初始值
 const searchForm = reactive({
   licensePlate: '',
   contactWay: '',
-  vehicleType: ''
+  vehicleType: ''  // 保持空字符串，对应"全部"选项
 })
 
 // 表格数据
@@ -209,10 +270,7 @@ const rules = {
   ]
 }
 
-// 生命周期钩子
-onMounted(() => {
-  fetchData()
-})
+
 
 // 格式化日期
 const formatDate = (date: string) => {
@@ -229,9 +287,9 @@ const fetchData = async () => {
       pageSize: pageSize.value,
       ...searchForm
     }
-    
+
     const response = await axios.get('/vehicle/list', { params })
-    
+
     if (response.data.code === 200) {
       tableData.value = response.data.data.list
       total.value = response.data.data.total
@@ -239,7 +297,6 @@ const fetchData = async () => {
       ElMessage.error(response.data.msg || '获取数据失败')
     }
   } catch (error) {
-    console.error('获取数据失败:', error)
     ElMessage.error('获取数据失败')
   } finally {
     loading.value = false
@@ -257,12 +314,12 @@ const handleSearch = () => {
   fetchData()
 }
 
-// 重置搜索
+// 重置搜索 - 确保重置时也设置为"全部"
 const resetSearch = () => {
   Object.assign(searchForm, {
     licensePlate: '',
     contactWay: '',
-    vehicleType: ''
+    vehicleType: ''  // 重置为空字符串，对应"请选择"
   })
   handleSearch()
 }
@@ -292,7 +349,7 @@ const resetForm = () => {
     contactWay: '',
     licensePlate: '',
     vehicleModel: '',
-    vehicleType: '',
+    vehicleType: '',  // 确保重置为空字符串
     startTime: '',
     endTime: ''
   })
@@ -302,12 +359,10 @@ const resetForm = () => {
 // 提交表单
 const handleSubmit = async () => {
   if (!formRef.value) return
-  
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
         const response = await axios.post('/vehicle/add', form)
-        
         if (response.data.code === 200) {
           ElMessage.success('添加成功')
           dialogVisible.value = false
@@ -316,7 +371,6 @@ const handleSubmit = async () => {
           ElMessage.error(response.data.msg || '添加失败')
         }
       } catch (error) {
-        console.error('添加失败:', error)
         ElMessage.error('添加失败')
       }
     }
@@ -332,7 +386,7 @@ const handleDelete = (row: any) => {
   }).then(async () => {
     try {
       const response = await axios.delete(`/vehicle/delete/${row._id}`)
-      
+
       if (response.data.code === 200) {
         ElMessage.success('删除成功')
         fetchData()
@@ -340,10 +394,9 @@ const handleDelete = (row: any) => {
         ElMessage.error(response.data.msg || '删除失败')
       }
     } catch (error) {
-      console.error('删除失败:', error)
       ElMessage.error('删除失败')
     }
-  }).catch(() => {})
+  }).catch(() => { })
 }
 
 // 批量删除
@@ -352,7 +405,7 @@ const handleBatchDelete = () => {
     ElMessage.warning('请至少选择一条记录')
     return
   }
-  
+
   ElMessageBox.confirm(`确认删除选中的 ${multipleSelection.value.length} 条记录吗？`, '提示', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
@@ -363,7 +416,7 @@ const handleBatchDelete = () => {
       const response = await axios.delete('/vehicle/batchDelete', {
         data: { ids }
       })
-      
+
       if (response.data.code === 200) {
         ElMessage.success('批量删除成功')
         fetchData()
@@ -371,10 +424,9 @@ const handleBatchDelete = () => {
         ElMessage.error(response.data.msg || '批量删除失败')
       }
     } catch (error) {
-      console.error('批量删除失败:', error)
       ElMessage.error('批量删除失败')
     }
-  }).catch(() => {})
+  }).catch(() => { })
 }
 
 // 分页处理
@@ -403,11 +455,15 @@ const handleGoToPage = () => {
   fetchData()
   goToPage.value = ''
 }
+// 生命周期钩子
+onMounted(() => {
+  fetchData()
+})
 </script>
 
 <style scoped>
 .vehicle-info-container {
-  padding: 20px;
+  padding: 24px;
   background-color: #f5f7fa;
   min-height: calc(100vh - 120px);
   display: flex;
@@ -418,50 +474,144 @@ const handleGoToPage = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   flex-shrink: 0;
 }
 
 .title {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
 
 .title-bar {
   width: 4px;
-  height: 20px;
-  background-color: #4080ff;
-  margin-right: 8px;
+  height: 24px;
+  background: linear-gradient(135deg, #4080ff, #1890ff);
+  border-radius: 2px;
 }
 
 .title h2 {
-  font-size: 18px;
+  font-size: 20px;
   margin: 0;
-  font-weight: 500;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin-left: 8px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
 }
 
 .search-area {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   margin-bottom: 20px;
   flex-shrink: 0;
 }
 
+.search-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px 0;
+}
+
+.option-desc {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-left: 8px;
+}
+
 .table-area {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 0;
 }
 
-.table-area :deep(.el-table) {
-  flex: 1;
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.table-info .info-text {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.table-info strong {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.owner-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.owner-name {
+  font-weight: 500;
+}
+
+.contact-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #374151;
+}
+
+.license-plate {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #1f2937;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+}
+
+.vehicle-model {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #374151;
+}
+
+.date-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.action-buttons-cell {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
 }
 
 .pagination-area {
@@ -469,37 +619,64 @@ const handleGoToPage = () => {
   justify-content: space-between;
   align-items: center;
   margin-top: 20px;
-  padding: 15px 20px;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  padding: 20px 24px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   flex-shrink: 0;
 }
 
 .pagination-info {
   font-size: 14px;
-  color: #666;
+  color: #6b7280;
 }
 
-.pagination-goto {
+.vehicle-form {
+  padding: 16px 0;
+}
+
+.dialog-footer {
   display: flex;
-  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Element Plus 组件样式优化 */
+:deep(.el-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-table th) {
+  background-color: #f8fafc !important;
+  color: #374151 !important;
+  font-weight: 600;
+}
+
+:deep(.el-table td) {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+:deep(.el-table__row:hover) {
+  background-color: #f8fafc;
+}
+
+/* 下拉框样式 - 纯文字样式 */
+:deep(.el-select-dropdown__item) {
+  padding: 8px 12px;
+  color: #606266;
   font-size: 14px;
-  color: #666;
 }
 
-.page-input {
-  width: 50px;
-  margin: 0 5px;
+:deep(.el-select-dropdown__item:hover) {
+  background-color: #f5f7fa;
+  color: #409eff;
 }
 
-.search-form {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-:deep(.el-form-item) {
-  margin-right: 20px;
+:deep(.el-select-dropdown__item.selected) {
+  background-color: #f5f7fa;
+  color: #409eff;
+  font-weight: 600;
 }
 
 :deep(.el-pagination) {
@@ -509,35 +686,40 @@ const handleGoToPage = () => {
 /* 响应式设计 */
 @media (max-width: 1200px) {
   .vehicle-info-container {
-    padding: 15px;
-  }
-
-  .pagination-area {
-    flex-direction: column;
-    gap: 15px;
-    align-items: stretch;
-  }
-
-  .pagination-goto {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 768px) {
-  .vehicle-info-container {
-    padding: 10px;
+    padding: 16px;
   }
 
   .header-area {
     flex-direction: column;
-    gap: 15px;
+    gap: 16px;
     align-items: stretch;
   }
 
-  .search-area,
-  .table-area,
   .pagination-area {
-    padding: 15px;
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
   }
+}
+
+@media (max-width: 768px) {
+  .search-form {
+    flex-direction: column;
+  }
+
+  .search-form .el-form-item {
+    margin-right: 0;
+    margin-bottom: 16px;
+  }
+
+  .action-buttons-cell {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+.vehicle-type-text {
+  color: #606266;
+  font-weight: 500;
 }
 </style>

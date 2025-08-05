@@ -525,7 +525,6 @@ const isOwnRouter = (to: RouteLocationNormalizedGeneric) => {
 
 // 路由守卫
 router.beforeEach((to, _, next) => {
-  console.log('🚦 路由守卫 - 准备跳转到:', to.path);
 
   // 从 localStorage 中获取持久化的用户数据
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -601,7 +600,6 @@ router.beforeEach((to, _, next) => {
   // 权限检查：如果系统中不存在这个路由，并且该路由是用户没有权限访问的路由，就进入404页面
   const routerExists = hasRouter(to);
   const hasPermission = isOwnRouter(to);
-  console.log('🔍 权限检查 - 路由存在:', routerExists, '有权限:', hasPermission);
 
   if (!routerExists && !hasPermission) {
     // 如果目标路径已经是404页面，直接放行
@@ -622,7 +620,6 @@ router.beforeEach((to, _, next) => {
     return;
   }
   // 其他情况，用户正常访问路由
-  console.log('✅ 路由守卫 - 允许访问:', to.path);
   next();
 });
 
