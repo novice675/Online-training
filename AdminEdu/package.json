@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "ant-design-vue": "^4.2.6",
     "axios": "^1.9.0",
-    "element-plus": "^2.10.1",
+    "echarts": "^5.6.0",
+    "echarts-gl": "^2.0.9",
+    "element-plus": "^2.10.5",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "jspdf-font": "^1.0.7",
@@ -22,11 +25,13 @@
     "pinia-plugin-persistedstate": "^4.3.0",
     "pug": "^2.0.4",
     "pug-loader": "^2.4.0",
+    "three": "^0.178.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@types/jspdf": "^1.3.3",
+    "@types/three": "^0.178.1",
     "@vitejs/plugin-vue": "^5.2.4",
     "@vue/tsconfig": "^0.7.0",
     "typescript": "~5.8.3",

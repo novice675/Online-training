@@ -2,11 +2,16 @@ import React, { useState, useEffect } from "react";
 import NewsAPI from "../../api/news";
 import type { NewsItem } from "../../types/news";
 import { RenderType } from "../../types/news";
+import { Swiper, Grid } from "antd-mobile";
+import styles from '../../cssmodule/recommend.module.css'
+import { useNavigate } from "react-router-dom";
 
 export default function Recommend() {
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate=useNavigate()
+  const items = ["/images/3.png", "/images/2.png", "/images/1.png"];
 
     // 获取新闻数据
   const fetchNews = async () => {
@@ -200,10 +205,72 @@ export default function Recommend() {
   }
 
   return (
-    <div className="content-area">
+    <div>
+      <Swiper autoplay loop>
+        {items.map((src, index) => (
+          <Swiper.Item key={index}>
+            <img src={src} alt="" style={{ width: "100%", display: "block" }} />
+          </Swiper.Item>
+        ))}
+      </Swiper>
+      <Grid columns={4} gap={15} style={{marginTop:'15px',marginBottom:'15px'}}>
+        <Grid.Item className={styles['grid-demo-item-block']}>
+          <div style={{textAlign:'center'}}>
+            <img src="/1.png" alt="" className={styles.img}/>
+            可租房源
+          </div>
+        </Grid.Item>
+        <Grid.Item onClick={()=>{navigate('/visitor')}} className={styles['grid-demo-item-block']}>
+          <div style={{textAlign:'center'}}>
+            <img src="/2.png" alt="" className={styles.img}/>
+            访客登记
+          </div>
+        </Grid.Item>
+        <Grid.Item className={styles['grid-demo-item-block']}>
+          <div style={{textAlign:'center'}}>
+            <img src="3.png" alt="" className={styles.img}/>
+            政策申报
+          </div>
+        </Grid.Item>
+        <Grid.Item onClick={()=>{navigate('/company')}} className={styles['grid-demo-item-block']}>
+          <div style={{textAlign:'center'}}>
+            <img src="4.png" alt="" className={styles.img}/>
+            企业入驻
+          </div>
+        </Grid.Item>
+        <Grid.Item className={styles['grid-demo-item-block']}>
+          <div style={{textAlign:'center'}}>
+            <img src="5.png" alt="" className={styles.img}/>
+            公寓入住
+          </div>
+        </Grid.Item>
+        <Grid.Item className={styles['grid-demo-item-block']}>
+          <div style={{textAlign:'center'}}>
+            <img src="6.png" alt="" className={styles.img}/>
+            圈子活动
+          </div>
+        </Grid.Item>
+        <Grid.Item  className={styles['grid-demo-item-block']}>
+          <div style={{textAlign:'center'}}>
+            <img src="7.png" alt="" className={styles.img}/>
+            场地预约
+          </div>
+        </Grid.Item>
+        <Grid.Item className={styles['grid-demo-item-block']}>
+          <div style={{textAlign:'center'}}>
+            <img src="8.png" alt="" className={styles.img}/>
+            园区信息
+          </div>
+        </Grid.Item>
+        
+      </Grid>
+      <div className="content-area">
       {newsList.map((news) => (
         <div key={news._id}>{renderNewsItem(news)}</div>
       ))}
+
     </div>
+    </div>
+    
   );
 }

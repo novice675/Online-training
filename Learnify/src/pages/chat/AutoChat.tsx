@@ -134,11 +134,11 @@ export default function AutoChat() {
       // 只有在API调用成功（内容安全）时才添加用户消息到状态
       const userMessage: ChatMessage = {
         content: messageToSend,
-        isUser: true,
+      isUser: true,
         timestamp: new Date(),
         sessionId: sessionId
-      }
-      setMessages(prev => [...prev, userMessage])
+    }
+    setMessages(prev => [...prev, userMessage])
 
       // 如果成功且有AI回复，添加AI回复
       if (response.data?.aiMessage) {
@@ -156,7 +156,7 @@ export default function AutoChat() {
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsTyping(false) // 隐藏正在输入指示器
-    }
+  }
   }
 
   const formatTime = (date: Date) => {
