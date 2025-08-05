@@ -55,4 +55,44 @@ export const allDelMenjin = (ids = []) => {
     })
 }
 
+// 获取文章列表
+export const wenList = (params = {}) => {
+    return api.get('/wen/list', { params })
+}
+
+// 添加文章
+export const addWen = (data = {}) => {
+    return api.post('/wen/add', data)
+}
+
+// 获取文章详情
+export const wenDetail = (id) => {
+    return api.get(`/wen/detail/${id}`)
+}
+
+// 更新文章
+export const updateWen = (id, data = {}) => {
+    return api.put(`/wen/update/${id}`, data)
+}
+
+// 删除单个文章
+export const deleteWen = (id) => {
+    return api.delete(`/wen/delete/${id}`)
+}
+
+// 批量删除文章
+export const batchDeleteWen = (ids = []) => {
+    return api.delete('/wen/batch-delete', {
+        data: { ids }
+    })
+}
+
+// 文件上传
+export const uploadFile = (data = {}) => {
+    return api.post('/wen/upload', data)
+}
+
+
+
+
 export default api

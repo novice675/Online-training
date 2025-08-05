@@ -96,10 +96,21 @@ const filteredMenuRoutes = computed(() => {
     route.meta.parentModule === currentModule
   )
   
-  // 然后根据权限过滤
-  return moduleRoutes.filter(route =>
-    route.meta.roleName.some(role => userRoles.includes(role))
+  // 然后根据权限过滤，同时排除隐藏的菜单项
+  const finalRoutes = moduleRoutes.filter(route =>
+    route.meta.roleName.some(role => userRoles.includes(role)) &&
+    !route.meta.hideInMenu
   )
+  
+  // 调试信息
+  console.log('菜单过滤调试:', {
+    currentModule,
+    allRoutes: routes.map(r => ({ name: r.name, hideInMenu: r.meta.hideInMenu, parentModule: r.meta.parentModule })),
+    moduleRoutes: moduleRoutes.map(r => ({ name: r.name, hideInMenu: r.meta.hideInMenu })),
+    finalRoutes: finalRoutes.map(r => ({ name: r.name, title: r.meta.menuTitle }))
+  })
+  
+  return finalRoutes
 })
 
 // 分离没有子路由的菜单项
@@ -120,7 +131,7 @@ const menuItemsWithChildren = computed(() => {
 const visibleChildren = (route: RouteConfig) => {
   if (!route.children) return []
   return route.children.filter(child =>
-    isValidRoute(child) && !child.meta.hidden
+    isValidRoute(child) && !child.meta.hidden && !child.meta.hideInMenu
   )
 }
 
