@@ -38,6 +38,6 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/types/**/*.d.ts"
-  ],
+, "src/api/auth.js"  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

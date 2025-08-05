@@ -10,8 +10,10 @@ const LCY = require('./routes/LCY')
 const LCYchat = require('./routes/LCYchat')
 const WYQ = require('./routes/WYQ')
 const Menjin = require('./routes/Menjin')
+const HeTong = require('./routes/HeTong')
+const KeHu = require('./routes/KeHu')
 const Vehicle = require('./routes/Vehicle')
-const Wen = require('./routes/Wenzhang')
+
 
 
 var app = express();
@@ -34,8 +36,9 @@ app.use('/LCY',LCY)
 app.use('/LCYchat',LCYchat)
 app.use('/WYQ',WYQ)
 app.use('/menjin',Menjin)
+app.use('/hetong', HeTong)
+app.use('/kehu', KeHu)
 app.use('/vehicle',Vehicle)
-app.use('/wen', Wen)
 
 
 // catch 404 and forward to error handler
