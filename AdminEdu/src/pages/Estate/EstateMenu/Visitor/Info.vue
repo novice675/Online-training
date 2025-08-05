@@ -111,7 +111,7 @@
       <div class="pagination-info">
         <span>共 {{ total }} 条记录，当前第 {{ currentPage }} 页</span>
       </div>
-      <el-pagination v-model:current-page="currentPage" :page-size="pageSize" :page-sizes="[10, 20, 30, 50]"
+      <el-pagination :current-page="currentPage" :page-size="pageSize" :page-sizes="[10, 20, 30, 50]"
         layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
         @current-change="handleCurrentChange" background />
     </div>
