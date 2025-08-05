@@ -1,6 +1,4 @@
 const mongoose = require('mongoose')
-
-
 let WenzhangSchema = new mongoose.Schema({
   title: {
     type: String,
