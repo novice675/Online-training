@@ -125,17 +125,35 @@ router.get("/employee", async (req, res) => {
 router.get("/visitors", async (req, res) => {
   const { comid, day } = req.query;
   console.log(comid);
-  const time = new Date(`${day}T16:00:00.000+00:00`)
-  console.log(time);
-
-  const list = await Visitor.find({ company_id: comid, time: time });
+  const date=new Date(day)
+  date.setHours(date.getHours()-8)
+  // console.log(time);
+  const list = await Visitor.find({ company_id: comid,time:date })
   console.log(list);
-
   res.send({
     code: 200,
     list,
-  });
+  })
+})
+
+router.get("/infovisitor", async (req, res) => {
+  console.log(req.query._id);
+  let info =await Visitor.findOne(req.query).populate('company_id')
+  console.log(info);
+  if(info){
+    res.send({
+      code: 200,
+      info
+    });
+  }else{
+    res.send({
+      code:400,
+      msg:"查询该访客失败"
+    })
+  }
+
 });
+
 
 // 新增：访客列表接口（支持分页和筛选）
 router.get("/visitor/list", async (req, res) => {
@@ -417,9 +435,9 @@ router.get("/comment", async (req, res) => {
       }
     }
   })
-  console.log(toplevel, 'toplevel');
-  console.log(toplevel[0].replies[0].replies.length, 999);
-
+  console.log(toplevel,'toplevel');
+  console.log(toplevel[0].replies[0].replies.length,999);
+  
   res.send({
     code: 200,
     list: toplevel

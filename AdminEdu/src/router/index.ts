@@ -55,6 +55,57 @@ export const menuRoutes: RouteConfig[] = [
       },
     ]
   },
+  // 招商管理菜单
+  {
+    name: 'InvestmentManagement',
+    path: 'InvestmentManagement',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '招商管理',
+      menuIcon: 'user-group',
+      parentModule: 'Operation',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'keHu',
+        path: 'keHu',
+        component: () => import('@/pages/Operation/zhaoShang/keHu.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '客户管理',
+          menuIcon: 'user',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'heTong',
+        path: 'heTong',
+        component: () => import('@/pages/Operation/zhaoShang/heTong.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '合同管理',
+          menuIcon: 'document-text',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'hetongDetail',
+        path: 'hetongDetail',
+        component: () => import('@/pages/Operation/zhaoShang/xiang.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '合同详情',
+          menuIcon: 'document-text',
+          parentModule: 'Operation',
+          isLogin: true,
+          hideInMenu: true // 隐藏在菜单中，不显示为独立菜单项
+        }
+      },
+    ]
+  },
   // 文章详情页面（不在菜单中显示）
   {
     name: 'xiang',

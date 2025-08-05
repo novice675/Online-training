@@ -10,7 +10,7 @@ export default function Login() {
       localStorage.setItem('com_id',user.company_id||'688b06dc52db26ae1e69b4b6')
       localStorage.setItem('role',user.role||'员工')
       localStorage.setItem('user_id',user._id||'688b258c82e870e203e576d0')
-
+      sessionStorage.setItem('token','1234')
 
 
       navigate('/')

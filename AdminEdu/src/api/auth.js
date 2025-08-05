@@ -1,5 +1,6 @@
 import axios from 'axios'
 
+// 创建axios实例
 const api = axios.create({
     baseURL: 'http://localhost:3008',
     timeout: 5000
@@ -21,6 +22,7 @@ api.interceptors.response.use(response => {
     return Promise.reject(error)
 })
 
+// ==================== 门禁设备相关接口 ====================
 
 // 获取门禁设备列表
 export const MenjinList = (params = {}) => {
@@ -33,7 +35,6 @@ export const MenjinDetail = (id) => {
 }
 
 // 添加门禁设备
-
 export const addMenjin = (data = {}) => {
     return api.post('/menjin/add', data)
 }
@@ -54,6 +55,10 @@ export const allDelMenjin = (ids = []) => {
         data: { ids }
     })
 }
+
+
+
+
 
 // 获取文章列表
 export const wenList = (params = {}) => {
@@ -88,11 +93,94 @@ export const batchDeleteWen = (ids = []) => {
 }
 
 // 文件上传
-export const uploadFile = (data = {}) => {
+export const uploadFile = (data) => {
     return api.post('/wen/upload', data)
 }
 
+// ==================== 合同管理相关接口 ====================
 
+// 获取合同列表
+export const hetongList = (params = {}) => {
+    return api.get('/hetong/list', { params })
+}
 
+// 获取合同详情
+export const hetongDetail = (id) => {
+    return api.get(`/hetong/detail/${id}`)
+}
 
-export default api
+// 添加合同
+export const addHetong = (data = {}) => {
+    return api.post('/hetong/add', data)
+}
+
+// 更新合同
+export const updateHetong = (id, data = {}) => {
+    return api.put(`/hetong/update/${id}`, data)
+}
+
+// 删除单个合同
+export const deleteHetong = (id) => {
+    return api.delete(`/hetong/delete/${id}`)
+}
+
+// 批量删除合同
+export const batchDeleteHetong = (ids = []) => {
+    return api.delete('/hetong/batch-delete', {
+        data: { ids }
+    })
+}
+
+// 获取合同统计信息
+export const hetongStatistics = () => {
+    return api.get('/hetong/statistics')
+}
+
+// 获取即将到期的合同
+export const hetongExpiring = (params = {}) => {
+    return api.get('/hetong/expiring', { params })
+}
+
+// 获取可用房间列表
+export const availableRooms = (params = {}) => {
+    return api.get('/hetong/available-rooms', { params })
+}
+
+// ==================== 客户管理相关接口 ====================
+
+// 获取客户列表
+export const kehuList = (params = {}) => {
+    return api.get('/kehu', { params })
+}
+
+// 获取客户详情
+export const kehuDetail = (id) => {
+    return api.get(`/kehu/${id}`)
+}
+
+// 新增客户
+export const addKehu = (data = {}) => {
+    return api.post('/kehu', data)
+}
+
+// 更新客户
+export const updateKehu = (id, data = {}) => {
+    return api.put(`/kehu/${id}`, data)
+}
+
+// 删除客户
+export const deleteKehu = (id) => {
+    return api.delete(`/kehu/${id}`)
+}
+
+// 批量删除客户
+export const batchDeleteKehu = (ids = []) => {
+    return api.delete('/kehu/batch/delete', { data: { ids } })
+}
+
+// 获取客户统计信息
+export const kehuStats = (params = {}) => {
+    return api.get('/kehu/stats/overview', { params })
+}
+
+export default api 

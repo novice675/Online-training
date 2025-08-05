@@ -3,7 +3,7 @@ import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // 创建请求实例
 const instance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/http://localhost:3008/', // 从环境变量获取基础URL
+  baseURL: import.meta.env.VITE_API_URL, // 从环境变量获取基础URL
   timeout: 15000, // 请求超时时间
   headers: {
     // 'Content-Type': 'application/json',
