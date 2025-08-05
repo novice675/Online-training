@@ -11,5 +11,5 @@ const VisitorSchema = new mongoose.Schema({
     }
 })
 
-const VisitorModel = mongoose.model('Visitor', VisitorSchema);
+const VisitorModel = mongoose.model('Visitor', VisitorSchema, 'Visitor');
 module.exports = VisitorModel;

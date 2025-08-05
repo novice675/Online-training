@@ -8,7 +8,8 @@
             </div>
             <div class="action-buttons">
                 <el-button type="primary">导出</el-button>
-                <el-button type="warning" :disabled="multipleSelection.length === 0" @click="handleBatchDelete">批量删除</el-button>
+                <el-button type="warning" :disabled="multipleSelection.length === 0"
+                    @click="handleBatchDelete">批量删除</el-button>
             </div>
         </div>
 
@@ -30,14 +31,8 @@
 
         <!-- 表格区域 -->
         <div class="table-area">
-            <el-table 
-                :data="tableData" 
-                border 
-                stripe 
-                style="width: 100%" 
-                v-loading="loading"
-                @selection-change="handleSelectionChange"
-            >
+            <el-table :data="tableData" border stripe style="width: 100%" v-loading="loading"
+                @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55" />
                 <el-table-column prop="name" label="访客姓名" align="center" />
                 <el-table-column prop="contactWay" label="联系方式" align="center" />
@@ -65,16 +60,9 @@
             <div class="pagination-info">
                 共 {{ total }} 条
             </div>
-            <el-pagination
-                v-model="currentPage"
-                :current-page="currentPage"
-                :page-size="pageSize"
-                :page-sizes="[10, 20, 30, 50]"
-                layout="sizes, prev, pager, next, jumper"
-                :total="total"
-                @size-change="handleSizeChange"
-                @current-change="handleCurrentChange"
-            />
+            <el-pagination v-model="currentPage" :current-page="currentPage" :page-size="pageSize"
+                :page-sizes="[10, 20, 30, 50]" layout="sizes, prev, pager, next, jumper" :total="total"
+                @size-change="handleSizeChange" @current-change="handleCurrentChange" />
             <div class="pagination-goto">
                 到第
                 <el-input v-model="goToPage" class="page-input" />
@@ -249,7 +237,7 @@ const handleDelete = (row: any) => {
         // 这里应该是实际的删除API调用
         ElMessage.success('删除成功')
         fetchData()
-    }).catch(() => {})
+    }).catch(() => { })
 }
 
 // 批量删除
@@ -266,7 +254,7 @@ const handleBatchDelete = () => {
         // 这里应该是实际的批量删除API调用
         ElMessage.success('批量删除成功')
         fetchData()
-    }).catch(() => {})
+    }).catch(() => { })
 }
 
 // 分页处理
@@ -283,13 +271,13 @@ const handleCurrentChange = (val: number) => {
 // 跳转到指定页
 const handleGoToPage = () => {
     if (!goToPage.value) return
-    
+
     const page = Number(goToPage.value)
     if (isNaN(page) || page < 1 || page > Math.ceil(total.value / pageSize.value)) {
         ElMessage.warning('请输入有效的页码')
         return
     }
-    
+
     currentPage.value = page
     fetchData()
 }
@@ -300,6 +288,8 @@ const handleGoToPage = () => {
     padding: 20px;
     background-color: #f5f7fa;
     min-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
 }
 
 .header-area {
@@ -307,6 +297,7 @@ const handleGoToPage = () => {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    flex-shrink: 0;
 }
 
 .title {
@@ -333,6 +324,7 @@ const handleGoToPage = () => {
     border-radius: 4px;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
     margin-bottom: 20px;
+    flex-shrink: 0;
 }
 
 .table-area {
@@ -340,7 +332,14 @@ const handleGoToPage = () => {
     padding: 20px;
     border-radius: 4px;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.table-area :deep(.el-table) {
+    flex: 1;
 }
 
 .pagination-area {
@@ -348,11 +347,23 @@ const handleGoToPage = () => {
     justify-content: space-between;
     align-items: center;
     margin-top: 20px;
+    padding: 15px 20px;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+.pagination-info {
+    font-size: 14px;
+    color: #666;
 }
 
 .pagination-goto {
     display: flex;
     align-items: center;
+    font-size: 14px;
+    color: #666;
 }
 
 .page-input {
@@ -365,15 +376,56 @@ const handleGoToPage = () => {
     flex-wrap: wrap;
 }
 
-:deep(.el-form-item) {
-    margin-right: 20px;
-}
-
 .in-direction {
     color: #67c23a;
+    font-weight: 500;
 }
 
 .out-direction {
     color: #f56c6c;
+    font-weight: 500;
+}
+
+:deep(.el-form-item) {
+    margin-right: 20px;
+}
+
+:deep(.el-pagination) {
+    --el-pagination-font-size: 14px;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+    .visitor-record-container {
+        padding: 15px;
+    }
+
+    .pagination-area {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .pagination-goto {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .visitor-record-container {
+        padding: 10px;
+    }
+
+    .header-area {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .search-area,
+    .table-area,
+    .pagination-area {
+        padding: 15px;
+    }
 }
 </style>

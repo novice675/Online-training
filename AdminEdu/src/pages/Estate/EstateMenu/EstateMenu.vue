@@ -112,10 +112,34 @@ a-layout {
         <div class="chart-card">
           <h4>物业缴费</h4>
           <div class="tabs">
-            <span class="tab active">物业缴费</span>
-            <span class="tab">公共费用</span>
-            <span class="tab">车辆费用</span>
-            <span class="tab">水电费用</span>
+            <span 
+              class="tab" 
+              :class="{ active: activeTab === '物业缴费' }"
+              @click="switchTab('物业缴费')"
+            >
+              物业缴费
+            </span>
+            <span 
+              class="tab" 
+              :class="{ active: activeTab === '公共费用' }"
+              @click="switchTab('公共费用')"
+            >
+              公共费用
+            </span>
+            <span 
+              class="tab" 
+              :class="{ active: activeTab === '车辆费用' }"
+              @click="switchTab('车辆费用')"
+            >
+              车辆费用
+            </span>
+            <span 
+              class="tab" 
+              :class="{ active: activeTab === '水电费用' }"
+              @click="switchTab('水电费用')"
+            >
+              水电费用
+            </span>
           </div>
           <div class="column-chart" ref="columnChart"></div>
         </div>
@@ -139,11 +163,47 @@ const barChart = ref()
 const columnChart = ref()
 const areaChart = ref()
 
-onMounted(() => {
-  nextTick(() => {
-    initCharts()
-  })
-})
+// 添加物业缴费类型状态
+const activeTab = ref('物业缴费')
+
+// 不同类型的数据
+const feeData = {
+  '物业缴费': [200, 400, 800, 1000, 800, 400, 200, 200, 800, 400, 200, 200],
+  '公共费用': [150, 300, 600, 750, 600, 300, 150, 150, 600, 300, 150, 150],
+  '车辆费用': [100, 200, 400, 500, 400, 200, 100, 100, 400, 200, 100, 100],
+  '水电费用': [250, 500, 1000, 1250, 1000, 500, 250, 250, 1000, 500, 250, 250]
+}
+
+// 切换标签页
+const switchTab = (tabName: string) => {
+  activeTab.value = tabName
+  updateColumnChart()
+}
+
+// 更新柱状图数据
+const updateColumnChart = () => {
+  const columnChartInstance = echarts.getInstanceByDom(columnChart.value)
+  if (columnChartInstance) {
+    columnChartInstance.setOption({
+      series: [{
+        data: feeData[activeTab.value],
+        type: 'bar',
+        itemStyle: {
+          color: '#409EFF',
+          borderRadius: [4, 4, 0, 0]
+        },
+        emphasis: {
+          itemStyle: {
+            color: '#66b1ff'
+          }
+        },
+        animationDelay: function (idx) {
+          return idx * 100;
+        }
+      }]
+    })
+  }
+}
 
 const initCharts = () => {
   // 饼图 - 设备分类占比
@@ -203,7 +263,7 @@ const initCharts = () => {
         type: 'shadow'
       },
       formatter: function(params) {
-        return `${params[0].name}<br/>缴费金额: ${params[0].value}万元`
+        return `${params[0].name}<br/>${activeTab.value}: ${params[0].value}万元`
       }
     },
     grid: {
@@ -221,13 +281,13 @@ const initCharts = () => {
     },
     yAxis: {
       type: 'value',
-      max: 1200,
+      max: 1400,
       axisLabel: {
         formatter: '{value}万'
       }
     },
     series: [{
-      data: [200, 400, 800, 1000, 800, 400, 200, 200, 800, 400, 200, 200],
+      data: feeData[activeTab.value],
       type: 'bar',
       itemStyle: {
         color: '#409EFF',
@@ -372,24 +432,6 @@ const initCharts = () => {
     }]
   })
 
-  // 添加点击事件
-  pieChartInstance.on('click', function (params) {
-    console.log('饼图点击:', params.name, params.value)
-    // 可以添加跳转到详细页面的逻辑
-  })
-
-  columnChartInstance.on('click', function (params) {
-    console.log('柱状图点击:', params.name, params.value)
-  })
-
-  barChartInstance.on('click', function (params) {
-    console.log('条形图点击:', params.name, params.value)
-  })
-
-  areaChartInstance.on('click', function (params) {
-    console.log('面积图点击:', params.name, params.value)
-  })
-
   // 监听窗口大小变化，重新调整图表大小
   window.addEventListener('resize', () => {
     pieChartInstance.resize()
@@ -398,6 +440,12 @@ const initCharts = () => {
     areaChartInstance.resize()
   })
 }
+
+onMounted(() => {
+  nextTick(() => {
+    initCharts()
+  })
+})
 </script>
 
 <style scoped>
