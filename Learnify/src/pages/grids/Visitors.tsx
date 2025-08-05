@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState,useRef } from "react";
 import { Grid, NavBar, Toast } from "antd-mobile";
 import { useNavigate } from "react-router-dom";
+import QRCode from "qrcode";
 import {
   UserOutline,
   BankcardOutline,
@@ -9,6 +10,7 @@ import {
 } from "antd-mobile-icons";
 import http from "../../utils/axios";
 interface Vis {
+  _id:string;
   name: string;
   phone: string;
   sfz: string;
@@ -25,6 +27,8 @@ export default function Visitors() {
   const getlist = async () => {
     const comid = localStorage.getItem("com_id");
     let res = await http.get("/WYQ/visitors", { comid: comid, day: day });
+    console.log(day);
+    
     if (res.code == 200) {
       setvisitors(res.list);
     } else {
@@ -47,9 +51,17 @@ export default function Visitors() {
       };
     });
 
+  // const [qrurl,setqrurl]=useState([])
+  const canvasRef=useRef<(HTMLCanvasElement|null)[]>([])
   useEffect(() => {
     getlist();
   }, [day]);
+  useEffect(()=>{
+    visitors.forEach((i,idx)=>{
+      const canvas=canvasRef.current[idx]
+      QRCode.toCanvas(canvas,`http://localhost:5173/visitors_detail?id=${i._id}`,{width:85,scale:10})
+    })
+  },[visitors])
   return (
     <div style={{backgroundColor:"white"}}>
       <NavBar
@@ -85,7 +97,6 @@ export default function Visitors() {
           </div>
         ))}
       </div>
-
       <div style={{ padding: 12, background: "white",borderTop:'10px solid #f2f2f2' }}>
         {visitors.map((v, idx) => (
           <div
@@ -111,7 +122,6 @@ export default function Visitors() {
                 marginRight: 10,
               }}
             />
-
             {/* 中间信息 */}
             <div
               style={{
@@ -171,11 +181,12 @@ export default function Visitors() {
             </div>
 
             {/* 右侧二维码 */}
-            <img
-              src="/1.png"
+            {/* <img
+              src={qrurl||'/1.png'}
               alt=""
               style={{ width: 56, height: 56, marginLeft: 8 }}
-            />
+            /> */}
+            <canvas ref={(el)=>{canvasRef.current[idx]=el}}></canvas>
           </div>
         ))}
       </div>
