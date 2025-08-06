@@ -16,16 +16,20 @@
         <!-- 搜索区域 -->
         <div class="search-area">
             <el-form :inline="true" :model="searchForm" class="search-form">
-                <el-form-item label="访客姓名：">
-                    <el-input v-model="searchForm.name" placeholder="请输入访客姓名" clearable />
-                </el-form-item>
-                <el-form-item label="联系方式：">
-                    <el-input v-model="searchForm.contactWay" placeholder="请输入联系方式" clearable />
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" @click="handleSearch">查询</el-button>
-                    <el-button @click="resetSearch">重置</el-button>
-                </el-form-item>
+                <div class="search-inputs">
+                    <el-form-item label="访客姓名：">
+                        <el-input v-model="searchForm.name" placeholder="请输入访客姓名" clearable />
+                    </el-form-item>
+                    <el-form-item label="联系方式：">
+                        <el-input v-model="searchForm.phone" placeholder="请输入联系方式" clearable />
+                    </el-form-item>
+                </div>
+                <div class="search-buttons">
+                    <el-form-item>
+                        <el-button type="primary" @click="handleSearch">查询</el-button>
+                        <el-button @click="resetSearch">重置</el-button>
+                    </el-form-item>
+                </div>
             </el-form>
         </div>
 
@@ -34,19 +38,33 @@
             <el-table :data="tableData" border stripe style="width: 100%" v-loading="loading"
                 @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55" />
-                <el-table-column prop="name" label="访客姓名" align="center" />
-                <el-table-column prop="contactWay" label="联系方式" align="center" />
-                <el-table-column prop="visitType" label="造访类型" align="center" />
-                <el-table-column prop="visitPlace" label="造访单位" align="center" />
-                <el-table-column prop="visitTime" label="造访时间" align="center" />
-                <el-table-column prop="direction" label="进出方向" align="center">
+                <el-table-column prop="name" label="访客姓名" align="center" width="100" />
+                <el-table-column prop="phone" label="联系方式" align="center" width="130" />
+                <el-table-column prop="visitType" label="造访类型" align="center" width="100">
                     <template #default="{ row }">
-                        <span :class="row.direction === '进场' ? 'in-direction' : 'out-direction'">
-                            {{ row.direction }}
+                        <el-tag :type="row.visitType === '企业' ? 'success' : row.visitType === '公寓' ? 'warning' : 'info'">
+                            {{ row.visitType || '企业' }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="companyName" label="造访单位" align="center" min-width="220" />
+                <el-table-column prop="time" label="造访时间" align="center" width="160">
+                    <template #default="{ row }">
+                        <span>{{ formatDateTime(row.time) }}</span>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="direction" label="进出方向" align="center" width="100">
+                    <template #default>
+                        <span class="in-direction">
+                            进场
                         </span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="endTime" label="造访结束时间" align="center" />
+                <el-table-column prop="endTime" label="造访结束时间" align="center" width="160">
+                    <template #default="{ row }">
+                        <span>{{ formatDateTime(row.time) }}</span>
+                    </template>
+                </el-table-column>
                 <el-table-column label="操作" width="100" align="center">
                     <template #default="{ row }">
                         <el-button type="danger" size="small" @click="handleDelete(row)">删除</el-button>
@@ -58,17 +76,11 @@
         <!-- 分页区域 -->
         <div class="pagination-area">
             <div class="pagination-info">
-                共 {{ total }} 条
+                共 {{ total }} 条记录，当前第 {{ currentPage }} 页
             </div>
             <el-pagination v-model="currentPage" :current-page="currentPage" :page-size="pageSize"
-                :page-sizes="[10, 20, 30, 50]" layout="sizes, prev, pager, next, jumper" :total="total"
-                @size-change="handleSizeChange" @current-change="handleCurrentChange" />
-            <div class="pagination-goto">
-                到第
-                <el-input v-model="goToPage" class="page-input" />
-                页
-                <el-button size="small" @click="handleGoToPage">确定</el-button>
-            </div>
+                :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next, jumper" :total="total"
+                @size-change="handleSizeChange" @current-change="handleCurrentChange" background />
         </div>
     </div>
 </template>
@@ -76,11 +88,12 @@
 <script lang="ts" setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import axios from "axios"
 
 // 搜索表单
 const searchForm = reactive({
     name: '',
-    contactWay: ''
+    phone: ''
 })
 
 // 表格数据
@@ -88,125 +101,45 @@ const tableData = ref<any[]>([])
 const loading = ref(false)
 const currentPage = ref(1)
 const pageSize = ref(10)
-const total = ref(100)
+const total = ref(0)
 const multipleSelection = ref<any[]>([])
-const goToPage = ref<number | string>('')
 
 // 生命周期钩子
 onMounted(() => {
     fetchData()
 })
 
-// 获取表格数据
-const fetchData = () => {
+// 格式化日期时间
+const formatDateTime = (date: string) => {
+    if (!date) return ''
+    return new Date(date).toLocaleString('zh-CN')
+}
+
+// 获取表格数据 - 使用与Info.vue相同的接口
+const fetchData = async () => {
     loading.value = true
-    // 模拟异步请求
-    setTimeout(() => {
-        // 这里应该是实际的API调用
-        tableData.value = [
-            {
-                id: '1',
-                name: '张旭',
-                contactWay: '18767256412',
-                visitType: '企业',
-                visitPlace: '北京久软科技有限公司',
-                visitTime: '2022-01-23',
-                direction: '出场',
-                endTime: '2022-01-23'
-            },
-            {
-                id: '2',
-                name: '李君虎',
-                contactWay: '13208432854',
-                visitType: '企业',
-                visitPlace: '北京久软科技有限公司',
-                visitTime: '2022-01-23',
-                direction: '出场',
-                endTime: '2022-01-23'
-            },
-            {
-                id: '3',
-                name: '李非非',
-                contactWay: '18767256412',
-                visitType: '企业',
-                visitPlace: '北京皇居东西科技有限公司',
-                visitTime: '2022-01-23',
-                direction: '进场',
-                endTime: '2022-01-23'
-            },
-            {
-                id: '4',
-                name: '张倩倩',
-                contactWay: '13208432854',
-                visitType: '企业',
-                visitPlace: '北京皇居东西科技有限公司',
-                visitTime: '2022-01-23',
-                direction: '进场',
-                endTime: '2022-01-23'
-            },
-            {
-                id: '5',
-                name: '洛佳',
-                contactWay: '18767256412',
-                visitType: '企业',
-                visitPlace: '北京皇居东西科技有限公司',
-                visitTime: '2022-01-23',
-                direction: '进场',
-                endTime: '2022-01-23'
-            },
-            {
-                id: '6',
-                name: '徐林',
-                contactWay: '13208432854',
-                visitType: '企业',
-                visitPlace: '北京蚂云科技有限公司',
-                visitTime: '2022-01-23',
-                direction: '进场',
-                endTime: '2022-01-23'
-            },
-            {
-                id: '7',
-                name: '张辉',
-                contactWay: '18767256412',
-                visitType: '企业',
-                visitPlace: '北京蚂云科技有限公司',
-                visitTime: '2022-01-23',
-                direction: '出场',
-                endTime: '2022-01-23'
-            },
-            {
-                id: '8',
-                name: '胡乐来',
-                contactWay: '13208432854',
-                visitType: '企业',
-                visitPlace: '北京蚂云科技有限公司',
-                visitTime: '2022-01-23',
-                direction: '进场',
-                endTime: '2022-01-23'
-            },
-            {
-                id: '9',
-                name: '缪贤身',
-                contactWay: '18767256412',
-                visitType: '企业',
-                visitPlace: '北京弘毅投资管理有限公司',
-                visitTime: '2022-01-23',
-                direction: '出场',
-                endTime: '2022-01-23'
-            },
-            {
-                id: '10',
-                name: '陆灵玉',
-                contactWay: '13208432854',
-                visitType: '企业',
-                visitPlace: '北京弘毅投资管理有限公司',
-                visitTime: '2022-01-23',
-                direction: '进场',
-                endTime: '2022-01-23'
-            }
-        ]
+    try {
+        const params = {
+            page: currentPage.value,
+            pageSize: pageSize.value,
+            name: searchForm.name,
+            phone: searchForm.phone
+        }
+
+        // 使用与Info.vue相同的接口地址
+        const response = await axios.get('/WYQ/visitor/list', { params })
+
+        if (response.data.code === 200) {
+            tableData.value = response.data.data.list
+            total.value = response.data.data.total
+        } else {
+            ElMessage.error(response.data.msg || '获取数据失败')
+        }
+    } catch (error) {
+        ElMessage.error('获取数据失败')
+    } finally {
         loading.value = false
-    }, 500)
+    }
 }
 
 // 表格多选
@@ -223,20 +156,29 @@ const handleSearch = () => {
 // 重置搜索
 const resetSearch = () => {
     searchForm.name = ''
-    searchForm.contactWay = ''
+    searchForm.phone = ''
     handleSearch()
 }
 
 // 删除记录
-const handleDelete = (row: any) => {
+const handleDelete = async (row: any) => {
     ElMessageBox.confirm('确认删除该访客记录吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-    }).then(() => {
-        // 这里应该是实际的删除API调用
-        ElMessage.success('删除成功')
-        fetchData()
+    }).then(async () => {
+        try {
+            const response = await axios.delete(`/WYQ/visitor/delete/${row._id}`)
+
+            if (response.data.code === 200) {
+                ElMessage.success('删除成功')
+                fetchData()
+            } else {
+                ElMessage.error(response.data.msg || '删除失败')
+            }
+        } catch (error) {
+            ElMessage.error('删除失败')
+        }
     }).catch(() => { })
 }
 
@@ -250,35 +192,34 @@ const handleBatchDelete = () => {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-    }).then(() => {
-        // 这里应该是实际的批量删除API调用
-        ElMessage.success('批量删除成功')
-        fetchData()
+    }).then(async () => {
+        try {
+            const ids = multipleSelection.value.map(item => item._id)
+            const response = await axios.delete('/WYQ/visitor/batchDelete', {
+                data: { ids }
+            })
+
+            if (response.data.code === 200) {
+                ElMessage.success('批量删除成功')
+                fetchData()
+            } else {
+                ElMessage.error(response.data.msg || '批量删除失败')
+            }
+        } catch (error) {
+            ElMessage.error('批量删除失败')
+        }
     }).catch(() => { })
 }
 
 // 分页处理
 const handleSizeChange = (val: number) => {
     pageSize.value = val
+    currentPage.value = 1
     fetchData()
 }
 
 const handleCurrentChange = (val: number) => {
     currentPage.value = val
-    fetchData()
-}
-
-// 跳转到指定页
-const handleGoToPage = () => {
-    if (!goToPage.value) return
-
-    const page = Number(goToPage.value)
-    if (isNaN(page) || page < 1 || page > Math.ceil(total.value / pageSize.value)) {
-        ElMessage.warning('请输入有效的页码')
-        return
-    }
-
-    currentPage.value = page
     fetchData()
 }
 </script>
@@ -373,7 +314,20 @@ const handleGoToPage = () => {
 
 .search-form {
     display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     flex-wrap: wrap;
+}
+
+.search-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.search-buttons {
+    display: flex;
+    flex-shrink: 0;
 }
 
 .in-direction {
@@ -426,6 +380,20 @@ const handleGoToPage = () => {
     .table-area,
     .pagination-area {
         padding: 15px;
+    }
+
+    .search-form {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .search-inputs {
+        width: 100%;
+    }
+
+    .search-buttons {
+        justify-content: flex-end;
+        width: 100%;
     }
 }
 </style>

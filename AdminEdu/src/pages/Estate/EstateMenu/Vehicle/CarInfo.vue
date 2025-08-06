@@ -129,9 +129,6 @@
 
     <!-- 分页区域 -->
     <div class="pagination-area">
-      <div class="pagination-info">
-        <span>共 {{ total }} 条记录，当前第 {{ currentPage }} 页</span>
-      </div>
       <el-pagination v-model="currentPage" :current-page="currentPage" :page-size="pageSize"
         :page-sizes="[10, 20, 30, 50]" layout="total, sizes, prev, pager, next, jumper" :total="total"
         @size-change="handleSizeChange" @current-change="handleCurrentChange" background />
@@ -626,10 +623,6 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.pagination-info {
-  font-size: 14px;
-  color: #6b7280;
-}
 
 .vehicle-form {
   padding: 16px 0;

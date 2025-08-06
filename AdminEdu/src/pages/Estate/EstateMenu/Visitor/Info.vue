@@ -5,11 +5,12 @@
       <div class="title">
         <div class="title-bar"></div>
         <h2>访客信息登记</h2>
-        <span class="subtitle">访客基础信息的增删改查和统计管理</span>
       </div>
       <div class="action-buttons">
         <el-button type="primary" @click="handleAdd" :icon="Plus">新增</el-button>
-        <el-button type="warning" @click="fetchData" :icon="Search">查询</el-button>
+        <el-button type="danger"  @click="handleBatchDelete" :icon="Delete">
+          批量删除 ({{ multipleSelection.length }})
+        </el-button>
       </div>
     </div>
 
@@ -39,17 +40,6 @@
 
     <!-- 表格区域 -->
     <div class="table-area">
-      <div class="table-header">
-        <div class="table-info">
-          <span class="info-text">共 <strong>{{ total }}</strong> 条</span>
-        </div>
-        <div class="batch-actions" v-if="multipleSelection.length > 0">
-          <el-button type="danger" size="small" @click="handleBatchDelete" :icon="Delete">
-            批量删除 ({{ multipleSelection.length }})
-          </el-button>
-        </div>
-      </div>
-
       <el-table :data="tableData" border stripe style="width: 100%" v-loading="loading"
         @selection-change="handleSelectionChange" :header-cell-style="{ backgroundColor: '#f8f9fa', color: '#495057' }">
         <el-table-column type="selection" width="55" align="center" />
@@ -144,7 +134,7 @@
               <el-select v-model="form.visitType" placeholder="请选择访客类型" style="width: 100%" clearable>
                 <el-option label="企业" value="企业" />
                 <el-option label="公寓" value="公寓" />
-                <el-option label="其它" value="其它" />
+                <el-option label="其它" value="访客" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -532,23 +522,6 @@ onMounted(() => {
   min-height: 0;
 }
 
-.table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.table-info .info-text {
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.table-info strong {
-  color: #1f2937;
-  font-weight: 600;
-}
-
 .license-plate {
   font-family: 'Courier New', monospace;
   font-weight: 600;
@@ -595,11 +568,6 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-}
-
-.batch-actions {
-  display: flex;
-  gap: 8px;
 }
 
 /* Element Plus 组件样式优化 */
