@@ -26,6 +26,7 @@
               :field="field"
               :form-data="formData"
               @update="handleFieldUpdate"
+              @change="handleFieldChange"
             />
           </el-col>
         </el-row>
@@ -38,14 +39,16 @@
           :field="field"
           :form-data="formData"
           @update="handleFieldUpdate"
+          @change="handleFieldChange"
         />
       </template>
     </el-form>
     
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="handleCancel">{{ cancelText }}</el-button>
+        <el-button @click="handleCancel">{{ readonly ? '关闭' : cancelText }}</el-button>
         <el-button 
+          v-if="!readonly"
           type="primary" 
           @click="handleSubmit" 
           :loading="submitting"
@@ -67,13 +70,15 @@ export interface FormFieldConfig {
   label: string
   type: 'input' | 'select' | 'date' | 'number' | 'textarea' | 'switch'
   placeholder?: string
-  options?: Array<{ label: string; value: any }>
+  options?: Array<{ label: string; value: any }> | (() => Array<{ label: string; value: any }>)
   required?: boolean
   span?: number
   min?: number
   max?: number
   precision?: number
   rows?: number
+  disabled?: boolean
+  onChange?: (value: any) => void
 }
 
 export interface FormGroup {
@@ -95,6 +100,7 @@ interface Props {
   useLayout?: boolean
   cancelText?: string
   submitText?: string
+  readonly?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -103,7 +109,8 @@ const props = withDefaults(defineProps<Props>(), {
   submitting: false,
   useLayout: false,
   cancelText: '取消',
-  submitText: '确定'
+  submitText: '确定',
+  readonly: false
 })
 
 const emit = defineEmits<{
@@ -126,8 +133,49 @@ watch(dialogVisible, (val) => {
 })
 
 const handleFieldUpdate = (key: string, value: any) => {
+  // 处理嵌套字段，如 'fuzeren.name'
+  const keys = key.split('.')
+  const newFormData = { ...props.formData }
+  
+  if (keys.length === 1) {
+    // 简单字段
+    newFormData[key] = value
+  } else {
+    // 嵌套字段
+    let current = newFormData
+    for (let i = 0; i < keys.length - 1; i++) {
+      const k = keys[i]
+      if (!current[k] || typeof current[k] !== 'object') {
+        current[k] = {}
+      }
+      current = current[k]
+    }
+    current[keys[keys.length - 1]] = value
+  }
+  
   // 通过事件更新表单数据，让父组件处理
-  emit('update:formData', { ...props.formData, [key]: value })
+  emit('update:formData', newFormData)
+}
+
+const handleFieldChange = (key: string, value: any) => {
+  // 处理字段变化事件
+  const field = findFieldByKey(key)
+  if (field && field.onChange) {
+    field.onChange(value)
+  }
+}
+
+const findFieldByKey = (key: string): FormFieldConfig | undefined => {
+  if (props.formFields) {
+    return props.formFields.find(field => field.key === key)
+  }
+  if (props.formGroups) {
+    for (const group of props.formGroups) {
+      const field = group.fields.find(field => field.key === key)
+      if (field) return field
+    }
+  }
+  return undefined
 }
 
 const handleSubmit = async () => {

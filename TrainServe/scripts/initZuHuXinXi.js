@@ -1,9 +1,11 @@
 const ZuHuXinXi = require('../models/ZuHuXinXi');
+const { HeTong } = require('../models/HeTong');
+const { Company, Employee } = require('../models/database');
 require('../db/index'); // 连接数据库
 
 /**
  * 初始化租户信息表
- * 插入10条测试数据
+ * 插入测试数据，严格按照ZuHuXinXi模型字段定义
  */
 async function initZuHuXinXi() {
   try {
@@ -16,238 +18,104 @@ async function initZuHuXinXi() {
       return;
     }
 
-    // 生成测试数据
-    const testTenants = [
-      {
-        name: '北京科技创新有限公司',
-        louyu: 'A座',
-        fangjian: 'A101',
-        fuzerenName: '张伟',
-        lianxiFangshi: '13800138001',
-        suoshuHangye: '软件和信息技术服务业',
-        qiyeGuimo: '中型',
-        zhucezijin: 5000000,
-        shifoGaoxin: '是',
-        shifouShangshi: '否',
-        qiyeGuzhi: 50000000,
-        qiyeLogo: 'uploads/logos/bjkj_logo.png',
-        jiaFangTouXiang: 'uploads/avatars/zhangwei_avatar.jpg',
-        fuzeren: {
-          name: '张伟',
-          xingbie: '男',
-          lianxiFangshi: '13800138001'
-        },
-        hetongBianhao: 'HT2024001',
-        status: '正常'
-      },
-      {
-        name: '上海智慧商贸集团',
-        louyu: 'B座',
-        fangjian: 'B205',
-        fuzerenName: '李娜',
-        lianxiFangshi: '13900139002',
-        suoshuHangye: '批发和零售业',
-        qiyeGuimo: '大型',
-        zhucezijin: 15000000,
-        shifoGaoxin: '否',
-        shifouShangshi: '是',
-        qiyeGuzhi: 200000000,
-        qiyeLogo: 'uploads/logos/shzh_logo.png',
-        jiaFangTouXiang: 'uploads/avatars/lina_avatar.jpg',
-        fuzeren: {
-          name: '李娜',
-          xingbie: '女',
-          lianxiFangshi: '13900139002'
-        },
-        hetongBianhao: 'HT2024002',
-        status: '正常'
-      },
-      {
-        name: '深圳互联网科技',
-        louyu: 'C座',
-        fangjian: 'C302',
-        fuzerenName: '王强',
-        lianxiFangshi: '13700137003',
-        suoshuHangye: '互联网和相关服务',
-        qiyeGuimo: '中型',
-        zhucezijin: 8000000,
-        shifoGaoxin: '是',
-        shifouShangshi: '否',
-        qiyeGuzhi: 80000000,
-        qiyeLogo: 'uploads/logos/szhl_logo.png',
-        jiaFangTouXiang: 'uploads/avatars/wangqiang_avatar.jpg',
-        fuzeren: {
-          name: '王强',
-          xingbie: '男',
-          lianxiFangshi: '13700137003'
-        },
-        hetongBianhao: 'HT2024003',
-        status: '正常'
-      },
-      {
-        name: '广州文化传媒工作室',
-        louyu: 'A座',
-        fangjian: 'A408',
-        fuzerenName: '陈美玲',
-        lianxiFangshi: '13600136004',
-        suoshuHangye: '文化、体育和娱乐业',
-        qiyeGuimo: '小型',
-        zhucezijin: 1000000,
-        shifoGaoxin: '否',
-        shifouShangshi: '否',
-        qiyeGuzhi: 5000000,
-        qiyeLogo: 'uploads/logos/gzwh_logo.png',
-        jiaFangTouXiang: 'uploads/avatars/chenmeiling_avatar.jpg',
-        fuzeren: {
-          name: '陈美玲',
-          xingbie: '女',
-          lianxiFangshi: '13600136004'
-        },
-        hetongBianhao: 'HT2024004',
-        status: '正常'
-      },
-      {
-        name: '杭州电子商务有限公司',
-        louyu: 'B座',
-        fangjian: 'B501',
-        fuzerenName: '刘建国',
-        lianxiFangshi: '13500135005',
-        suoshuHangye: '电子商务',
-        qiyeGuimo: '中型',
-        zhucezijin: 3000000,
-        shifoGaoxin: '是',
-        shifouShangshi: '否',
-        qiyeGuzhi: 25000000,
-        qiyeLogo: 'uploads/logos/hzdz_logo.png',
-        jiaFangTouXiang: 'uploads/avatars/liujianguo_avatar.jpg',
-        fuzeren: {
-          name: '刘建国',
-          xingbie: '男',
-          lianxiFangshi: '13500135005'
-        },
-        hetongBianhao: 'HT2024005',
-        status: '正常'
-      },
-      {
-        name: '成都人工智能研究院',
-        louyu: 'C座',
-        fangjian: 'C601',
-        fuzerenName: '赵敏',
-        lianxiFangshi: '13400134006',
-        suoshuHangye: '科学研究和技术服务业',
-        qiyeGuimo: '大型',
-        zhucezijin: 20000000,
-        shifoGaoxin: '是',
-        shifouShangshi: '否',
-        qiyeGuzhi: 150000000,
-        qiyeLogo: 'uploads/logos/cdrg_logo.png',
-        jiaFangTouXiang: 'uploads/avatars/zhaomin_avatar.jpg',
-        fuzeren: {
-          name: '赵敏',
-          xingbie: '女',
-          lianxiFangshi: '13400134006'
-        },
-        hetongBianhao: 'HT2024006',
-        status: '正常'
-      },
-      {
-        name: '武汉生物科技企业',
-        louyu: 'A座',
-        fangjian: 'A703',
-        fuzerenName: '孙涛',
-        lianxiFangshi: '13300133007',
-        suoshuHangye: '医药制造业',
-        qiyeGuimo: '中型',
-        zhucezijin: 12000000,
-        shifoGaoxin: '是',
-        shifouShangshi: '否',
-        qiyeGuzhi: 100000000,
-        qiyeLogo: 'uploads/logos/whsw_logo.png',
-        jiaFangTouXiang: 'uploads/avatars/suntao_avatar.jpg',
-        fuzeren: {
-          name: '孙涛',
-          xingbie: '男',
-          lianxiFangshi: '13300133007'
-        },
-        hetongBianhao: 'HT2024007',
-        status: '正常'
-      },
-      {
-        name: '西安新能源技术公司',
-        louyu: 'B座',
-        fangjian: 'B804',
-        fuzerenName: '周丽华',
-        lianxiFangshi: '13200132008',
-        suoshuHangye: '电力、热力、燃气及水生产和供应业',
-        qiyeGuimo: '大型',
-        zhucezijin: 25000000,
-        shifoGaoxin: '是',
-        shifouShangshi: '是',
-        qiyeGuzhi: 300000000,
-        qiyeLogo: 'uploads/logos/xaxy_logo.png',
-        jiaFangTouXiang: 'uploads/avatars/zhoulihua_avatar.jpg',
-        fuzeren: {
-          name: '周丽华',
-          xingbie: '女',
-          lianxiFangshi: '13200132008'
-        },
-        hetongBianhao: 'HT2024008',
-        status: '正常'
-      },
-      {
-        name: '南京智能制造工厂',
-        louyu: 'C座',
-        fangjian: 'C905',
-        fuzerenName: '吴刚',
-        lianxiFangshi: '13100131009',
-        suoshuHangye: '制造业',
-        qiyeGuimo: '特大型',
-        zhucezijin: 50000000,
-        shifoGaoxin: '是',
-        shifouShangshi: '是',
-        qiyeGuzhi: 500000000,
-        qiyeLogo: 'uploads/logos/njzn_logo.png',
-        jiaFangTouXiang: 'uploads/avatars/wugang_avatar.jpg',
-        fuzeren: {
-          name: '吴刚',
-          xingbie: '男',
-          lianxiFangshi: '13100131009'
-        },
-        hetongBianhao: 'HT2024009',
-        status: '正常'
-      },
-      {
-        name: '重庆区块链技术工作室',
-        louyu: 'A座',
-        fangjian: 'A1001',
-        fuzerenName: '许晓燕',
-        lianxiFangshi: '13000130010',
-        suoshuHangye: '软件和信息技术服务业',
-        qiyeGuimo: '小型',
-        zhucezijin: 800000,
-        shifoGaoxin: '是',
-        shifouShangshi: '否',
-        qiyeGuzhi: 8000000,
-        qiyeLogo: 'uploads/logos/cqql_logo.png',
-        jiaFangTouXiang: 'uploads/avatars/xuxiaoyan_avatar.jpg',
-        fuzeren: {
-          name: '许晓燕',
-          xingbie: '女',
-          lianxiFangshi: '13000130010'
-        },
-        hetongBianhao: 'HT2024010',
-        status: '正常'
-      }
-    ];
+    // 获取现有的企业数据 - companyId是必需的
+    const companies = await Company.find({}, { _id: 1, name: 1 }).sort({ name: 1 });
+    
+    if (companies.length === 0) {
+      console.log('⚠️ 错误: 没有找到企业数据，请先运行企业初始化脚本');
+      console.log('无法创建租户数据，因为companyId是必需的');
+      return;
+    } else {
+      console.log(`✓ 找到 ${companies.length} 个可用企业`);
+    }
+
+    // 获取现有的员工数据 - employeeId是可选的
+    const employees = await Employee.find({}, { _id: 1, company_id: 1, name: 1 }).sort({ company_id: 1, name: 1 });
+    
+    if (employees.length === 0) {
+      console.log('⚠️ 警告: 没有找到员工数据，租户数据将创建，但员工关联字段为空');
+    } else {
+      console.log(`✓ 找到 ${employees.length} 个可用员工`);
+    }
+
+    // 获取现有的合同数据 - hetongId是可选的
+    const contracts = await HeTong.find({}, { _id: 1, he_bian: 1 }).sort({ created_at: 1 });
+    
+    if (contracts.length === 0) {
+      console.log('⚠️ 警告: 没有找到合同数据，租户数据将创建，但合同关联字段为空');
+    } else {
+      console.log(`✓ 找到 ${contracts.length} 个可用合同`);
+    }
+
+    // 确定要创建的租户数量（不超过企业数量）
+    const tenantCount = Math.min(companies.length, 15);
+    console.log(`📊 将创建 ${tenantCount} 个租户（基于可用企业数量）`);
+
+    // 生成测试数据 - 严格按照模型字段定义
+    const testTenants = [];
+    const statusOptions = ['正常', '暂停', '终止'];
+    
+    for (let i = 0; i < tenantCount; i++) {
+      const company = companies[i];
+      
+      // 查找该企业对应的员工（如果存在）
+      const employee = employees.find(emp => emp.company_id?.toString() === company._id?.toString());
+      
+      // 随机分配合同（如果存在）
+      const contract = contracts.length > 0 ? contracts[i % contracts.length] : null;
+      
+      const tenant = {
+        // 关联企业表 - 必需字段
+        companyId: company._id,
+        
+        // 关联人员表 - 可选字段
+        employeeId: employee ? employee._id : null,
+        
+        // 关联合同表 - 可选字段
+        hetongId: contract ? contract._id : null,
+        
+        // 状态信息 - 必需字段，大部分设为正常，少量设为其他状态
+        status: i < tenantCount - 2 ? '正常' : statusOptions[i % statusOptions.length]
+      };
+      
+      testTenants.push(tenant);
+    }
 
     // 批量插入数据
     const result = await ZuHuXinXi.insertMany(testTenants);
     console.log(`✓ 成功插入 ${result.length} 条租户信息数据`);
     
-    // 显示插入的数据概览
+    // 显示插入的数据概览和关联信息
     console.log('\n插入的租户信息概览:');
-    result.forEach((tenant, index) => {
-      console.log(`${index + 1}. ${tenant.name} - ${tenant.louyu}${tenant.fangjian} - 负责人: ${tenant.fuzerenName}`);
+    for (let i = 0; i < result.length; i++) {
+      const tenant = result[i];
+      const company = companies.find(c => c._id.toString() === tenant.companyId.toString());
+      const employee = employees.find(e => tenant.employeeId && e._id.toString() === tenant.employeeId.toString());
+      const contract = contracts.find(c => tenant.hetongId && c._id.toString() === tenant.hetongId.toString());
+      
+      const companyInfo = company ? `企业: ${company.name}` : '无企业关联';
+      const employeeInfo = employee ? `负责人: ${employee.name}` : '无负责人关联';
+      const contractInfo = contract ? `合同: ${contract.he_bian}` : '无合同关联';
+      
+      console.log(`${i + 1}. [${tenant.status}] ${companyInfo} | ${employeeInfo} | ${contractInfo}`);
+    }
+    
+    // 显示关联统计
+    const linkedCompanyCount = result.filter(tenant => tenant.companyId).length;
+    const linkedEmployeeCount = result.filter(tenant => tenant.employeeId).length;
+    const linkedContractCount = result.filter(tenant => tenant.hetongId).length;
+    const statusStats = {};
+    result.forEach(tenant => {
+      statusStats[tenant.status] = (statusStats[tenant.status] || 0) + 1;
+    });
+    
+    console.log(`\n📊 关联统计:`);
+    console.log(`  - 企业关联: ${linkedCompanyCount}/${result.length} 个租户已关联企业`);
+    console.log(`  - 员工关联: ${linkedEmployeeCount}/${result.length} 个租户已关联员工`);
+    console.log(`  - 合同关联: ${linkedContractCount}/${result.length} 个租户已关联合同`);
+    console.log(`\n📈 状态分布:`);
+    Object.entries(statusStats).forEach(([status, count]) => {
+      console.log(`  - ${status}: ${count} 个租户`);
     });
     
   } catch (error) {

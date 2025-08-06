@@ -27,7 +27,7 @@
     },
     
     /* Vue 3 Support */
-    "types": ["vite/client", "element-plus/global"],
+    "types": ["vite/client"],
     "allowJs": true,
     "esModuleInterop": true
   },
@@ -35,7 +35,8 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "src/types/**/*.d.ts"
-, "src/api/auth.js"  ],
+    "src/types/**/*.d.ts",
+    "src/api/auth.js"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
