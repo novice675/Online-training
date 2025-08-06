@@ -15,6 +15,7 @@ const KeHu = require('./routes/KeHu')
 const Vehicle = require('./routes/Vehicle')
 const Ping = require('./routes/Ping')
 const ZuHuXinXi = require('./routes/ZuHuXinXi')
+const Building = require('./routes/Building')
 
 
 
@@ -43,6 +44,7 @@ app.use('/kehu', KeHu)
 app.use('/vehicle',Vehicle)
 app.use('/ping', Ping)
 app.use('/zuhuxinxi', ZuHuXinXi)
+app.use('/Building', Building)
 
 
 // catch 404 and forward to error handler

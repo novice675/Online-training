@@ -176,8 +176,8 @@ router.get("/visitor/list", async (req, res) => {
     if (phone) {
       query.phone = { $regex: phone, $options: 'i' };
     }
-    // 注意：访客类型筛选暂时不使用，因为所有访客都是企业类型
-    if (visitType && visitType !== '企业') {
+    // 根据访客类型进行筛选
+    if (visitType) {
       query.role = visitType;
     }
 
@@ -202,7 +202,7 @@ router.get("/visitor/list", async (req, res) => {
       {
         $addFields: {
           companyName: { $arrayElemAt: ["$company.name", 0] },
-          visitType: "企业" // 统一设置访客类型为企业
+          visitType: "$role" // 使用数据库中实际的role值
         }
       },
       { $sort: { time: -1 } },
