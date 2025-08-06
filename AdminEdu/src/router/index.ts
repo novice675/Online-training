@@ -542,14 +542,15 @@ router.beforeEach((to, _, next) => {
     const hasRoutes = ownRoutes.every(route => router.hasRoute(route.name as string));
     if (!hasRoutes) {
       // 清除所有动态添加的路由
-      const staticRouteNames = ['home', 'login', 'situation', 'Operation', 'Estate', 'VisualData', 'Configuration'];
+      const staticRouteNames = ['home', 'login', 'situation', 'Operation', 'Estate', 'VisualData', 'Configuration', 'OperationDefault', 'EstateDefault', 'VisualDataDefault', 'ConfigurationDefault'];
       router.getRoutes().forEach(route => {
         if (route.name && !staticRouteNames.includes(route.name as string)) {
           router.removeRoute(route.name);
         }
       });
-      const mainRouteNames = ['home', 'Operation', 'Estate', 'VisualData', 'Configuration'];
-      const addRoutes = (routes: RouteConfig[], parentName = 'home') => {
+      
+      // 添加动态路由的函数
+      const addRoutes = (routes: RouteConfig[]) => {
         routes.forEach(route => {
           if (!router.hasRoute(route.name as string)) {
             const routeConfig: RouteRecordRaw = {
@@ -563,35 +564,27 @@ router.beforeEach((to, _, next) => {
 
             // 如果有子路由，递归添加
             if (route.children && route.children.length > 0) {
-              routeConfig.children = route.children.map(child => {
-                const childRoute = {
-                  name: child.name,
-                  path: child.path,
-                  component: child.component,
-                  meta: child.meta,
-                  children: child.children
-                } as RouteRecordRaw;
-                if (child.redirect) {
-                  childRoute.redirect = child.redirect;
-                }
-                return childRoute;
-              });
+              routeConfig.children = route.children.map(child => ({
+                name: child.name,
+                path: child.path,
+                component: child.component,
+                meta: child.meta,
+                children: child.children,
+                redirect: child.redirect
+              } as RouteRecordRaw));
             }
+
+            // 根据路由的parentModule属性确定父路由名称
+            const parentName = (route.meta && typeof route.meta.parentModule === 'string')
+              ? route.meta.parentModule
+              : 'home';
+            
             router.addRoute(parentName, routeConfig);
-          }
-          // 只在主路由名下递归添加
-          if (route.children && route.children.length > 0 && mainRouteNames.includes(route.name as string)) {
-            addRoutes(route.children, route.name as string);
           }
         });
       };
-      ownRoutes.forEach(route => {
-        // 根据路由的parentModule属性确定父路由名称
-        const parentName = (route.meta && typeof route.meta.parentModule === 'string')
-          ? route.meta.parentModule
-          : 'home';
-        addRoutes([route], parentName);
-      });
+      
+      addRoutes(ownRoutes);
       next({ ...to, replace: true });
       return;
     }

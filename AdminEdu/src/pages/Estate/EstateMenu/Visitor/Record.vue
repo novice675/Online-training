@@ -38,7 +38,7 @@
             <el-table :data="tableData" border stripe style="width: 100%" v-loading="loading"
                 @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55" />
-                <el-table-column prop="name" label="访客姓名" align="center" width="100" />
+                <el-table-column prop="name" label="访客姓名" align="center" width="120" />
                 <el-table-column prop="phone" label="联系方式" align="center" width="130" />
                 <el-table-column prop="visitType" label="造访类型" align="center" width="100">
                     <template #default="{ row }">
@@ -47,20 +47,20 @@
                         </el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column prop="companyName" label="造访单位" align="center" min-width="220" />
+                <el-table-column prop="companyName" label="造访单位" align="center" min-width="150" />
                 <el-table-column prop="time" label="造访时间" align="center" width="160">
                     <template #default="{ row }">
                         <span>{{ formatDateTime(row.time) }}</span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="direction" label="进出方向" align="center" width="100">
+                <el-table-column prop="direction" label="进出方向" align="center" width="90">
                     <template #default>
                         <span class="in-direction">
                             进场
                         </span>
                     </template>
                 </el-table-column>
-                <el-table-column prop="endTime" label="造访结束时间" align="center" width="160">
+                <el-table-column prop="time" label="造访结束时间" align="center" width="160">
                     <template #default="{ row }">
                         <span>{{ formatDateTime(row.time) }}</span>
                     </template>

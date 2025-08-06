@@ -105,9 +105,6 @@ router.post('/add', async (req, res) => {
 router.delete('/delete/:id', async (req, res) => {
     try {
         const { id } = req.params;
-
-        console.log('收到删除车辆请求, ID:', id);
-
         const deletedVehicle = await VehiclesModel.findByIdAndDelete(id);
         if (!deletedVehicle) {
             return res.send({
@@ -115,9 +112,6 @@ router.delete('/delete/:id', async (req, res) => {
                 msg: '车辆记录不存在'
             });
         }
-
-        console.log('删除车辆成功:', deletedVehicle);
-
         res.send({
             code: 200,
             msg: '删除成功'
@@ -136,9 +130,6 @@ router.delete('/delete/:id', async (req, res) => {
 router.delete('/batchDelete', async (req, res) => {
     try {
         const { ids } = req.body;
-
-        console.log('收到批量删除请求, IDs:', ids);
-
         if (!ids || !Array.isArray(ids) || ids.length === 0) {
             return res.send({
                 code: 400,
@@ -147,9 +138,6 @@ router.delete('/batchDelete', async (req, res) => {
         }
 
         const result = await VehiclesModel.deleteMany({ _id: { $in: ids } });
-
-        console.log('批量删除结果:', result);
-
         res.send({
             code: 200,
             msg: `成功删除 ${result.deletedCount} 条记录`
@@ -169,8 +157,6 @@ router.put('/update/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
-
-        console.log('收到更新车辆请求, ID:', id, '数据:', updateData);
 
         // 如果更新车牌号，检查是否与其他车辆冲突
         if (updateData.licensePlate) {
@@ -207,8 +193,6 @@ router.put('/update/:id', async (req, res) => {
             });
         }
 
-        console.log('更新车辆成功:', updatedVehicle);
-
         res.send({
             code: 200,
             msg: '更新成功',
@@ -229,8 +213,6 @@ router.get('/detail/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        console.log('收到获取车辆详情请求, ID:', id);
-
         const vehicle = await VehiclesModel.findById(id);
         if (!vehicle) {
             return res.send({
@@ -238,8 +220,6 @@ router.get('/detail/:id', async (req, res) => {
                 msg: '车辆记录不存在'
             });
         }
-
-        console.log('获取车辆详情成功:', vehicle);
 
         res.send({
             code: 200,

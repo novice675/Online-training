@@ -75,7 +75,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="time" label="造访到访时间" align="center" width="160">
+        <el-table-column prop="time" label="造访结束时间" align="center" width="160">
           <template #default="{ row }">
             <span>{{ formatDateTime(row.time) }}</span>
           </template>
