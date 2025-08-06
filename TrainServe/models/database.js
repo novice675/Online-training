@@ -9,7 +9,7 @@ let CompanySchema = new mongoose.Schema({
     type: String,      // 企业名称，唯一
     unique: true
   },
-  inaddress: String,   // 入驻地址
+  inaddress: String,   // 所属楼宇
   type: String,        // 企业类型
   logo: String,        // 企业 logo
   house: String,       // 房间号或楼号
@@ -17,7 +17,7 @@ let CompanySchema = new mongoose.Schema({
 })
 
 /**
- * 人员表 Person
+ * 人员表 Person·
  */
 let EmployeeSchema = new mongoose.Schema({
   company_id: {

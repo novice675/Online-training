@@ -217,6 +217,16 @@ export const getContracts = (params = {}) => {
     return api.get('/zuhuxinxi/contracts', { params })
 }
 
+// 获取企业列表
+export const getCompanies = (params = {}) => {
+    return api.get('/zuhuxinxi/companies', { params })
+}
+
+// 获取企业员工列表
+export const getCompanyEmployees = (companyId) => {
+    return api.get(`/zuhuxinxi/employees/${companyId}`)
+}
+
 // 获取租户统计信息
 export const zuhuStats = (params = {}) => {
     return api.get('/zuhuxinxi/stats/overview', { params })
