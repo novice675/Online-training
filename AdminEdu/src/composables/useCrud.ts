@@ -123,7 +123,9 @@ export function useCrud<T = any>(options: CrudOptions<T>) {
   const handleEdit = (row: T) => {
     isEdit.value = true
     currentEditId.value = (row as any)._id || ''
-    formData.value = { ...row }
+    // 确保所有字段都有默认值
+    const defaultData = options.defaultFormData ? options.defaultFormData() : {}
+    formData.value = { ...defaultData, ...row }
     dialogVisible.value = true
   }
 

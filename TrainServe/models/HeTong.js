@@ -9,21 +9,7 @@ const HeTongSchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
-  
-  // 租户名称
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  
-  // 租户类型
-  type: {
-    type: String,
-    required: true,
-    enum: ['企业', '个体经营户'],
-    default: '企业'
-  },
+
   
   // 合同属性
   shuxing: {
@@ -58,13 +44,6 @@ const HeTongSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true
-  },
-  
-  // 所属楼宇
-  louyu: {
-    type: String,
-    required: true,
-    enum: ['A1楼', 'A2楼', 'B1楼', 'B2楼', 'C1楼', 'C2楼', 'D1楼', 'D2楼']
   },
   
   // 房间名称

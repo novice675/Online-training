@@ -2,96 +2,18 @@ const mongoose = require('../db/index');
 
 // 租户信息模式
 const zuHuXinXiSchema = new mongoose.Schema({
-  // 基本信息
-  name: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  louyu: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  fangjian: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  fuzerenName: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  lianxiFangshi: {
-    type: String,
-    required: true,
-    trim: true
+  // 关联企业表
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company',
+    required: true
   },
   
-  // 企业信息
-  suoshuHangye: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  qiyeGuimo: {
-    type: String,
-    required: true,
-    enum: ['小型', '中型', '大型', '特大型']
-  },
-  zhucezijin: {
-    type: Number,
-    required: false,
-    min: 0
-  },
-  shifoGaoxin: {
-    type: String,
-    required: false,
-    enum: ['是', '否'],
-    default: '否'
-  },
-  shifouShangshi: {
-    type: String,
-    required: false,
-    enum: ['是', '否'],
-    default: '否'
-  },
-  qiyeGuzhi: {
-    type: Number,
-    required: false,
-    min: 0
-  },
-  
-  // 图片信息
-  qiyeLogo: {
-    type: String,
-    required: false,
-    trim: true
-  },
-  jiaFangTouXiang: {
-    type: String,
-    required: false,
-    trim: true
-  },
-  
-  // 负责人信息
-  fuzeren: {
-    name: {
-      type: String,
-      required: true,
-      trim: true
-    },
-    xingbie: {
-      type: String,
-      required: true,
-      enum: ['男', '女']
-    },
-    lianxiFangshi: {
-      type: String,
-      required: true,
-      trim: true
-    }
+  // 关联人员表 - 负责人信息
+  employeeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employee',
+    required: false
   },
   
   // 合同信息 - 关联到合同表
@@ -99,11 +21,6 @@ const zuHuXinXiSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'HeTong',
     default: null
-  },
-  hetongBianhao: {
-    type: String,
-    required: false,
-    trim: true
   },
   
   // 状态信息
@@ -135,6 +52,25 @@ zuHuXinXiSchema.pre('findOneAndUpdate', function(next) {
   this.set({ updated_at: new Date() });
   next();
 });
+
+// 虚拟字段 - 从关联表获取数据
+zuHuXinXiSchema.virtual('company', {
+  ref: 'Company',
+  localField: 'companyId',
+  foreignField: '_id',
+  justOne: true
+});
+
+zuHuXinXiSchema.virtual('employee', {
+  ref: 'Employee',
+  localField: 'employeeId',
+  foreignField: '_id',
+  justOne: true
+});
+
+// 确保虚拟字段在JSON序列化时包含
+zuHuXinXiSchema.set('toJSON', { virtuals: true });
+zuHuXinXiSchema.set('toObject', { virtuals: true });
 
 const ZuHuXinXi = mongoose.model('ZuHuXinXi', zuHuXinXiSchema);
 

@@ -131,6 +131,19 @@ export const menuRoutes: RouteConfig[] = [
         }
       },
       {
+        name: 'ZuHuDetail',
+        path: 'ZuHuXinXi/detail/:id',
+        component: () => import('@/pages/Operation/ZuHu/xiang.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '租户详情',
+          menuIcon: 'document',
+          parentModule: 'Operation',
+          isLogin: true,
+          hideInMenu: true // 隐藏在菜单中，只能通过跳转访问
+        }
+      },
+      {
         name: 'ZuHuPeople',
         path: 'ZuHuPeople',
         component: () => import('@/pages/Operation/ZuHu/ZuHuPeople.vue'),
