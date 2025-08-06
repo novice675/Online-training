@@ -7,7 +7,7 @@
                 <h2>访客进出记录</h2>
             </div>
             <div class="action-buttons">
-                <el-button type="primary">导出</el-button>
+                <el-button type="primary" @click="handleExport">导出</el-button>
                 <el-button type="warning" :disabled="multipleSelection.length === 0"
                     @click="handleBatchDelete">批量删除</el-button>
             </div>
@@ -42,7 +42,12 @@
                 <el-table-column prop="phone" label="联系方式" align="center" width="130" />
                 <el-table-column prop="visitType" label="造访类型" align="center" width="100">
                     <template #default="{ row }">
-                        <el-tag :type="row.visitType === '企业' ? 'success' : row.visitType === '公寓' ? 'warning' : 'info'">
+                        <!-- 导出模式下显示纯文本 -->
+                        <span v-if="isExporting" :class="getVisitTypeClass(row.visitType)">
+                            {{ row.visitType || '企业' }}
+                        </span>
+                        <!-- 正常模式下显示el-tag -->
+                        <el-tag v-else :type="row.visitType === '企业' ? 'success' : row.visitType === '公寓' ? 'warning' : 'info'">
                             {{ row.visitType || '企业' }}
                         </el-tag>
                     </template>
@@ -67,7 +72,10 @@
                 </el-table-column>
                 <el-table-column label="操作" width="100" align="center">
                     <template #default="{ row }">
-                        <el-button type="danger" size="small" @click="handleDelete(row)">删除</el-button>
+                        <!-- 导出模式下显示纯文本 -->
+                        <span v-if="isExporting" class="export-action-text">删除</span>
+                        <!-- 正常模式下显示el-button -->
+                        <el-button v-else type="danger" size="small" @click="handleDelete(row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -89,6 +97,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from "axios"
+import html2canvas from 'html2canvas'
 
 // 搜索表单
 const searchForm = reactive({
@@ -103,11 +112,20 @@ const currentPage = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const multipleSelection = ref<any[]>([])
+const isExporting = ref(false) // 添加导出状态标识
 
 // 生命周期钩子
 onMounted(() => {
     fetchData()
 })
+
+// 获取造访类型样式类名
+const getVisitTypeClass = (visitType: string) => {
+    const type = visitType || '企业'
+    if (type === '企业') return 'visit-type-enterprise'
+    if (type === '公寓') return 'visit-type-apartment'
+    return 'visit-type-other'
+}
 
 // 格式化日期时间
 const formatDateTime = (date: string) => {
@@ -209,6 +227,59 @@ const handleBatchDelete = () => {
             ElMessage.error('批量删除失败')
         }
     }).catch(() => { })
+}
+
+// 导出图片功能
+const handleExport = async () => {
+    isExporting.value = true // 进入导出模式
+    try {
+        ElMessage.info('正在生成图片，请稍候...')
+        
+        // 等待DOM更新
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        // 获取表格容器元素
+        const element = document.querySelector('.table-area') as HTMLElement
+        if (!element) {
+            ElMessage.error('未找到表格元素')
+            return
+        }
+
+        // 使用html2canvas生成图片
+        const canvas = await html2canvas(element, {
+            backgroundColor: '#ffffff',
+            scale: 2, // 提高图片质量
+            useCORS: true,
+            allowTaint: true,
+            width: element.offsetWidth,
+            height: element.offsetHeight,
+            logging: false, // 关闭日志
+            onclone: (clonedDoc) => {
+                // 确保克隆的文档中样式正确应用
+                const clonedElement = clonedDoc.querySelector('.table-area') as HTMLElement
+                if (clonedElement) {
+                    clonedElement.style.background = '#ffffff'
+                }
+            }
+        })
+
+        // 创建下载链接
+        const link = document.createElement('a')
+        link.download = `访客进出记录_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.png`
+        link.href = canvas.toDataURL('image/png')
+        
+        // 触发下载
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
+        ElMessage.success('导出成功')
+    } catch (error) {
+        console.error('导出失败:', error)
+        ElMessage.error('导出失败，请重试')
+    } finally {
+        isExporting.value = false // 退出导出模式
+    }
 }
 
 // 分页处理
@@ -346,6 +417,51 @@ const handleCurrentChange = (val: number) => {
 
 :deep(.el-pagination) {
     --el-pagination-font-size: 14px;
+}
+
+/* 导出模式下的样式 */
+.visit-type-enterprise {
+    background-color: #f0f9ff;
+    color: #67c23a;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #b3e19d;
+    display: inline-block;
+}
+
+.visit-type-apartment {
+    background-color: #fdf6ec;
+    color: #e6a23c;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #f5dab1;
+    display: inline-block;
+}
+
+.visit-type-other {
+    background-color: #f4f4f5;
+    color: #909399;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #d3d4d6;
+    display: inline-block;
+}
+
+.export-action-text {
+    background-color: #fef0f0;
+    color: #f56c6c;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #fbc4c4;
+    display: inline-block;
 }
 
 /* 响应式设计 */
