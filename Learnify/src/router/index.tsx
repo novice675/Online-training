@@ -34,8 +34,8 @@ interface RouteConfig {
 
 
 const Islogin = ({ children }: { children: React.ReactElement }) => {
-   
-  let Com = children.type  
+
+  let Com = children.type
   console.log(Com);
   return sessionStorage.getItem("token") ? <Com /> : <Navigate to="/login" />
 
@@ -44,38 +44,24 @@ const Islogin = ({ children }: { children: React.ReactElement }) => {
 const routes = createBrowserRouter([
   {
     path: "/",
-    element: (
-      <Islogin>
-        <App></App>
-      </Islogin>
-    ),
+    element: (<Islogin><App /></Islogin>),
     children: [
       { path: "/shou", element: <Shou></Shou> },
-      {
-        path: "/serve",
-        element: <Serve />,
-      },
-      {
-        path: "/organization",
-        element: <Organize />,
-      },
-      {
-        path: "/me",
-        element: <Main />,
-      },
-
+      { path: "/serve", element: <Serve /> },
+      { path: "/organization", element: <Organize /> },
+      { path: "/me", element: <Main /> },
       { path: "/", element: <Navigate to="/shou"></Navigate> },
     ],
   },
   { path: "/login", element: <Login></Login> },
-  {path:'/company',element:<Company></Company>},
-  {path:'/company_em',element:<Company_em></Company_em>},
-  {path:'/company_done',element:<Company_done></Company_done>},
-  {path:'/visitor',element:<Visitor></Visitor>},
-  {path:'/visitor_done',element:<Visitor_done></Visitor_done>},
-  {path:'/employee',element:<Employee></Employee>},
-  {path:'/employee_com',element:<Employee_com></Employee_com>},
-  {path:'/employee_done',element:<Employee_done></Employee_done>},
+  { path: '/company', element: <Company></Company> },
+  { path: '/company_em', element: <Company_em></Company_em> },
+  { path: '/company_done', element: <Company_done></Company_done> },
+  { path: '/visitor', element: <Visitor></Visitor> },
+  { path: '/visitor_done', element: <Visitor_done></Visitor_done> },
+  { path: '/employee', element: <Employee></Employee> },
+  { path: '/employee_com', element: <Employee_com></Employee_com> },
+  { path: '/employee_done', element: <Employee_done></Employee_done> },
   { path: "/mima", element: <Mima></Mima> },
   { path: "/mycom", element: <Mycom></Mycom> },
   { path: "/haoni", element: <Haoni></Haoni> },
@@ -85,10 +71,7 @@ const routes = createBrowserRouter([
   { path: "/comment", element: <Comment></Comment> },
   { path: "/middle", element: <Middle></Middle> },
   { path: "/visitors_detail", element: <Visitors_detail></Visitors_detail> },
-  {
-    path: '/autochat',
-    element: <AutoChat />,
-  },
+  { path: '/autochat', element: <AutoChat /> },
 ]);
 
 export default routes;

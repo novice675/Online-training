@@ -370,6 +370,12 @@ onMounted(() => {
 <style scoped>
 .zuhu-people-container {
   padding: 20px;
+  background: #f5f5f5;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 .page-header {

@@ -214,6 +214,20 @@ const getIcon = (iconName: string) => {
   color: #409eff;
 }
 
+/* 隐藏滚动条 */
+:deep(.el-menu) {
+  overflow: hidden !important;
+}
+
+:deep(.el-scrollbar__wrap) {
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+
+:deep(.el-scrollbar__view) {
+  overflow: hidden !important;
+}
+
 /* 确保子菜单有动画效果 */
 :deep(.el-menu) {
   border-right: none;

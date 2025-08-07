@@ -75,7 +75,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="time" label="造访到访时间" align="center" width="160">
+        <el-table-column prop="time" label="造访结束时间" align="center" width="160">
           <template #default="{ row }">
             <span>{{ formatDateTime(row.time) }}</span>
           </template>
@@ -452,7 +452,10 @@ onMounted(() => {
 .visitor-info-container {
   padding: 24px;
   background-color: #f5f7fa;
-  min-height: calc(100vh - 120px);
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
 }

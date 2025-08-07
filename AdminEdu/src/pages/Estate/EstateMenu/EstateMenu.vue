@@ -1,56 +1,4 @@
 
-<style scoped>
-/* 添加全局样式 */
-a-layout {
-  padding: 24px;
-}
-
-/* 数据概览卡片样式 */
-.card-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-}
-
-.card-content h1 {
-  margin: 0;
-  font-size: 24px;
-}
-
-.card-content a {
-  color: #1890ff;
-  text-decoration: none;
-}
-
-/* 设备分类占比饼图样式 */
-#devicePieChart {
-  width: 100%;
-  height: 300px;
-}
-
-/* 物业缴费柱状图样式 */
-#propertyFeeBarChart {
-  width: 100%;
-  height: 300px;
-}
-
-/* 设备报错原因分析表格样式 */
-.device-reason-table {
-  width: 100%;
-}
-
-.device-reason-table .ant-table-thead > tr > th,
-.device-reason-table .ant-table-tbody > tr > td {
-  text-align: center;
-}
-
-/* 设备报错次数统计折线图样式 */
-#errorCountLineChart {
-  width: 100%;
-  height: 300px;
-}
-</style>
 
 <template>
   <div class="estate-dashboard">
@@ -63,7 +11,7 @@ a-layout {
           <div class="stat-trend">查看 ></div>
         </div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-content">
           <h3>年度累计缴费 (元)</h3>
@@ -71,7 +19,7 @@ a-layout {
           <div class="stat-trend">查看 ></div>
         </div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-content">
           <h3>今日进出人数 (人)</h3>
@@ -79,7 +27,7 @@ a-layout {
           <div class="stat-trend">查看 ></div>
         </div>
       </div>
-      
+
       <div class="stat-card">
         <div class="stat-content">
           <h3>今日进出车辆 (辆)</h3>
@@ -98,7 +46,7 @@ a-layout {
           <h4>设备分类占比</h4>
           <div class="pie-chart" ref="pieChart"></div>
         </div>
-        
+
         <!-- 设备管理情况分析 -->
         <div class="chart-card">
           <h4>设备管理情况分析</h4>
@@ -112,38 +60,22 @@ a-layout {
         <div class="chart-card">
           <h4>物业缴费</h4>
           <div class="tabs">
-            <span 
-              class="tab" 
-              :class="{ active: activeTab === '物业缴费' }"
-              @click="switchTab('物业缴费')"
-            >
+            <span class="tab" :class="{ active: activeTab === '物业缴费' }" @click="switchTab('物业缴费')">
               物业缴费
             </span>
-            <span 
-              class="tab" 
-              :class="{ active: activeTab === '公共费用' }"
-              @click="switchTab('公共费用')"
-            >
+            <span class="tab" :class="{ active: activeTab === '公共费用' }" @click="switchTab('公共费用')">
               公共费用
             </span>
-            <span 
-              class="tab" 
-              :class="{ active: activeTab === '车辆费用' }"
-              @click="switchTab('车辆费用')"
-            >
+            <span class="tab" :class="{ active: activeTab === '车辆费用' }" @click="switchTab('车辆费用')">
               车辆费用
             </span>
-            <span 
-              class="tab" 
-              :class="{ active: activeTab === '水电费用' }"
-              @click="switchTab('水电费用')"
-            >
+            <span class="tab" :class="{ active: activeTab === '水电费用' }" @click="switchTab('水电费用')">
               水电费用
             </span>
           </div>
           <div class="column-chart" ref="columnChart"></div>
         </div>
-        
+
         <!-- 设备管理次数统计 -->
         <div class="chart-card">
           <h4>设备管理次数统计</h4>
@@ -262,7 +194,7 @@ const initCharts = () => {
       axisPointer: {
         type: 'shadow'
       },
-      formatter: function(params) {
+      formatter: function (params) {
         return `${params[0].name}<br/>${activeTab.value}: ${params[0].value}万元`
       }
     },
@@ -312,7 +244,7 @@ const initCharts = () => {
       axisPointer: {
         type: 'shadow'
       },
-      formatter: function(params) {
+      formatter: function (params) {
         return `${params[0].name}<br/>完成度: ${params[0].value}%`
       }
     },
@@ -368,7 +300,7 @@ const initCharts = () => {
           backgroundColor: '#6a7985'
         }
       },
-      formatter: function(params) {
+      formatter: function (params) {
         return `${params[0].name}<br/>管理次数: ${params[0].value}次`
       }
     },
@@ -449,10 +381,54 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 全局样式 */
+a-layout {
+  padding: 24px;
+}
+
+/* 数据概览卡片样式 */
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+}
+
+.card-content h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.card-content a {
+  color: #1890ff;
+  text-decoration: none;
+}
+
+/* 图表相关样式 */
+#devicePieChart,
+#propertyFeeBarChart,
+#errorCountLineChart {
+  width: 100%;
+  height: 300px;
+}
+
+/* 表格样式 */
+.device-reason-table {
+  width: 100%;
+}
+
+.device-reason-table .ant-table-thead>tr>th,
+.device-reason-table .ant-table-tbody>tr>td {
+  text-align: center;
+}
+
 .estate-dashboard {
   padding: 20px;
   background-color: #f0f2f5;
-  min-height: 100vh;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .stats-cards {
@@ -492,10 +468,12 @@ onMounted(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  height: calc(100vh - 200px);
+  height: calc(100% - 160px);
+  overflow: hidden;
 }
 
-.left-charts, .right-charts {
+.left-charts,
+.right-charts {
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -517,7 +495,10 @@ onMounted(() => {
   color: #333;
 }
 
-.pie-chart, .bar-chart, .column-chart, .area-chart {
+.pie-chart,
+.bar-chart,
+.column-chart,
+.area-chart {
   height: calc(100% - 40px);
   min-height: 250px;
 }
@@ -546,18 +527,28 @@ onMounted(() => {
   .charts-container {
     grid-template-columns: 1fr;
     height: auto;
+    overflow-y: auto;
   }
-  
-  .left-charts, .right-charts {
+
+  .left-charts,
+  .right-charts {
     height: auto;
   }
-  
+
   .chart-card {
     min-height: 300px;
+    height: auto;
   }
-  
-  .pie-chart, .bar-chart, .column-chart, .area-chart {
+
+  .pie-chart,
+  .bar-chart,
+  .column-chart,
+  .area-chart {
     height: 250px;
+  }
+
+  .estate-dashboard {
+    overflow-y: auto;
   }
 }
 
@@ -565,7 +556,7 @@ onMounted(() => {
   .stats-cards {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .estate-dashboard {
     padding: 10px;
   }

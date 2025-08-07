@@ -274,6 +274,128 @@ export const menuRoutes: RouteConfig[] = [
       },
     ]
   },
+  // 智能设备管理菜单
+  {
+    name: 'SmartDevice',
+    path: 'SmartDevice',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '设备管理',
+      menuIcon: 'cog',
+      parentModule: 'Estate',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'DeviceOverview',
+        path: 'DeviceOverview',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/DeviceOverview.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '设备总览',
+          menuIcon: 'view-grid',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'SecurityMonitor',
+        path: 'SecurityMonitor',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/SecurityMonitor.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '安防监控管理',
+          menuIcon: 'video-camera',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'AccessControl',
+        path: 'AccessControl',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/AccessControl.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '门禁管理',
+          menuIcon: 'lock-closed',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'ElevatorControl',
+        path: 'ElevatorControl',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/ElevatorControl.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '电梯控制',
+          menuIcon: 'arrow-up',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'LightingSystem',
+        path: 'LightingSystem',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/LightingSystem.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '智能照明',
+          menuIcon: 'light-bulb',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'AirCondition',
+        path: 'AirCondition',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/AirCondition.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '空调系统',
+          menuIcon: 'wind',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'FireSafety',
+        path: 'FireSafety',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/FireSafety.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '消防安全',
+          menuIcon: 'fire',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'WaterSystem',
+        path: 'WaterSystem',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/WaterSystem.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '给排水系统',
+          menuIcon: 'beaker',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'PowerManagement',
+        path: 'PowerManagement',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/PowerManagement.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '电力管理',
+          menuIcon: 'lightning-bolt',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+    ]
+  },
   // 账单管理菜单
   {
     name: 'BillManagement',
@@ -441,7 +563,7 @@ const router = createRouter({
             },
           ],
         },
-        {
+        { 
           // 物业管理
           name: 'Estate',
           path: 'Estate',
@@ -457,15 +579,6 @@ const router = createRouter({
               name: 'EstateMenu',
               path: 'EstateMenu',
               component: () => import('@/pages/Estate/EstateMenu/EstateMenu.vue'),
-              children: [],
-              meta: {  // 配置路由一些额外的信息
-                isLogin: true
-              },
-            },
-            {
-              name: 'Equipment',
-              path: 'Equipment',
-              component: () => import('@/pages/Estate/EstateMenu/Equipment/Equipment.vue'),
               children: [],
               meta: {  // 配置路由一些额外的信息
                 isLogin: true
@@ -642,14 +755,15 @@ router.beforeEach((to, _, next) => {
     const hasRoutes = ownRoutes.every(route => router.hasRoute(route.name as string));
     if (!hasRoutes) {
       // 清除所有动态添加的路由
-      const staticRouteNames = ['home', 'login', 'situation', 'Operation', 'Estate', 'VisualData', 'Configuration', 'ZiChan', 'ZiChanLouYu', 'ZiChanZiYuan'];
+      const staticRouteNames = ['home', 'login', 'situation', 'Operation', 'Estate', 'VisualData', 'Configuration', 'OperationDefault', 'EstateDefault', 'VisualDataDefault', 'ConfigurationDefault'];
       router.getRoutes().forEach(route => {
         if (route.name && !staticRouteNames.includes(route.name as string)) {
           router.removeRoute(route.name);
         }
       });
-      const mainRouteNames = ['home', 'Operation', 'Estate', 'VisualData', 'Configuration'];
-      const addRoutes = (routes: RouteConfig[], parentName = 'home') => {
+      
+      // 添加动态路由的函数
+      const addRoutes = (routes: RouteConfig[]) => {
         routes.forEach(route => {
           if (!router.hasRoute(route.name as string)) {
             const routeConfig: RouteRecordRaw = {
@@ -663,35 +777,27 @@ router.beforeEach((to, _, next) => {
 
             // 如果有子路由，递归添加
             if (route.children && route.children.length > 0) {
-              routeConfig.children = route.children.map(child => {
-                const childRoute = {
-                  name: child.name,
-                  path: child.path,
-                  component: child.component,
-                  meta: child.meta,
-                  children: child.children
-                } as RouteRecordRaw;
-                if (child.redirect) {
-                  childRoute.redirect = child.redirect;
-                }
-                return childRoute;
-              });
+              routeConfig.children = route.children.map(child => ({
+                name: child.name,
+                path: child.path,
+                component: child.component,
+                meta: child.meta,
+                children: child.children,
+                redirect: child.redirect
+              } as RouteRecordRaw));
             }
+
+            // 根据路由的parentModule属性确定父路由名称
+            const parentName = (route.meta && typeof route.meta.parentModule === 'string')
+              ? route.meta.parentModule
+              : 'home';
+            
             router.addRoute(parentName, routeConfig);
-          }
-          // 只在主路由名下递归添加
-          if (route.children && route.children.length > 0 && mainRouteNames.includes(route.name as string)) {
-            addRoutes(route.children, route.name as string);
           }
         });
       };
-      ownRoutes.forEach(route => {
-        // 根据路由的parentModule属性确定父路由名称
-        const parentName = (route.meta && typeof route.meta.parentModule === 'string')
-          ? route.meta.parentModule
-          : 'home';
-        addRoutes([route], parentName);
-      });
+      
+      addRoutes(ownRoutes);
       next({ ...to, replace: true });
       return;
     }
