@@ -23,13 +23,15 @@ const isCollapse = ref(false)
 <style scoped>
 .container {
     display: flex;
-    width: 100vw;
-    height: calc(100vh - 145px);
+    width: 100%;
+    height: 100%;
     background-color: #f0f2f5;
+    overflow: hidden;
 }
 
 .menu {
     width: 240px;
+    min-height: 100%;
     background-color: #304156;
     color: #fff;
     display: flex;
@@ -38,7 +40,7 @@ const isCollapse = ref(false)
     transition: all 0.3s ease-in-out;
     z-index: 1000;
     position: relative;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .menu.collapse {
@@ -49,11 +51,11 @@ const isCollapse = ref(false)
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
     transition: all 0.3s ease-in-out;
     position: relative;
     min-width: 0;
+    height: 100%;
 }
 
 /* 路由切换动画 */

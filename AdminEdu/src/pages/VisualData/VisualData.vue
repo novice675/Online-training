@@ -31,6 +31,7 @@ const isCollapse = ref(false)
 
 .menu {
     width: 240px;
+    min-height: 100%;
     background-color: #304156;
     color: #fff;
     display: flex;
@@ -39,7 +40,7 @@ const isCollapse = ref(false)
     transition: all 0.3s ease-in-out;
     z-index: 1000;
     position: relative;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .menu.collapse {

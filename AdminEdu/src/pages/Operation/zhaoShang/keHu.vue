@@ -376,7 +376,10 @@ onMounted(() => {
 .kehu-container {
   padding: 20px;
   background: #f5f5f5;
-  min-height: calc(100vh - 40px);
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
   box-sizing: border-box;
 }
 

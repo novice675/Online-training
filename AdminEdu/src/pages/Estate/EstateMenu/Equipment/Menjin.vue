@@ -1,7 +1,7 @@
 <template>
   <div class="menjin-page">
     <TableLayout
-      title="智能门禁设备管理"
+      title="智能门禁设备"
       :current-page="page"
       :page-size="size"
       :total="total"
@@ -276,7 +276,7 @@ import {
   upMenjin,
   delMenjin,
   allDelMenjin,
-} from "../../api/auth";
+} from "@/api/auth";
 
 interface alonefrom {
   _id: string;

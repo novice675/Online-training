@@ -201,7 +201,9 @@ const navigateTo = (path: string) => {
 .equipment-management {
   padding: 20px;
   background-color: #f0f2f5;
-  min-height: 100vh;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .header {

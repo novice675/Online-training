@@ -258,6 +258,128 @@ export const menuRoutes: RouteConfig[] = [
       },
     ]
   },
+  // 智能设备管理菜单
+  {
+    name: 'SmartDevice',
+    path: 'SmartDevice',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '设备管理',
+      menuIcon: 'cog',
+      parentModule: 'Estate',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'DeviceOverview',
+        path: 'DeviceOverview',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/DeviceOverview.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '设备总览',
+          menuIcon: 'view-grid',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'SecurityMonitor',
+        path: 'SecurityMonitor',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/SecurityMonitor.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '安防监控管理',
+          menuIcon: 'video-camera',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'AccessControl',
+        path: 'AccessControl',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/AccessControl.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '门禁管理',
+          menuIcon: 'lock-closed',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'ElevatorControl',
+        path: 'ElevatorControl',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/ElevatorControl.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '电梯控制',
+          menuIcon: 'arrow-up',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'LightingSystem',
+        path: 'LightingSystem',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/LightingSystem.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '智能照明',
+          menuIcon: 'light-bulb',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'AirCondition',
+        path: 'AirCondition',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/AirCondition.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '空调系统',
+          menuIcon: 'wind',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'FireSafety',
+        path: 'FireSafety',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/FireSafety.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '消防安全',
+          menuIcon: 'fire',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'WaterSystem',
+        path: 'WaterSystem',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/WaterSystem.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '给排水系统',
+          menuIcon: 'beaker',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'PowerManagement',
+        path: 'PowerManagement',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/PowerManagement.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '电力管理',
+          menuIcon: 'lightning-bolt',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+    ]
+  },
   // 数据可视管理菜单
   {
     name: 'DataAnalysis',
@@ -349,7 +471,7 @@ const router = createRouter({
             },
           ],
         },
-        {
+        { 
           // 物业管理
           name: 'Estate',
           path: 'Estate',

@@ -213,4 +213,18 @@ const getIcon = (iconName: string) => {
 :deep(.el-sub-menu.is-active .el-sub-menu__title .el-icon) {
   color: #409eff;
 }
+
+/* 隐藏滚动条 */
+:deep(.el-menu) {
+  overflow: hidden !important;
+}
+
+:deep(.el-scrollbar__wrap) {
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+
+:deep(.el-scrollbar__view) {
+  overflow: hidden !important;
+}
 </style>

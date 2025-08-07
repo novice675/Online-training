@@ -10,7 +10,8 @@ router.get('/list', async (req, res) => {
             pageSize = 10,
             licensePlate = '',
             contactWay = '',
-            vehicleType = ''
+            vehicleType = '',
+            exitTime = ''  // 新增exitTime参数
         } = req.query;
 
         // 构建查询条件
@@ -23,6 +24,29 @@ router.get('/list', async (req, res) => {
         }
         if (vehicleType) {
             query.vehicleType = new RegExp(vehicleType, 'i');
+        }
+
+        // 添加exitTime筛选逻辑
+        // 当exitTime存在时，筛选endTime在指定日期的记录
+        if (exitTime) {
+            const searchDate = new Date(exitTime);
+            const startOfDay = new Date(searchDate.getFullYear(), searchDate.getMonth(), searchDate.getDate());
+            const endOfDay = new Date(searchDate.getFullYear(), searchDate.getMonth(), searchDate.getDate() + 1);
+            
+            query.$or = [
+                {
+                    endTime: {
+                        $gte: startOfDay,
+                        $lt: endOfDay
+                    }
+                },
+                {
+                    startTime: {
+                        $gte: startOfDay,
+                        $lt: endOfDay
+                    }
+                }
+            ];
         }
 
         // 计算跳过的记录数

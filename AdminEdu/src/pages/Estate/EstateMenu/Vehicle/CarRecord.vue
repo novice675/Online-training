@@ -286,7 +286,10 @@ const handleCurrentChange = (val: number) => {
 .vehicle-record-container {
   padding: 20px;
   background-color: #f5f7fa;
-  min-height: calc(100vh - 120px);
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
 }

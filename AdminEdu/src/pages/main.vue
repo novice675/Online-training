@@ -2,8 +2,9 @@
     <div>
         <header class="headerTop">
             <h1>智慧校园管理平台</h1>
-            <el-menu :key="activeIndex2" :default-active="activeIndex2" class="el-menu-demo" mode="horizontal" background-color="#082c61"
-                text-color="#dddddd" active-text-color="#fff" :ellipsis="false" @select="handleSelect">
+            <el-menu :key="activeIndex2" :default-active="activeIndex2" class="el-menu-demo" mode="horizontal"
+                background-color="#082c61" text-color="#dddddd" active-text-color="#fff" :ellipsis="false"
+                @select="handleSelect">
                 <el-menu-item index="Situation">综合态势</el-menu-item>
                 <el-menu-item index="Operation">运营管理</el-menu-item>
                 <el-menu-item index="Estate">物业管理</el-menu-item>
@@ -61,7 +62,9 @@
                 </div>
             </div>
         </div>
-        <router-view></router-view>
+        <div class="router-container">
+            <router-view></router-view>
+        </div>
     </div>
 </template>
 
@@ -97,16 +100,16 @@ const currentTime = ref('')
 const handleSelect = (key: string, keyPath: string[]) => {
     console.log('顶部导航点击:', key, keyPath)
     console.log('当前路径:', route.path)
-    
+
     // 根据选中的菜单项跳转到对应的模块默认总览页面
     const routeMap: Record<string, string> = {
         'Situation': '/home/situation',
         'Operation': '/home/Operation/OperationOverview',
-        'Estate': '/home/Estate/Overview', 
+        'Estate': '/home/Estate/Overview',
         'VisualData': '/home/VisualData/DataAnalysis',
         'Configuration': '/home/Configuration/SystemConfig'
     }
-    
+
     if (routeMap[key]) {
         console.log('🎯 即将跳转到:', routeMap[key])
         console.log('📍 当前激活导航:', activeIndex2.value)
@@ -373,6 +376,7 @@ onMounted(() => {
 
 /* 校区选择器 - 原生Flexbox布局 */
 .campus-selector {
+    height: 80px;
     background: linear-gradient(135deg, #415c85 0%, #2c4a7a 100%);
     padding: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -428,6 +432,14 @@ onMounted(() => {
     white-space: nowrap;
 }
 
+/* Router容器样式 */
+.router-container {
+    height: calc(100vh - 85px - 80px);
+    /* 100vh - headerTop高度 - campus-selector高度 */
+    overflow: hidden;
+    background-color: #f0f2f5;
+}
+
 /* 移动端响应式 */
 @media (max-width: 768px) {
     .selector-container {
@@ -448,6 +460,11 @@ onMounted(() => {
 
     .time-display {
         text-align: center;
+    }
+
+    .router-container {
+        height: calc(100vh - 85px - 120px);
+        /* 移动端campus-selector更高 */
     }
 }
 </style>
