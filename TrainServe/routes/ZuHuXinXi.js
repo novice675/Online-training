@@ -48,14 +48,36 @@ router.get('/', async (req, res) => {
             {
               $project: {
                 name: 1,
-                inaddress: 1,
+                inaddress: 1,    // 保留旧字段给组员使用
                 outaddress: 1,
                 type: 1,
                 logo: 1,
-                house: 1
+                house: 1,        // 保留旧字段给组员使用
+                buildingId: 1,   // 新增外键字段
+                houseId: 1       // 新增外键字段
               }
             }
           ]
+        }
+      },
+      
+      // 关联楼宇表（通过企业的buildingId）
+      {
+        $lookup: {
+          from: 'Building',
+          localField: 'company.buildingId',
+          foreignField: '_id',
+          as: 'building'
+        }
+      },
+      
+      // 关联房间表（通过企业的houseId）
+      {
+        $lookup: {
+          from: 'House',
+          localField: 'company.houseId',
+          foreignField: '_id',
+          as: 'house'
         }
       },
       
@@ -108,7 +130,9 @@ router.get('/', async (req, res) => {
         $addFields: {
           company: { $arrayElemAt: ['$company', 0] },
           employee: { $arrayElemAt: ['$employee', 0] },
-          contract: { $arrayElemAt: ['$contract', 0] }
+          contract: { $arrayElemAt: ['$contract', 0] },
+          building: { $arrayElemAt: ['$building', 0] },  // 楼宇信息
+          house: { $arrayElemAt: ['$house', 0] }         // 房间信息
         }
       }
     ];
@@ -142,13 +166,19 @@ router.get('/', async (req, res) => {
     
     if (building) {
       searchConditions.push({
-        'company.inaddress': { $regex: building, $options: 'i' }
+        $or: [
+          { 'building.name': { $regex: building, $options: 'i' } },      // 优先使用外键关联的楼宇名称
+          { 'company.inaddress': { $regex: building, $options: 'i' } }   // 兼容旧字段
+        ]
       });
     }
     
     if (room) {
       searchConditions.push({
-        'company.house': { $regex: room, $options: 'i' }
+        $or: [
+          { 'house.number': { $regex: room, $options: 'i' } },           // 优先使用外键关联的房间号
+          { 'company.house': { $regex: room, $options: 'i' } }           // 兼容旧字段
+        ]
       });
     }
 
@@ -160,7 +190,7 @@ router.get('/', async (req, res) => {
         }
       });
     }
-
+    
     // 计算总数
     const totalPipeline = [...pipeline, { $count: 'total' }];
     const totalResult = await ZuHuXinXi.aggregate(totalPipeline);
@@ -169,7 +199,7 @@ router.get('/', async (req, res) => {
     // 添加分页和排�?
     const skip = (parseInt(page) - 1) * parseInt(size);
     const limit = parseInt(size);
-    
+
     pipeline.push(
       { $sort: { created_at: -1 } },
       { $skip: skip },
@@ -474,16 +504,36 @@ router.get('/:id', async (req, res) => {
             {
               $project: {
                 name: 1,
-                inaddress: 1,
+                inaddress: 1,    // 保留旧字段给组员使用
                 outaddress: 1,
                 type: 1,
                 logo: 1,
-                house: 1,
+                house: 1,        // 保留旧字段给组员使用
+                buildingId: 1,   // 新增外键字段
+                houseId: 1,      // 新增外键字段
                 created_at: 1,
                 updated_at: 1
               }
             }
           ]
+        }
+      },
+      // 关联楼宇表（通过企业的buildingId）
+      {
+        $lookup: {
+          from: 'Building',
+          localField: 'company.buildingId',
+          foreignField: '_id',
+          as: 'building'
+        }
+      },
+      // 关联房间表（通过企业的houseId）
+      {
+        $lookup: {
+          from: 'House',
+          localField: 'company.houseId',
+          foreignField: '_id',
+          as: 'house'
         }
       },
       {
@@ -534,7 +584,9 @@ router.get('/:id', async (req, res) => {
         $addFields: {
           company: { $arrayElemAt: ['$company', 0] },
           employee: { $arrayElemAt: ['$employee', 0] },
-          contract: { $arrayElemAt: ['$contract', 0] }
+          contract: { $arrayElemAt: ['$contract', 0] },
+          building: { $arrayElemAt: ['$building', 0] },  // 楼宇信息
+          house: { $arrayElemAt: ['$house', 0] }         // 房间信息
         }
       }
     ]);
@@ -593,12 +645,12 @@ router.post('/', async (req, res) => {
     // 验证员工是否存在且属于该企业 - 可选字�?
     if (employeeId) {
       const employee = await Employee.findById(employeeId);
-      if (!employee) {
-        return res.status(400).json({
-          code: 400,
+    if (!employee) {
+      return res.status(400).json({
+        code: 400,
           message: '指定的员工不存在'
-        });
-      }
+      });
+    }
       if (employee.company_id.toString() !== companyId) {
         return res.status(400).json({
           code: 400,
@@ -611,19 +663,19 @@ router.post('/', async (req, res) => {
     if (hetongId) {
       const contract = await HeTong.findById(hetongId);
       if (!contract) {
-        return res.status(400).json({
-          code: 400,
+      return res.status(400).json({
+        code: 400,
           message: '指定的合同不存在'
-        });
-      }
-      
+      });
+    }
+
       // 检查合同是否已被使�?
       const existingTenant = await ZuHuXinXi.findOne({ hetongId });
       if (existingTenant) {
-        return res.status(400).json({
-          code: 400,
+      return res.status(400).json({
+        code: 400,
           message: '该合同已被其他租户使用'
-        });
+      });
       }
     }
 
@@ -727,7 +779,7 @@ router.put('/:id', async (req, res) => {
           message: '企业ID不能为空'
         });
       }
-      
+
       const company = await Company.findById(companyId);
       if (!company) {
         return res.status(400).json({
@@ -743,20 +795,20 @@ router.put('/:id', async (req, res) => {
       if (employeeId) {
         const employee = await Employee.findById(employeeId);
         if (!employee) {
-          return res.status(400).json({
-            code: 400,
+        return res.status(400).json({
+          code: 400,
             message: '指定的员工不存在'
-          });
-        }
+        });
+      }
         
         const targetCompanyId = updateData.companyId || existingTenant.companyId;
         if (employee.company_id.toString() !== targetCompanyId.toString()) {
-          return res.status(400).json({
-            code: 400,
+        return res.status(400).json({
+          code: 400,
             message: '员工不属于指定的企业'
-          });
-        }
+        });
       }
+    }
       updateData.employeeId = employeeId || null;
     }
 
@@ -765,24 +817,24 @@ router.put('/:id', async (req, res) => {
       if (hetongId) {
         const contract = await HeTong.findById(hetongId);
         if (!contract) {
-          return res.status(400).json({
-            code: 400,
+      return res.status(400).json({
+        code: 400,
             message: '指定的合同不存在'
-          });
-        }
-        
+      });
+    }
+
         // 检查合同是否已被其他租户使�?
         const duplicateTenant = await ZuHuXinXi.findOne({ 
           hetongId,
-          _id: { $ne: id }
-        });
+        _id: { $ne: id }
+      });
         if (duplicateTenant) {
-          return res.status(400).json({
-            code: 400,
+        return res.status(400).json({
+          code: 400,
             message: '该合同已被其他租户使用'
-          });
-        }
+        });
       }
+    }
       updateData.hetongId = hetongId || null;
     }
 
@@ -863,7 +915,6 @@ router.put('/:id', async (req, res) => {
 
 /**
  * 删除租户信息
- * DELETE /zuhuxinxi/:id
  */
 router.delete('/:id', async (req, res) => {
   try {

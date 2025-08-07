@@ -42,11 +42,7 @@
         </el-tag>
       </template>
 
-      <template #status="{ row }">
-        <el-tag :type="row.status === '成交' ? 'success' : 'info'">
-          {{ row.status }}
-        </el-tag>
-      </template>
+
 
       <template #createTime="{ row }">
         {{ formatDate(row.createTime) }}
@@ -58,7 +54,7 @@
 
       <!-- 操作列 -->
       <template #actions="{ row }">
-        <el-button link type="primary" @click="handleView(row)">详情</el-button>
+        <el-button link type="primary" @click="handleView(row)">编辑</el-button>
         <el-button link type="danger" @click="handleDelete(row)">删除</el-button>
       </template>
     </DataTable>
@@ -89,10 +85,12 @@
             <el-form-item label="所属行业" prop="industry">
               <el-input v-model="formData.industry" placeholder="请输入所属行业" />
             </el-form-item>
-            <el-form-item label="跟进状态" prop="status">
-              <el-select v-model="formData.status" placeholder="请选择跟进状态" style="width: 100%">
-                <el-option label="成交" value="成交" />
-                <el-option label="意向" value="意向" />
+
+            <el-form-item label="意向等级" prop="intentLevel">
+              <el-select v-model="formData.intentLevel" placeholder="请选择意向等级" style="width: 100%">
+                <el-option label="高" value="高" />
+                <el-option label="中" value="中" />
+                <el-option label="低" value="低" />
               </el-select>
             </el-form-item>
             <el-form-item label="跟进人" prop="followPerson">
@@ -205,7 +203,6 @@ interface CustomerData {
   phone: string
   level: '一级' | '二级'
   industry: string
-  status: '成交' | '意向'
   followPerson: string
   contactPhone: string
   requiredAreaMin?: number | null
@@ -230,7 +227,6 @@ const formRules = {
   phone: [{ required: true, message: '请输入联系方式', trigger: 'blur' }],
   level: [{ required: true, message: '请选择客户等级', trigger: 'change' }],
   industry: [{ required: true, message: '请输入所属行业', trigger: 'blur' }],
-  status: [{ required: true, message: '请选择跟进状态', trigger: 'change' }],
   followPerson: [{ required: true, message: '请输入跟进人姓名', trigger: 'blur' }],
   contactPhone: [{ required: true, message: '请输入跟进人联系方式', trigger: 'blur' }]
 }
@@ -273,7 +269,7 @@ const {
     phone: '',
     level: '一级' as const,
     industry: '',
-    status: '意向' as const,
+    intentLevel: '中' as const,
     followPerson: '',
     contactPhone: '',
     requiredAreaMin: null,
@@ -315,16 +311,7 @@ const filterFields = [
       { label: '二级', value: '二级' }
     ]
   },
-  {
-    key: 'status',
-    label: '跟进状态',
-    type: 'select' as const,
-    placeholder: '请选择',
-    options: [
-      { label: '成交', value: '成交' },
-      { label: '意向', value: '意向' }
-    ]
-  }
+
 ]
 
 // 表格列配置
@@ -334,7 +321,6 @@ const columns: TableColumn[] = [
   { prop: 'name', label: '客户名称', minWidth: 150, showOverflowTooltip: true },
   { prop: 'intentLevel', label: '意向等级', width: 100, slot: 'intentLevel' },
   { prop: 'level', label: '客户等级', width: 100, slot: 'level' },
-  { prop: 'status', label: '跟进状态', width: 100, slot: 'status' },
   { prop: 'followPerson', label: '跟进人', width: 120 },
   { prop: 'createTime', label: '新增时间', width: 120, slot: 'createTime' },
   { prop: 'updateTime', label: '最近跟进时间', width: 140, slot: 'updateTime' },

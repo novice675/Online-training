@@ -244,7 +244,6 @@ const articleData = ref<any>(null)
 // 获取文章详情
 const getArticleDetail = async () => {
   const articleId = route.params.id as string
-  console.log('📝 开始获取文章详情, ID:', articleId)
   
   if (!articleId) {
     ElMessage.error('文章ID不存在')
@@ -254,24 +253,16 @@ const getArticleDetail = async () => {
 
   try {
     loading.value = true
-    console.log('🔄 发起API请求...')
     const response = await wenDetail(articleId)
-    console.log('📡 API响应:', response)
-    console.log('📊 响应数据:', response.data)
     
     if (response.data.code === 200) {
       articleData.value = response.data.data
-      console.log('✅ 文章数据设置成功:', articleData.value)
-      console.log('📄 文章类型:', articleData.value?.articleType)
-      console.log('📝 文章内容:', articleData.value?.detailContent)
     } else {
-      console.error('❌ API响应错误:', response.data)
       ElMessage.error(response.data.msg || '获取文章详情失败')
       goBack()
     }
   } catch (error) {
-    console.error('💥 请求异常:', error)
-    console.error('💥 错误详情:', error.response)
+    console.error('获取文章详情失败:', error)
     ElMessage.error('获取文章详情失败')
     goBack()
   } finally {
@@ -282,22 +273,15 @@ const getArticleDetail = async () => {
 // 返回列表
 const goBack = () => {
   try {
-    // 先尝试使用路由名称跳转
     if (router.hasRoute('zhang')) {
-      console.log('使用路由名称跳转到zhang')
       router.push({ name: 'zhang' })
     } else {
-      console.log('zhang路由不存在，尝试路径跳转')
-      // 直接使用路径跳转
-      router.push('/home/Operation/zhang').catch(err => {
-        console.error('路径跳转失败:', err)
-        // 使用浏览器历史记录回退
+      router.push('/home/Operation/zhang').catch(() => {
         window.history.back()
       })
     }
   } catch (error) {
     console.error('路由跳转失败:', error)
-    // 最后的兜底方案，使用浏览器历史记录回退
     window.history.back()
   }
 }
@@ -654,7 +638,7 @@ onMounted(() => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* 内容区域 */
+/* 内容区域卡片标题通用样式 */
 .article-body-card h3,
 .article-cover-card h3,
 .article-stats-card h3,

@@ -4,19 +4,19 @@ const KeHu = require('../models/KeHu');
 
 /**
  * 获取客户列表
- * GET /kehu
+ * GET /kehu 和 GET /kehu/list
  * 支持分页、搜索、筛选
  */
-router.get('/', async (req, res) => {
+const getCustomerList = async (req, res) => {
   try {
     const {
       page = 1,
       size = 10,
       name,
       level,
-      status,
       industry,
-      followPerson
+      followPerson,
+      intentLevel
     } = req.query;
 
     // 构建查询条件
@@ -28,14 +28,14 @@ router.get('/', async (req, res) => {
     if (level) {
       query.level = level;
     }
-    if (status) {
-      query.status = status;
-    }
     if (industry) {
       query.industry = { $regex: industry, $options: 'i' };
     }
     if (followPerson) {
       query.followPerson = { $regex: followPerson, $options: 'i' };
+    }
+    if (intentLevel) {
+      query.intentLevel = intentLevel;
     }
 
     // 计算分页
@@ -68,7 +68,11 @@ router.get('/', async (req, res) => {
       error: error.message
     });
   }
-});
+};
+
+// 注册两个路由使用相同的处理函数
+router.get('/', getCustomerList);
+router.get('/list', getCustomerList);
 
 /**
  * 获取客户详情

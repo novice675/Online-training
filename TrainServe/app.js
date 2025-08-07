@@ -13,10 +13,11 @@ const Menjin = require('./routes/Menjin')
 const HeTong = require('./routes/HeTong')
 const KeHu = require('./routes/KeHu')
 const Vehicle = require('./routes/Vehicle')
-const Ping = require('./routes/Ping')
 const ZuHuXinXi = require('./routes/ZuHuXinXi')
 const Building = require('./routes/Building')
-
+const House = require('./routes/House')
+const TenantBill = require('./routes/TenantBill')
+const OperationOverview = require('./routes/OperationOverview')
 
 
 var app = express();
@@ -42,9 +43,11 @@ app.use('/menjin',Menjin)
 app.use('/hetong', HeTong)
 app.use('/kehu', KeHu)
 app.use('/vehicle',Vehicle)
-app.use('/ping', Ping)
 app.use('/zuhuxinxi', ZuHuXinXi)
 app.use('/Building', Building)
+app.use('/House', House)
+app.use('/tenantbill', TenantBill)
+app.use('/operation', OperationOverview)
 
 
 // catch 404 and forward to error handler

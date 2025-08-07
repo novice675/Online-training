@@ -7,7 +7,7 @@
   >
     <el-form 
       :model="formData" 
-      :rules="rules" 
+      :rules="computedRules" 
       ref="formRef" 
       :label-width="labelWidth"
     >
@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed, withDefaults } from 'vue'
 import type { FormInstance, FormRules } from 'element-plus'
 import FormField from './FormField.vue'
 
@@ -79,6 +79,7 @@ export interface FormFieldConfig {
   rows?: number
   disabled?: boolean
   onChange?: (value: any) => void
+  rules?: FormRules // 新增rules属性
 }
 
 export interface FormGroup {
@@ -115,17 +116,50 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  'update:formData': [formData: Record<string, any>]
-  'submit': [formData: Record<string, any>]
-  'cancel': []
-  'close': []
+  'update:formData': [data: Record<string, any>]
+  submit: [data: Record<string, any>]
+  cancel: []
+  close: []
 }>()
 
 const formRef = ref<FormInstance>()
 const dialogVisible = ref(props.modelValue)
 
+// 计算表单验证规则
+const computedRules = computed(() => {
+  const rules: FormRules = { ...props.rules }
+  
+  // 从formGroups中提取验证规则
+  if (props.formGroups) {
+    props.formGroups.forEach(group => {
+      group.fields.forEach(field => {
+        if (field.rules) {
+          rules[field.key] = field.rules
+        }
+      })
+    })
+  }
+  
+  // 从formFields中提取验证规则
+  if (props.formFields) {
+    props.formFields.forEach(field => {
+      if (field.rules) {
+        rules[field.key] = field.rules
+      }
+    })
+  }
+  
+  return rules
+})
+
 watch(() => props.modelValue, (val) => {
   dialogVisible.value = val
+  if (val) {
+    // 弹窗打开时，延迟清除验证状态
+    setTimeout(() => {
+      formRef.value?.clearValidate()
+    }, 100)
+  }
 })
 
 watch(dialogVisible, (val) => {
@@ -188,13 +222,16 @@ const handleSubmit = async () => {
 }
 
 const handleCancel = () => {
+  formRef.value?.resetFields()
+  formRef.value?.clearValidate()
   emit('cancel')
   dialogVisible.value = false
 }
 
 const handleClose = () => {
-  emit('close')
   formRef.value?.resetFields()
+  formRef.value?.clearValidate()
+  emit('close')
 }
 </script>
 

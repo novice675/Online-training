@@ -26,7 +26,7 @@
       @current-change="handleCurrentChange"
     >
       <template #shuxing="{ row }">
-        <el-tag>{{ row.shuxing }}</el-tag>
+        <el-tag :type="row.shuxing === '新签' ? 'success' : 'warning'">{{ row.shuxing }}</el-tag>
       </template>
 
       <template #status="{ row }">
@@ -57,6 +57,7 @@
       :form-groups="formGroups"
       :submitting="submitLoading"
       use-layout
+      @update:formData="handleFormDataUpdate"
       @submit="handleSubmit"
       @cancel="handleCancel"
     />
@@ -78,23 +79,22 @@ import {
   addHetong, 
   updateHetong, 
   deleteHetong, 
-  batchDeleteHetong 
+  batchDeleteHetong,
+  generateHetongNumber 
 } from '@/api/auth'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 
 interface HetongData {
   _id: string
-  name: string
-  louyu: string
-  fangjian: string
+  he_bian: string
   shuxing: string
   qianPeople: string
+  phone: string
   startDate: string | Date
   endDate: string | Date
-  zujin: number
-  wuye: number
-  yajin: number
+  beizhu?: string
   created_at?: string
   updated_at?: string
 }
@@ -115,11 +115,11 @@ const {
   handleSizeChange,
   handleCurrentChange,
   handleSelectionChange,
-  handleAdd,
-  handleEdit,
+  handleAdd: originalHandleAdd,
+  handleEdit: originalHandleEdit,
   handleDelete,
   handleBatchDelete,
-  handleSubmit,
+  handleSubmit: originalHandleSubmit,
   handleCancel
 } = useCrud<HetongData>({
   listApi: hetongList,
@@ -129,40 +129,132 @@ const {
   batchDeleteApi: batchDeleteHetong,
   pageSize: 10,
   defaultFormData: () => ({
-    name: '',
-    louyu: '',
-    fangjian: '',
-    shuxing: '租赁',
+    he_bian: '',
+    shuxing: '新签',
     qianPeople: '',
+    phone: '',
     startDate: '',
     endDate: '',
-    zujin: 0,
-    wuye: 0,
-    yajin: 0
+    beizhu: ''
   })
 })
 
+// 重写编辑处理函数，确保日期字段正确处理
+const handleEdit = (row: HetongData) => {
+  // 处理日期字段转换
+  const editData = { ...row }
+  if (editData.startDate) {
+    editData.startDate = new Date(editData.startDate)
+  }
+  if (editData.endDate) {
+    editData.endDate = new Date(editData.endDate)
+  }
+  
+  // 调用原始编辑方法
+  originalHandleEdit(editData)
+}
+
+// 重写提交处理函数，确保日期格式正确
+const handleSubmit = async () => {
+  try {
+    // 处理日期字段格式
+    const submitData = { ...formData.value }
+    if (submitData.startDate && submitData.startDate instanceof Date) {
+      submitData.startDate = submitData.startDate.toISOString().split('T')[0]
+    }
+    if (submitData.endDate && submitData.endDate instanceof Date) {
+      submitData.endDate = submitData.endDate.toISOString().split('T')[0]
+    }
+    
+    // 临时更新formData
+    const originalStartDate = formData.value.startDate
+    const originalEndDate = formData.value.endDate
+    
+    formData.value.startDate = submitData.startDate
+    formData.value.endDate = submitData.endDate
+    
+    try {
+      await originalHandleSubmit()
+    } finally {
+      // 恢复原始数据
+      formData.value.startDate = originalStartDate
+      formData.value.endDate = originalEndDate
+    }
+  } catch (error) {
+    console.error('提交合同失败:', error)
+  }
+}
+
+// 重写新增处理函数，自动生成合同编号
+const handleAdd = async () => {
+  try {
+    // 生成新的合同编号
+    const newHebian = await generateContractNumber()
+    
+    // 调用原始新增方法
+    originalHandleAdd()
+    
+    // 设置自动生成的合同编号
+    formData.value.he_bian = newHebian
+  } catch (error) {
+    console.error('生成合同编号失败:', error)
+    ElMessage.error('生成合同编号失败')
+  }
+}
+
+// 生成合同编号的函数
+const generateContractNumber = async (): Promise<string> => {
+  try {
+    const response = await generateHetongNumber()
+    if (response.data.code === 200 && response.data.data) {
+      return response.data.data.he_bian
+    } else {
+      throw new Error(response.data.msg || '生成合同编号失败')
+    }
+  } catch (error) {
+    console.error('生成合同编号时出错:', error)
+    // 如果出错，使用时间戳作为后备方案
+    const timestamp = Date.now().toString().slice(-4)
+    return `HT${new Date().getFullYear()}${timestamp}`
+  }
+}
+
+// 处理表单数据更新
+const handleFormDataUpdate = (newFormData: HetongData) => {
+  Object.assign(formData.value, newFormData)
+}
+
 const filterFields = [
   {
-    key: 'name',
-    label: '租户名称',
+    key: 'he_bian',
+    label: '合同编号',
     type: 'input' as const,
-    placeholder: '请输入租户名称'
+    placeholder: '请输入合同编号'
   },
   {
-    key: 'louyu',
-    label: '所属楼宇',
+    key: 'qianPeople',
+    label: '签约人',
     type: 'input' as const,
-    placeholder: '请输入楼宇名称'
+    placeholder: '请输入签约人'
   },
   {
     key: 'shuxing',
-    label: '合同类型',
+    label: '合同属性',
     type: 'select' as const,
-    placeholder: '请选择合同类型',
+    placeholder: '请选择合同属性',
     options: [
-      { label: '租赁', value: '租赁' },
-      { label: '销售', value: '销售' }
+      { label: '新签', value: '新签' },
+      { label: '续签', value: '续签' }
+    ]
+  },
+  {
+    key: 'status_filter',
+    label: '合同状态',
+    type: 'select' as const,
+    placeholder: '请选择合同状态',
+    options: [
+      { label: '生效中', value: '生效中' },
+      { label: '已到期', value: '已到期' }
     ]
   }
 ]
@@ -170,12 +262,11 @@ const filterFields = [
 const columns: Column[] = [
   { type: 'selection', width: 55 },
   { type: 'index', label: '序号', width: 60 },
-  { prop: 'name', label: '租户名称', minWidth: 150, showOverflowTooltip: true },
-  { prop: 'louyu', label: '所属楼宇', width: 100 },
-  { prop: 'fangjian', label: '房间名称', width: 100 },
-  { prop: 'shuxing', label: '合同类型', width: 100, slot: 'shuxing' },
-  { prop: 'status', label: '合同状态', width: 100, slot: 'status' },
+  { prop: 'he_bian', label: '合同编号', minWidth: 150, showOverflowTooltip: true },
+  { prop: 'shuxing', label: '合同属性', width: 100, slot: 'shuxing' },
   { prop: 'qianPeople', label: '签约人', width: 120 },
+  { prop: 'phone', label: '联系方式', width: 130 },
+  { prop: 'status', label: '合同状态', width: 100, slot: 'status' },
   { prop: 'startDate', label: '签约时间', width: 120, slot: 'startDate' },
   { prop: 'endDate', label: '到期时间', width: 120, slot: 'endDate' },
   { type: 'actions', label: '操作', width: 180, fixed: 'right' }
@@ -186,40 +277,25 @@ const formGroups: FormGroup[] = [
     title: '基本信息',
     fields: [
       {
-        key: 'name',
-        label: '租户名称',
+        key: 'he_bian',
+        label: '合同编号',
         type: 'input',
-        placeholder: '请输入租户名称',
+        placeholder: '自动生成',
         required: true,
-        rules: [{ required: true, message: '请输入租户名称' }]
-      },
-      {
-        key: 'louyu',
-        label: '所属楼宇',
-        type: 'input',
-        placeholder: '请输入楼宇名称',
-        required: true,
-        rules: [{ required: true, message: '请输入楼宇名称' }]
-      },
-      {
-        key: 'fangjian',
-        label: '房间名称',
-        type: 'input',
-        placeholder: '请输入房间名称',
-        required: true,
-        rules: [{ required: true, message: '请输入房间名称' }]
+        disabled: true,
+        rules: [{ required: true, message: '合同编号不能为空' }]
       },
       {
         key: 'shuxing',
-        label: '合同类型',
+        label: '合同属性',
         type: 'select',
-        placeholder: '请选择合同类型',
+        placeholder: '请选择合同属性',
         required: true,
         options: [
-          { label: '租赁', value: '租赁' },
-          { label: '销售', value: '销售' }
+          { label: '新签', value: '新签' },
+          { label: '续签', value: '续签' }
         ],
-        rules: [{ required: true, message: '请选择合同类型' }]
+        rules: [{ required: true, message: '请选择合同属性' }]
       },
       {
         key: 'qianPeople',
@@ -228,6 +304,17 @@ const formGroups: FormGroup[] = [
         placeholder: '请输入签约人',
         required: true,
         rules: [{ required: true, message: '请输入签约人' }]
+      },
+      {
+        key: 'phone',
+        label: '联系方式',
+        type: 'input',
+        placeholder: '请输入联系方式',
+        required: true,
+        rules: [
+          { required: true, message: '请输入联系方式' },
+          { len: 11, message: '联系方式长度必须为11位' }
+        ]
       }
     ]
   },
@@ -253,31 +340,14 @@ const formGroups: FormGroup[] = [
     ]
   },
   {
-    title: '费用信息',
+    title: '其他信息',
     fields: [
       {
-        key: 'zujin',
-        label: '租金',
-        type: 'number',
-        placeholder: '请输入租金',
-        required: true,
-        rules: [{ required: true, message: '请输入租金' }]
-      },
-      {
-        key: 'wuye',
-        label: '物业费',
-        type: 'number',
-        placeholder: '请输入物业费',
-        required: true,
-        rules: [{ required: true, message: '请输入物业费' }]
-      },
-      {
-        key: 'yajin',
-        label: '押金',
-        type: 'number',
-        placeholder: '请输入押金',
-        required: true,
-        rules: [{ required: true, message: '请输入押金' }]
+        key: 'beizhu',
+        label: '合同备注',
+        type: 'textarea',
+        placeholder: '请输入合同备注',
+        required: false
       }
     ]
   }

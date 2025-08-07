@@ -3,7 +3,7 @@ require('../db/index'); // 连接数据库
 
 /**
  * 初始化合同表
- * 插入测试数据
+ * 生成测试合同数据
  */
 async function initHeTong() {
   try {
@@ -16,130 +16,69 @@ async function initHeTong() {
       return;
     }
 
-    // 生成测试数据
-    const testContracts = [];
-    
-    const tenantNames = [
-      '北京科技有限公司', '上海商贸集团', '深圳创新科技', '广州文化传媒',
-      '杭州互联网科技', '成都电子商务', '武汉软件开发', '西安网络科技',
-      '南京信息技术', '重庆大数据', '苏州智能制造', '天津物联网',
-      '青岛海洋科技', '大连软件园', '厦门文创公司', '福州新能源',
-      '济南生物科技', '郑州智慧城市', '长沙移动互联', '昆明云计算',
-      '太原人工智能', '石家庄区块链', '哈尔滨机器人', '沈阳自动化',
-      '长春汽车电子', '南昌虚拟现实', '合肥量子科技', '银川新材料',
-      '王小明个体户', '李小红美容店', '张三服装店', '刘四餐饮店',
-      '赵五文具店', '陈六五金店', '周七理发店', '吴八书店',
-      '孙九药店', '胡十超市', '朱小美花店', '林小强维修店'
-    ];
-    
-    const louyu = ['A1楼', 'A2楼', 'B1楼', 'B2楼', 'C1楼', 'C2楼', 'D1楼', 'D2楼'];
-    const tenantTypes = ['企业', '个体经营户'];
+    // 合同数据配置
+    const contractCount = 20; // 生成20份合同
     const contractTypes = ['新签', '续签'];
-    
-    const contactPeople = [
-      '张经理', '李总监', '王主任', '刘负责人', '陈总经理', '周主管',
-      '吴经理', '孙总', '胡主任', '朱负责人', '林经理', '徐总监',
-      '孟主管', '何经理', '韩总', '冯主任', '邓负责人', '曹经理'
+    const signers = [
+      '张三', '李四', '王五', '赵六', '钱七', '孙八', '周九', '吴十',
+      '郑一', '王二', '李三', '张四', '陈五', '刘六', '杨七', '黄八',
+      '朱九', '林十', '何一', '罗二'
     ];
     
-    // 生成40条测试数据
-    for (let i = 0; i < 40; i++) {
-      const randomTenantName = tenantNames[i % tenantNames.length];
-      const randomLouyu = louyu[Math.floor(Math.random() * louyu.length)];
-      const randomType = tenantTypes[Math.floor(Math.random() * tenantTypes.length)];
-      const randomShuxing = contractTypes[Math.floor(Math.random() * contractTypes.length)];
-      const randomContactPerson = contactPeople[Math.floor(Math.random() * contactPeople.length)];
+    let allContracts = [];
+
+    console.log(`准备生成 ${contractCount} 份合同...`);
+
+    // 生成合同数据
+    for (let i = 0; i < contractCount; i++) {
+      const contractNumber = `HT${new Date().getFullYear()}${(i + 1).toString().padStart(4, '0')}`;
+      const signerIndex = i % signers.length;
+      const signer = signers[signerIndex];
       
-      // 随机生成房间号
-      const roomNumber = `${Math.floor(Math.random() * 20) + 1}${String.fromCharCode(65 + Math.floor(Math.random() * 4))}`;
-      const fangjian = `${roomNumber}室`;
+      // 随机生成合同日期
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - Math.floor(Math.random() * 365)); // 过去一年内的随机日期
       
-      // 随机生成合同日期（开始时间在过去一年内，结束时间在开始时间后1-3年）
-      const startDaysAgo = Math.floor(Math.random() * 365);
-      const startDate = new Date(Date.now() - startDaysAgo * 24 * 60 * 60 * 1000);
-      const contractDuration = Math.floor(Math.random() * 3) + 1; // 1-3年
-      const endDate = new Date(startDate.getTime() + contractDuration * 365 * 24 * 60 * 60 * 1000);
+      const endDate = new Date(startDate);
+      endDate.setFullYear(endDate.getFullYear() + 1 + Math.floor(Math.random() * 2)); // 1-3年合同期
       
-      // 随机生成面积和费用
-      const mian = Math.floor(Math.random() * 150) + 50; // 50-200平米
-      const jiajian = mian * (0.9 + Math.random() * 0.2); // 计价面积略有差异
-      const wuye = Math.floor(Math.random() * 10) + 5; // 5-15元/平米
-      const zujin = Math.floor(Math.random() * 50) + 30; // 30-80元/平米
-      const yajin = Math.floor(zujin * jiajian * (1 + Math.random() * 2)); // 1-3个月租金
-      
-      // 生成手机号
-      const phonePrefix = ['138', '139', '150', '151', '152', '188', '189'];
-      const randomPrefix = phonePrefix[Math.floor(Math.random() * phonePrefix.length)];
-      const phoneSuffix = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
-      const phone = randomPrefix + phoneSuffix;
-      
-      testContracts.push({
-        he_bian: `HT${new Date().getFullYear()}${(i + 1).toString().padStart(4, '0')}`,
-        name: randomTenantName,
-        type: randomType,
-        shuxing: randomShuxing,
+      const contract = {
+        he_bian: contractNumber,
+        shuxing: contractTypes[Math.floor(Math.random() * contractTypes.length)],
         startDate: startDate,
         endDate: endDate,
-        qianPeople: randomContactPerson,
-        phone: phone,
-        louyu: randomLouyu,
-        fangjian: fangjian,
-        mian: parseFloat(mian.toFixed(2)),
-        jiajian: parseFloat(jiajian.toFixed(2)),
-        wuye: parseFloat(wuye.toFixed(2)),
-        zujin: parseFloat(zujin.toFixed(2)),
-        yajin: parseFloat(yajin.toFixed(2)),
-        beizhu: `这是第${i + 1}号合同的备注信息`,
-        created_at: startDate,
-        updated_at: startDate
-      });
+        qianPeople: signer,
+        phone: `138${Math.floor(Math.random() * 100000000).toString().padStart(8, '0')}`,
+        beizhu: Math.random() > 0.7 ? `${signer}的租赁合同` : undefined
+      };
+      
+      allContracts.push(contract);
     }
 
-    await HeTong.insertMany(testContracts);
-    console.log(`✓ 成功插入 ${testContracts.length} 条测试数据`);
-
+    // 批量插入数据
+    console.log(`准备插入 ${allContracts.length} 份合同...`);
+    const result = await HeTong.insertMany(allContracts);
+    console.log(`✓ 成功插入 ${result.length} 条合同数据`);
+    
     // 显示统计信息
-    const typeStats = await HeTong.aggregate([
-      { $group: { _id: '$type', count: { $sum: 1 } } }
-    ]);
-
-    const louyuStats = await HeTong.aggregate([
-      { $group: { _id: '$louyu', count: { $sum: 1 } } }
-    ]);
-
-    const shuxingStats = await HeTong.aggregate([
-      { $group: { _id: '$shuxing', count: { $sum: 1 } } }
-    ]);
-
-    // 统计合同状态
+    const newContracts = result.filter(contract => contract.shuxing === '新签').length;
+    const renewalContracts = result.filter(contract => contract.shuxing === '续签').length;
+    
+    console.log(`\n合同类型统计:`);
+    console.log(`  新签合同: ${newContracts} 份`);
+    console.log(`  续签合同: ${renewalContracts} 份`);
+    
+    // 显示合同期限统计
     const now = new Date();
-    const activeCount = await HeTong.countDocuments({ endDate: { $gt: now } });
-    const expiredCount = await HeTong.countDocuments({ endDate: { $lte: now } });
-
-    console.log('\n📊 数据统计:');
-    console.log('按租户类型统计:');
-    typeStats.forEach(stat => {
-      console.log(`  ${stat._id}: ${stat.count} 个`);
-    });
-
-    console.log('按楼宇统计:');
-    louyuStats.forEach(stat => {
-      console.log(`  ${stat._id}: ${stat.count} 个`);
-    });
-
-    console.log('按合同属性统计:');
-    shuxingStats.forEach(stat => {
-      console.log(`  ${stat._id}: ${stat.count} 个`);
-    });
-
-    console.log('按合同状态统计:');
-    console.log(`  生效中: ${activeCount} 个`);
-    console.log(`  已到期: ${expiredCount} 个`);
-
-    console.log('\n✅ 合同表初始化完成！');
+    const activeContracts = result.filter(contract => contract.endDate > now).length;
+    const expiredContracts = result.filter(contract => contract.endDate <= now).length;
+    
+    console.log(`\n合同状态统计:`);
+    console.log(`  生效中: ${activeContracts} 份`);
+    console.log(`  已到期: ${expiredContracts} 份`);
     
   } catch (error) {
-    console.error('❌ 合同表初始化失败:', error);
+    console.error('❌ 初始化合同表失败:', error.message);
     throw error;
   }
 }
@@ -148,11 +87,11 @@ async function initHeTong() {
 if (require.main === module) {
   initHeTong()
     .then(() => {
-      console.log('初始化完成，即将退出...');
+      console.log('\n🎉 合同表初始化完成!');
       process.exit(0);
     })
     .catch((error) => {
-      console.error('初始化失败:', error);
+      console.error('\n💥 初始化过程中出现错误:', error);
       process.exit(1);
     });
 }

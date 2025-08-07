@@ -30,8 +30,12 @@
             </el-tag>
           </div>
           <div class="status-details">
-            <h3>{{ contractData.name }}</h3>
-            <p>合同编号：{{ contractData.he_bian }}</p>
+            <h3>合同编号：{{ contractData.he_bian }}</h3>
+            <p>合同属性：
+              <el-tag :type="contractData.shuxing === '新签' ? 'success' : 'warning'">
+                {{ contractData.shuxing }}
+              </el-tag>
+            </p>
             <div class="time-info">
               <span>签订时间：{{ formatDate(contractData.startDate) }}</span>
               <span>到期时间：{{ formatDate(contractData.endDate) }}</span>
@@ -62,28 +66,9 @@
               </div>
               
               <div class="info-item">
-                <label>租户名称：</label>
-                <span v-if="!isEditing">{{ contractData.name }}</span>
-                <el-input v-else v-model="editForm.name" />
-              </div>
-              
-              <div class="info-item">
-                <label>租户类型：</label>
-                <span v-if="!isEditing">
-                  <el-tag :type="contractData.type === '企业' ? 'primary' : 'warning'">
-                    {{ contractData.type }}
-                  </el-tag>
-                </span>
-                <el-select v-else v-model="editForm.type" style="width: 100%">
-                  <el-option label="企业" value="企业" />
-                  <el-option label="个体经营户" value="个体经营户" />
-                </el-select>
-              </div>
-              
-              <div class="info-item">
                 <label>合同属性：</label>
                 <span v-if="!isEditing">
-                  <el-tag :type="contractData.shuxing === '新签' ? 'success' : 'info'">
+                  <el-tag :type="contractData.shuxing === '新签' ? 'success' : 'warning'">
                     {{ contractData.shuxing }}
                   </el-tag>
                 </span>
@@ -108,130 +93,34 @@
           </el-card>
         </el-col>
 
-        <!-- 房间信息 -->
+        <!-- 时间信息 -->
         <el-col :span="12">
-          <el-card title="房间信息" class="info-card">
-            <template #header>
-              <span class="card-title">房间信息</span>
-            </template>
-            
-            <div class="info-grid">
-              <div class="info-item">
-                <label>所属楼宇：</label>
-                <span v-if="!isEditing">
-                  <el-tag type="primary">{{ contractData.louyu }}</el-tag>
-                </span>
-                <el-select v-else v-model="editForm.louyu" style="width: 100%">
-                  <el-option label="A1楼" value="A1楼" />
-                  <el-option label="A2楼" value="A2楼" />
-                  <el-option label="B1楼" value="B1楼" />
-                  <el-option label="B2楼" value="B2楼" />
-                  <el-option label="C1楼" value="C1楼" />
-                  <el-option label="C2楼" value="C2楼" />
-                  <el-option label="D1楼" value="D1楼" />
-                  <el-option label="D2楼" value="D2楼" />
-                </el-select>
-              </div>
-              
-              <div class="info-item">
-                <label>房间名称：</label>
-                <span v-if="!isEditing">{{ contractData.fangjian }}</span>
-                <el-input v-else v-model="editForm.fangjian" />
-              </div>
-              
-              <div class="info-item">
-                <label>房间面积：</label>
-                <span v-if="!isEditing">{{ contractData.mian }} 平方米</span>
-                <el-input-number v-else v-model="editForm.mian" :min="0" :precision="2" style="width: 100%" />
-              </div>
-              
-              <div class="info-item">
-                <label>计价面积：</label>
-                <span v-if="!isEditing">{{ contractData.jiajian }} 平方米</span>
-                <el-input-number v-else v-model="editForm.jiajian" :min="0" :precision="2" style="width: 100%" />
-              </div>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
-
-      <!-- 时间信息 -->
-      <el-row :gutter="20">
-        <el-col :span="24">
           <el-card title="时间信息" class="info-card">
             <template #header>
               <span class="card-title">时间信息</span>
             </template>
             
-            <div class="time-grid">
-              <div class="time-item">
+            <div class="info-grid">
+              <div class="info-item">
                 <label>签订时间：</label>
                 <span v-if="!isEditing">{{ formatDate(contractData.startDate) }}</span>
                 <el-date-picker v-else v-model="editForm.startDate" type="date" style="width: 100%" />
               </div>
               
-              <div class="time-item">
-                <label>结束时间：</label>
+              <div class="info-item">
+                <label>到期时间：</label>
                 <span v-if="!isEditing">{{ formatDate(contractData.endDate) }}</span>
                 <el-date-picker v-else v-model="editForm.endDate" type="date" style="width: 100%" />
               </div>
               
-              <div class="time-item">
+              <div class="info-item">
                 <label>合同期限：</label>
                 <span>{{ getContractDuration() }}</span>
               </div>
               
-              <div class="time-item">
+              <div class="info-item">
                 <label>剩余天数：</label>
                 <span :class="getRemainingDaysClass()">{{ getRemainingDays() }}</span>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
-
-      <!-- 费用信息 -->
-      <el-row :gutter="20">
-        <el-col :span="24">
-          <el-card title="费用信息" class="info-card">
-            <template #header>
-              <span class="card-title">费用信息</span>
-            </template>
-            
-            <div class="fee-grid">
-              <div class="fee-item">
-                <div class="fee-label">租金金额</div>
-                <div class="fee-value" v-if="!isEditing">
-                  <span class="amount">¥{{ formatMoney(contractData?.zujin || 0) }}</span>
-                  <span class="unit">元</span>
-                </div>
-                <el-input-number v-else v-model="editForm.zujin" :min="0" :precision="2" style="width: 100%" />
-              </div>
-              
-              <div class="fee-item">
-                <div class="fee-label">物业费用</div>
-                <div class="fee-value" v-if="!isEditing">
-                  <span class="amount">¥{{ formatMoney(contractData?.wuye || 0) }}</span>
-                  <span class="unit">元</span>
-                </div>
-                <el-input-number v-else v-model="editForm.wuye" :min="0" :precision="2" style="width: 100%" />
-              </div>
-              
-              <div class="fee-item">
-                <div class="fee-label">押金金额</div>
-                <div class="fee-value" v-if="!isEditing">
-                  <span class="amount">¥{{ formatMoney(contractData?.yajin || 0) }}</span>
-                  <span class="unit">元</span>
-                </div>
-                <el-input-number v-else v-model="editForm.yajin" :min="0" :precision="2" style="width: 100%" />
-              </div>
-              
-              <div class="fee-item total">
-                <div class="fee-label">总计费用</div>
-                <div class="fee-value">
-                  <span class="amount total-amount">¥{{ formatMoney(getTotalFee()) }}</span>
-                  <span class="unit">元</span>
-                </div>
               </div>
             </div>
           </el-card>
@@ -267,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed, type Ref } from 'vue'
+import { ref, reactive, onMounted, type Ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Document, ArrowLeft, Edit, Check, Close, Delete } from '@element-plus/icons-vue'
@@ -277,41 +166,23 @@ import { hetongDetail, updateHetong, deleteHetong } from '@/api/auth'
 interface ContractData {
   _id?: string
   he_bian: string
-  name: string
-  type: '企业' | '个体经营户'
   shuxing: '新签' | '续签'
-  startDate: string | Date | null
-  endDate: string | Date | null
   qianPeople: string
   phone: string
-  louyu: string
-  fangjian: string
-  mian: number
-  jiajian: number
-  wuye: number
-  zujin: number
-  yajin: number
-  beizhu: string
-  createTime?: string
-  updateTime?: string
+  startDate: string | Date | null
+  endDate: string | Date | null
+  beizhu?: string
+  created_at?: string
+  updated_at?: string
 }
 
 interface EditForm {
   he_bian: string
-  name: string
-  type: '企业' | '个体经营户'
   shuxing: '新签' | '续签'
-  startDate: Date | null
-  endDate: Date | null
   qianPeople: string
   phone: string
-  louyu: string
-  fangjian: string
-  mian: number
-  jiajian: number
-  wuye: number
-  zujin: number
-  yajin: number
+  startDate: Date | null
+  endDate: Date | null
   beizhu: string
 }
 
@@ -327,20 +198,11 @@ const contractData: Ref<ContractData | null> = ref(null)
 // 编辑表单
 const editForm: EditForm = reactive({
   he_bian: '',
-  name: '',
-  type: '企业',
   shuxing: '新签',
-  startDate: null,
-  endDate: null,
   qianPeople: '',
   phone: '',
-  louyu: '',
-  fangjian: '',
-  mian: 0,
-  jiajian: 0,
-  wuye: 0,
-  zujin: 0,
-  yajin: 0,
+  startDate: null,
+  endDate: null,
   beizhu: ''
 })
 
@@ -357,19 +219,11 @@ const fetchContractDetail = async (): Promise<void> => {
     }
 
     const response = await hetongDetail(contractId as string)
-    console.log('合同详情API响应:', response) // 调试信息
+    console.log('合同详情API响应:', response)
     
     if (response.data.code === 200) {
       contractData.value = response.data.data
-      console.log('获取到的合同数据:', contractData.value) // 调试信息
-      
-      // 如果费用数据为空，设置默认值用于测试
-      if (contractData.value && (!contractData.value.zujin && !contractData.value.wuye && !contractData.value.yajin)) {
-        console.log('费用数据为空，设置测试数据')
-        contractData.value.zujin = contractData.value.zujin || 0
-        contractData.value.wuye = contractData.value.wuye || 0
-        contractData.value.yajin = contractData.value.yajin || 0
-      }
+      console.log('获取到的合同数据:', contractData.value)
       
       // 填充编辑表单
       Object.keys(editForm).forEach((key: string) => {
@@ -377,7 +231,7 @@ const fetchContractDetail = async (): Promise<void> => {
           if (key === 'startDate' || key === 'endDate') {
             ;(editForm as any)[key] = (contractData.value as any)[key] ? new Date((contractData.value as any)[key]) : null
           } else {
-            ;(editForm as any)[key] = (contractData.value as any)[key]
+            ;(editForm as any)[key] = (contractData.value as any)[key] || ''
           }
         }
       })
@@ -398,14 +252,6 @@ const fetchContractDetail = async (): Promise<void> => {
 const formatDate = (dateStr: string | Date | undefined): string => {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('zh-CN')
-}
-
-const formatMoney = (amount: number | undefined): string => {
-  if (!amount) return '0.00'
-  return Number(amount).toLocaleString('zh-CN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })
 }
 
 const getContractStatus = (endDate: string | Date | undefined): string => {
@@ -466,12 +312,6 @@ const getRemainingDaysClass = (): string => {
   return 'text-success'
 }
 
-const getTotalFee = (): number => {
-  if (!contractData.value) return 0
-  const { zujin = 0, wuye = 0, yajin = 0 } = contractData.value
-  return Number(zujin || 0) + Number(wuye || 0) + Number(yajin || 0)
-}
-
 // 事件处理
 const goBack = (): void => {
   router.go(-1)
@@ -489,7 +329,7 @@ const handleCancel = (): void => {
       if (key === 'startDate' || key === 'endDate') {
         ;(editForm as any)[key] = (contractData.value as any)[key] ? new Date((contractData.value as any)[key]) : null
       } else {
-        editForm[key] = contractData.value[key]
+        ;(editForm as any)[key] = (contractData.value as any)[key] || ''
       }
     }
   })
@@ -696,29 +536,6 @@ onMounted(() => {
   color: #303133;
 }
 
-.time-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.time-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.time-item label {
-  color: #606266;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.time-item span {
-  color: #303133;
-  font-size: 16px;
-}
-
 .text-success {
   color: #67C23A;
   font-weight: 600;
@@ -732,59 +549,6 @@ onMounted(() => {
 .text-danger {
   color: #F56C6C;
   font-weight: 600;
-}
-
-.fee-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.fee-item {
-  text-align: center;
-  padding: 20px;
-  border: 2px solid #EBEEF5;
-  border-radius: 8px;
-  transition: all 0.3s;
-}
-
-.fee-item:hover {
-  border-color: #409EFF;
-  box-shadow: 0 2px 12px rgba(64, 158, 255, 0.2);
-}
-
-.fee-item.total {
-  border-color: #67C23A;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-}
-
-.fee-label {
-  color: #606266;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.fee-value {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 4px;
-}
-
-.amount {
-  font-size: 24px;
-  font-weight: 600;
-  color: #303133;
-}
-
-.total-amount {
-  color: #67C23A;
-  font-size: 28px;
-}
-
-.unit {
-  font-size: 14px;
-  color: #909399;
 }
 
 .remark-content {
@@ -837,10 +601,6 @@ onMounted(() => {
   .time-info {
     flex-direction: column;
     gap: 8px;
-  }
-  
-  .fee-grid {
-    grid-template-columns: 1fr;
   }
 }
 </style>

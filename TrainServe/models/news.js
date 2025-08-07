@@ -8,12 +8,6 @@ const RENDER_TYPES = {
   IMAGE_RIGHT: 'IMAGE_RIGHT'    // 右侧小图/头像样式
 };
 
-// 定义文章类型的枚举值
-const ARTICLE_TYPES = {
-  ARTICLE: '文章',
-  VIDEO: '视频'
-};
-
 // 定义频道的枚举值
 const CHANNELS = {
   RECOMMEND: '推荐',
@@ -37,20 +31,7 @@ const newsSchema = new Schema({
     index: true // 用于标题搜索优化
   },
   
-  // 文章类型（必选，只能是文章或视频）
-  articleType: {
-    type: String,
-    required: true,
-    enum: Object.values(ARTICLE_TYPES),
-    index: true
-  },
   
-  // 视频地址（可选，仅当articleType为视频时使用）
-  video: {
-    type: String,
-    trim: true,
-    default: null
-  },
   
   // 频道（必选，只能是推荐或政策）
   channel: {
@@ -91,7 +72,8 @@ const newsSchema = new Schema({
   
   // 作者/来源（可选）
   author: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'AppUser',
     trim: true
   },
   
@@ -152,7 +134,6 @@ let News = mongoose.model('news', newsSchema,'news');
 module.exports = {
   News,
   RENDER_TYPES,
-  ARTICLE_TYPES,
   CHANNELS,
   STATUS_TYPES
 };

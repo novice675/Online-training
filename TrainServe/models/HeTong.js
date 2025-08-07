@@ -9,8 +9,6 @@ const HeTongSchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
-
-  
   // 合同属性
   shuxing: {
     type: String,
@@ -44,49 +42,6 @@ const HeTongSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true
-  },
-  
-  // 房间名称
-  fangjian: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  
-  // 房间面积
- mian: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  
-  // 计价面积
-  jiajian: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  
-  // 物业费用
-  wuye: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  
-  // 租金金额
-  zujin: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  
-  // 押金金额
-  yajin: {
-    type: Number,
-    required: false,
-    min: 0,
-    default: 0
   },
   
   // 合同备注

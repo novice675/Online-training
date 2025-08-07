@@ -107,6 +107,19 @@ const getFieldValue = (key: string) => {
     }
   }
   
+  // 特殊处理日期字段
+  if (props.field.type === 'date' && value) {
+    // 如果是字符串日期，转换为Date对象
+    if (typeof value === 'string') {
+      const dateValue = new Date(value)
+      return isNaN(dateValue.getTime()) ? '' : dateValue
+    }
+    // 如果已经是Date对象，直接返回
+    if (value instanceof Date) {
+      return value
+    }
+  }
+  
   return value !== undefined && value !== null ? value : ''
 }
 

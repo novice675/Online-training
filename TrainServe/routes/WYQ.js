@@ -475,4 +475,199 @@ router.delete('/delcomment', async (req, res) => {
     code: 200
   })
 })
+
+// 新增：获取租户人员列表接口（支持分页和筛选）
+router.get("/employee/list", async (req, res) => {
+  try {
+    console.log('获取租户人员列表请求参数:', req.query);
+    const {
+      page = 1,
+      pageSize = 10,
+      name = '',
+      phone = '',
+      companyName = '',
+      role = ''
+    } = req.query;
+
+    // 构建查询条件
+    let query = {};
+
+    if (name) {
+      query.name = { $regex: name, $options: 'i' };
+    }
+    if (phone) {
+      query.phone = { $regex: phone, $options: 'i' };
+    }
+    if (role) {
+      query.role = role;
+    }
+
+    console.log('查询条件:', query);
+
+    // 计算分页
+    const skip = (parseInt(page) - 1) * parseInt(pageSize);
+    const limit = parseInt(pageSize);
+
+    // 聚合查询，关联企业信息
+    let pipeline = [
+      { $match: query },
+      {
+        $lookup: {
+          from: 'company',
+          localField: 'company_id',
+          foreignField: '_id',
+          as: 'company'
+        }
+      },
+      {
+        $addFields: {
+          companyInfo: { $arrayElemAt: ["$company", 0] }
+        }
+      }
+    ];
+
+    // 如果有企业名称筛选，添加到管道中
+    if (companyName) {
+      pipeline.push({
+        $match: {
+          'companyInfo.name': { $regex: companyName, $options: 'i' }
+        }
+      });
+    }
+
+    // 添加排序、分页
+    pipeline.push(
+      { $sort: { _id: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          sex: 1,
+          phone: 1,
+          sfz: 1,
+          email: 1,
+          weixin: 1,
+          picture: 1,
+          role: 1,
+          companyName: '$companyInfo.name',
+          companyType: '$companyInfo.type',
+          inaddress: '$companyInfo.inaddress',
+          house: '$companyInfo.house',
+          outaddress: '$companyInfo.outaddress'
+        }
+      }
+    );
+
+    const list = await Employee.aggregate(pipeline);
+
+    // 获取总数 - 需要重新构建管道来计算总数
+    let countPipeline = [
+      { $match: query },
+      {
+        $lookup: {
+          from: 'company',
+          localField: 'company_id',
+          foreignField: '_id',
+          as: 'company'
+        }
+      },
+      {
+        $addFields: {
+          companyInfo: { $arrayElemAt: ["$company", 0] }
+        }
+      }
+    ];
+
+    if (companyName) {
+      countPipeline.push({
+        $match: {
+          'companyInfo.name': { $regex: companyName, $options: 'i' }
+        }
+      });
+    }
+
+    countPipeline.push({ $count: "total" });
+
+    const countResult = await Employee.aggregate(countPipeline);
+    const total = countResult.length > 0 ? countResult[0].total : 0;
+
+    console.log('查询结果:', { total, listLength: list.length });
+
+    res.send({
+      code: 200,
+      data: {
+        list,
+        total,
+        page: parseInt(page),
+        pageSize: parseInt(pageSize)
+      }
+    });
+  } catch (error) {
+    console.error('获取租户人员列表失败:', error);
+    res.send({
+      code: 500,
+      msg: '获取租户人员列表失败'
+    });
+  }
+});
+
+// 新增：删除员工接口
+router.delete('/employee/delete/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('删除员工ID:', id);
+    
+    const result = await Employee.findByIdAndDelete(id);
+    
+    if (result) {
+      res.send({
+        code: 200,
+        msg: '删除成功'
+      });
+    } else {
+      res.send({
+        code: 404,
+        msg: '员工记录不存在'
+      });
+    }
+  } catch (error) {
+    console.error('删除员工失败:', error);
+    res.send({
+      code: 500,
+      msg: '删除员工失败'
+    });
+  }
+});
+
+// 新增：批量删除员工接口
+router.delete('/employee/batchDelete', async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.send({
+        code: 400,
+        msg: '请提供要删除的记录ID'
+      });
+    }
+
+    const result = await Employee.deleteMany({
+      _id: { $in: ids }
+    });
+
+    res.send({
+      code: 200,
+      msg: `成功删除 ${result.deletedCount} 条记录`
+    });
+  } catch (error) {
+    console.error('批量删除员工失败:', error);
+    res.send({
+      code: 500,
+      msg: '批量删除员工失败'
+    });
+  }
+});
+
 module.exports = router

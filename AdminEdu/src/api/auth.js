@@ -138,10 +138,12 @@ export const hetongExpiring = (params = {}) => {
     return api.get('/hetong/expiring', { params })
 }
 
-// 获取可用房间列表
-export const availableRooms = (params = {}) => {
-    return api.get('/hetong/available-rooms', { params })
+// 生成合同编号
+export const generateHetongNumber = () => {
+    return api.get('/hetong/generate-number')
 }
+
+// 注意：availableRooms 已移除，因为新的合同模型不再包含房间信息
 
 // ==================== 客户管理相关接口 ====================
 
@@ -230,6 +232,181 @@ export const getCompanyEmployees = (companyId) => {
 // 获取租户统计信息
 export const zuhuStats = (params = {}) => {
     return api.get('/zuhuxinxi/stats/overview', { params })
+}
+
+// ==================== 租户人员管理相关接口 ====================
+
+// 获取租户人员列表
+export const employeeList = (params = {}) => {
+    return api.get('/WYQ/employee/list', { params })
+}
+
+// 获取指定企业的员工列表 
+export const getEmployeesByCompany = (companyId) => {
+    return api.get('/WYQ/employee', { params: { comid: companyId } })
+}
+
+// 添加员工
+export const addEmployee = (data = {}) => {
+    return api.post('/WYQ/addcomem', data)
+}
+
+// 上传员工头像
+export const uploadEmployeePhoto = (data) => {
+    return api.post('/WYQ/uploadcomem', data)
+}
+
+// 删除员工
+export const deleteEmployee = (id) => {
+    return api.delete(`/WYQ/employee/delete/${id}`)
+}
+
+// 批量删除员工
+export const batchDeleteEmployee = (ids) => {
+    return api.delete('/WYQ/employee/batchDelete', { data: { ids } })
+}
+
+// ==================== 楼宇管理相关接口 ====================
+
+// 获取楼栋列表
+export const getBuildingList = (params = {}) => {
+    return api.get('/Building', { params })
+}
+
+// 获取楼宇详情
+export const getBuildingDetail = (id) => {
+    return api.get(`/Building/detail/${id}`)
+}
+
+// 添加楼栋
+export const addBuilding = (data = {}) => {
+    return api.post('/Building/add', data)
+}
+
+// 更新楼栋
+export const updateBuilding = (id, data = {}) => {
+    return api.put(`/Building/update/${id}`, data)
+}
+
+// 删除楼栋
+export const deleteBuilding = (id) => {
+    return api.delete(`/Building/delete/${id}`)
+}
+
+// 获取楼宇统计信息
+export const getBuildingStats = () => {
+    return api.get('/Building/stats')
+}
+
+// ==================== 房间管理相关接口 ====================
+
+// 获取房间列表
+export const getHouseList = (params = {}) => {
+    return api.get('/House', { params })
+}
+
+// 根据楼栋ID获取房间列表
+export const getHousesByBuilding = (buildingId) => {
+    return api.get(`/House/building/${buildingId}`)
+}
+
+// 根据楼栋ID和楼层获取房间列表
+export const getHousesByBuildingAndFloor = (buildingId, floor) => {
+    return api.get(`/House/building/${buildingId}/floor/${floor}`)
+}
+
+// 添加房间
+export const addHouse = (data = {}) => {
+    return api.post('/House/add', data)
+}
+
+// 更新房间
+export const updateHouse = (id, data = {}) => {
+    return api.put(`/House/update/${id}`, data)
+}
+
+// 删除房间
+export const deleteHouse = (id) => {
+    return api.delete(`/House/delete/${id}`)
+}
+
+// 获取楼宇的楼层信息
+export const getBuildingFloors = (buildingId) => {
+    return api.get(`/House/building/${buildingId}/floors`)
+}
+
+// 批量生成房间
+export const batchGenerateHouses = (data = {}) => {
+    return api.post('/House/batch-generate', data)
+}
+
+// 获取房间统计信息
+export const getHouseStats = () => {
+    return api.get('/House/stats')
+}
+
+// ==================== 租户账单管理相关接口 ====================
+
+// 获取租户账单列表
+export const getTenantBillList = (params = {}) => {
+    return api.get('/tenantbill', { params })
+}
+
+// 获取企业列表（用于下拉选择）
+export const getTenantBillCompanies = (params = {}) => {
+    return api.get('/tenantbill/companies', { params })
+}
+
+// 新增租户账单
+export const addTenantBill = (data = {}) => {
+    return api.post('/tenantbill', data)
+}
+
+// 更新租户账单
+export const updateTenantBill = (id, data = {}) => {
+    return api.put(`/tenantbill/${id}`, data)
+}
+
+// 删除租户账单
+export const deleteTenantBill = (id) => {
+    return api.delete(`/tenantbill/${id}`)
+}
+
+// 批量删除租户账单
+export const batchDeleteTenantBill = (ids = []) => {
+    return api.delete('/tenantbill/batch', {
+        data: { ids }
+    })
+}
+
+// 更新缴费状态
+export const updateTenantBillPayment = (id, data = {}) => {
+    return api.put(`/tenantbill/${id}/payment`, data)
+}
+
+// 运营总览相关API
+export const getOperationOverview = () => {
+  return api.get('/operation/overview')
+}
+
+export const getOperationStats = () => {
+  return api.get('/operation/stats')
+}
+
+export const getRecentContracts = (params = {}) => {
+  return api.get('/heTong', { params: { ...params, page: 1, pageSize: 5 } })
+}
+
+export const getRecentTenantBills = (params = {}) => {
+  return api.get('/tenantbill', { params: { ...params, page: 1, pageSize: 10 } })
+}
+
+export const getBuildingOccupancy = () => {
+  return api.get('/building/occupancy')
+}
+
+export const getRevenueStats = (timeRange = '30days') => {
+  return api.get('/operation/revenue', { params: { timeRange } })
 }
 
 export default api 

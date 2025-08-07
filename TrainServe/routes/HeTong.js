@@ -5,30 +5,21 @@ const { HeTong } = require('../models/HeTong');
 //获取合同列表
 router.get('/list', async (req, res) => {
     try {
-        let { page, size, name, type, louyu, he_bian, shuxing, fangjian, status_filter } = req.query;
+        let { page, size, he_bian, shuxing, qianPeople, status_filter } = req.query;
         
         // 设置默认分页参数
         page = parseInt(page) || 1;
         size = parseInt(size) || 10;
 
         let tj = {}
-        if(name && name.trim()){  
-            tj.name = { $regex: name.trim(), $options: 'i' }
-        }
-        if(type){
-            tj.type = type
-        }
-        if(louyu){
-            tj.louyu = louyu
-        }
         if(he_bian && he_bian.trim()){
             tj.he_bian = { $regex: he_bian.trim(), $options: 'i' }
         }
         if(shuxing){
             tj.shuxing = shuxing
         }
-        if(fangjian && fangjian.trim()){
-            tj.fangjian = { $regex: fangjian.trim(), $options: 'i' }
+        if(qianPeople && qianPeople.trim()){  
+            tj.qianPeople = { $regex: qianPeople.trim(), $options: 'i' }
         }
         if(status_filter){
             const now = new Date();
@@ -249,16 +240,6 @@ router.get('/statistics', async (req, res) => {
         // 总合同数
         const totalContracts = await HeTong.countDocuments();
         
-        // 按类型统计
-        const typeStats = await HeTong.aggregate([
-            { $group: { _id: '$type', count: { $sum: 1 } } }
-        ]);
-        
-        // 按楼宇统计
-        const louyuStats = await HeTong.aggregate([
-            { $group: { _id: '$louyu', count: { $sum: 1 } } }
-        ]);
-        
         // 按属性统计
         const shuxingStats = await HeTong.aggregate([
             { $group: { _id: '$shuxing', count: { $sum: 1 } } }
@@ -281,8 +262,6 @@ router.get('/statistics', async (req, res) => {
             msg: "获取统计信息成功",
             data: {
                 totalContracts,
-                typeStats,
-                louyuStats,
                 shuxingStats,
                 expiringCount,
                 expiredCount
@@ -292,6 +271,67 @@ router.get('/statistics', async (req, res) => {
         res.send({
             code: 500,
             msg: "获取统计信息失败",
+            error: error.message
+        });
+    }
+});
+
+//生成合同编号
+router.get('/generate-number', async (req, res) => {
+    try {
+        const currentYear = new Date().getFullYear();
+        const prefix = `HT${currentYear}`;
+        
+        // 查找当前年份最大的合同编号
+        const latestContract = await HeTong.findOne({
+            he_bian: { $regex: `^${prefix}\\d{4}$` }
+        }).sort({ he_bian: -1 });
+        
+        let newNumber = 1;
+        if (latestContract && latestContract.he_bian) {
+            const numberPart = latestContract.he_bian.replace(prefix, '');
+            const currentNumber = parseInt(numberPart);
+            if (!isNaN(currentNumber)) {
+                newNumber = currentNumber + 1;
+            }
+        }
+        
+        // 格式化为4位数字
+        const formattedNumber = newNumber.toString().padStart(4, '0');
+        const newHebian = `${prefix}${formattedNumber}`;
+        
+        // 检查生成的编号是否已存在（防止并发问题）
+        const existing = await HeTong.findOne({ he_bian: newHebian });
+        if (existing) {
+            // 如果存在，递增直到找到不存在的编号
+            let counter = newNumber + 1;
+            let uniqueHebian;
+            do {
+                const testNumber = counter.toString().padStart(4, '0');
+                uniqueHebian = `${prefix}${testNumber}`;
+                const testExisting = await HeTong.findOne({ he_bian: uniqueHebian });
+                if (!testExisting) {
+                    break;
+                }
+                counter++;
+            } while (counter < 9999);
+            
+            res.send({
+                code: 200,
+                msg: "生成成功",
+                data: { he_bian: uniqueHebian }
+            });
+        } else {
+            res.send({
+                code: 200,
+                msg: "生成成功",
+                data: { he_bian: newHebian }
+            });
+        }
+    } catch (error) {
+        res.send({
+            code: 500,
+            msg: "生成合同编号失败",
             error: error.message
         });
     }

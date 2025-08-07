@@ -42,11 +42,29 @@ declare module '@/api/auth' {
     contract?: {
       _id: string
       he_bian: string
-      name: string
+      shuxing: string
+      qianPeople: string
+      phone: string
       startDate: string
       endDate: string
-      louyu: string
-      fangjian: string
+      beizhu?: string
+    }
+    // 新增楼宇和房间关联数据
+    building?: {
+      _id: string
+      name: string
+      description?: string
+      floors?: number
+    }
+    house?: {
+      _id: string
+      number: string
+      area: number
+      pricingArea: number
+      rent: number
+      propertyFee: number
+      deposit: number
+      status: '空闲' | '已租' | '维修'
     }
   }
 
@@ -77,11 +95,14 @@ declare module '@/api/auth' {
   interface Contract {
     _id: string
     he_bian: string
-    name: string
+    shuxing: '新签' | '续签'
+    qianPeople: string
+    phone: string
     startDate?: string
     endDate?: string
-    louyu?: string
-    fangjian?: string
+    beizhu?: string
+    created_at?: string
+    updated_at?: string
   }
 
   // API函数类型声明
@@ -119,7 +140,7 @@ declare module '@/api/auth' {
   export function batchDeleteHetong(ids: string[]): Promise<AxiosResponse<ApiResponse>>
   export function hetongStatistics(): Promise<AxiosResponse<ApiResponse>>
   export function hetongExpiring(params?: Record<string, any>): Promise<AxiosResponse<ApiResponse>>
-  export function availableRooms(params?: Record<string, any>): Promise<AxiosResponse<ApiResponse>>
+  export function generateHetongNumber(): Promise<AxiosResponse<ApiResponse<{ he_bian: string }>>>
 
   export function kehuList(params?: Record<string, any>): Promise<AxiosResponse<ApiResponse>>
   export function kehuDetail(id: string): Promise<AxiosResponse<ApiResponse>>

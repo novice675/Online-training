@@ -213,4 +213,40 @@ const getIcon = (iconName: string) => {
 :deep(.el-sub-menu.is-active .el-sub-menu__title .el-icon) {
   color: #409eff;
 }
+
+/* 确保子菜单有动画效果 */
+:deep(.el-menu) {
+  border-right: none;
+}
+
+:deep(.el-sub-menu .el-menu) {
+  background-color: #1f2d3d;
+}
+
+:deep(.el-sub-menu .el-menu-item) {
+  background-color: #1f2d3d !important;
+  min-height: 46px;
+}
+
+:deep(.el-sub-menu .el-menu-item:hover) {
+  background-color: #001528 !important;
+}
+
+:deep(.el-sub-menu .el-menu-item.is-active) {
+  background-color: #409eff !important;
+  color: #fff;
+}
+
+/* 子菜单展开动画 */
+:deep(.el-sub-menu .el-menu) {
+  transition: all 0.3s ease;
+}
+
+:deep(.el-sub-menu__title .el-sub-menu__icon-arrow) {
+  transition: transform 0.3s ease;
+}
+
+:deep(.el-sub-menu.is-opened .el-sub-menu__title .el-sub-menu__icon-arrow) {
+  transform: rotateZ(180deg);
+}
 </style>

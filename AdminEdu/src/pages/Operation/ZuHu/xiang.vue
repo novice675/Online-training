@@ -61,7 +61,8 @@
           <el-col :span="8">
             <div class="info-item">
               <label>所在楼宇：</label>
-              <span>{{ zuhuData.company.inaddress || '暂无' }}</span>
+              <span v-if="zuhuData.building">{{ zuhuData.building.name }}</span>
+              <span v-else>{{ zuhuData.company.inaddress || '暂无' }}</span>
             </div>
           </el-col>
         </el-row>
@@ -69,7 +70,8 @@
           <el-col :span="8">
             <div class="info-item">
               <label>房间号：</label>
-              <span>{{ zuhuData.company.house || '暂无' }}</span>
+              <span v-if="zuhuData.house">{{ zuhuData.house.number }}</span>
+              <span v-else>{{ zuhuData.company.house || '暂无' }}</span>
             </div>
           </el-col>
           <el-col :span="16">

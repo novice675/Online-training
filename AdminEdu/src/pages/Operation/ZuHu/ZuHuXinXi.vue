@@ -51,12 +51,14 @@
       </template>
 
       <template #building="{ row }">
-        <span v-if="row.company">{{ row.company.inaddress || '暂无' }}</span>
+        <span v-if="row.building">{{ row.building.name }}</span>
+        <span v-else-if="row.company">{{ row.company.inaddress || '暂无' }}</span>
         <span v-else>暂无</span>
       </template>
 
       <template #room="{ row }">
-        <span v-if="row.company">{{ row.company.house || '暂无' }}</span>
+        <span v-if="row.house">{{ row.house.number }}</span>
+        <span v-else-if="row.company">{{ row.company.house || '暂无' }}</span>
         <span v-else>暂无</span>
       </template>
 

@@ -19,31 +19,6 @@
         </el-col>
         
         <el-col :span="12">
-          <el-form-item label="租户名称" prop="name" required>
-            <el-input 
-              v-model="formData.name" 
-              placeholder="请输入租户名称"
-              clearable
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="租户类型" prop="type" required>
-            <el-select 
-              v-model="formData.type" 
-              placeholder="请选择租户类型"
-              style="width: 100%"
-            >
-              <el-option label="企业" value="企业" />
-              <el-option label="个体经营户" value="个体经营户" />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        
-        <el-col :span="12">
           <el-form-item label="合同属性" prop="shuxing" required>
             <el-select 
               v-model="formData.shuxing" 
@@ -53,30 +28,6 @@
               <el-option label="新签" value="新签" />
               <el-option label="续签" value="续签" />
             </el-select>
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="签订时间" prop="startDate" required>
-            <el-date-picker
-              v-model="formData.startDate"
-              type="date"
-              placeholder="选择签订时间"
-              style="width: 100%"
-            />
-          </el-form-item>
-        </el-col>
-        
-        <el-col :span="12">
-          <el-form-item label="结束时间" prop="endDate" required>
-            <el-date-picker
-              v-model="formData.endDate"
-              type="date"
-              placeholder="选择结束时间"
-              style="width: 100%"
-            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -105,93 +56,22 @@
 
       <el-row :gutter="20">
         <el-col :span="12">
-          <el-form-item label="所属楼宇" prop="louyu" required>
-            <el-select 
-              v-model="formData.louyu" 
-              placeholder="请选择所属楼宇"
-              style="width: 100%"
-            >
-              <el-option label="A1楼" value="A1楼" />
-              <el-option label="A2楼" value="A2楼" />
-              <el-option label="B1楼" value="B1楼" />
-              <el-option label="B2楼" value="B2楼" />
-              <el-option label="C1楼" value="C1楼" />
-              <el-option label="C2楼" value="C2楼" />
-              <el-option label="D1楼" value="D1楼" />
-              <el-option label="D2楼" value="D2楼" />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        
-        <el-col :span="12">
-          <el-form-item label="房间名称" prop="fangjian" required>
-            <el-input 
-              v-model="formData.fangjian" 
-              placeholder="请输入房间名称"
-              clearable
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <el-row :gutter="20">
-        <el-col :span="8">
-          <el-form-item label="房间面积" prop="mian" required>
-            <el-input-number
-              v-model="formData.mian"
-              :min="0"
-              :precision="2"
-              placeholder="平方米"
-              style="width: 100%"
-            />
-          </el-form-item>
-        </el-col>
-        
-        <el-col :span="8">
-          <el-form-item label="计价面积" prop="jiajian" required>
-            <el-input-number
-              v-model="formData.jiajian"
-              :min="0"
-              :precision="2"
-              placeholder="平方米"
-              style="width: 100%"
-            />
-          </el-form-item>
-        </el-col>
-        
-        <el-col :span="8">
-          <el-form-item label="物业费用" prop="wuye" required>
-            <el-input-number
-              v-model="formData.wuye"
-              :min="0"
-              :precision="2"
-              placeholder="元"
-              style="width: 100%"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-
-      <el-row :gutter="20">
-        <el-col :span="12">
-          <el-form-item label="租金金额" prop="zujin" required>
-            <el-input-number
-              v-model="formData.zujin"
-              :min="0"
-              :precision="2"
-              placeholder="元"
+          <el-form-item label="签订时间" prop="startDate" required>
+            <el-date-picker
+              v-model="formData.startDate"
+              type="date"
+              placeholder="选择签订时间"
               style="width: 100%"
             />
           </el-form-item>
         </el-col>
         
         <el-col :span="12">
-          <el-form-item label="押金金额" prop="yajin">
-            <el-input-number
-              v-model="formData.yajin"
-              :min="0"
-              :precision="2"
-              placeholder="元"
+          <el-form-item label="结束时间" prop="endDate" required>
+            <el-date-picker
+              v-model="formData.endDate"
+              type="date"
+              placeholder="选择结束时间"
               style="width: 100%"
             />
           </el-form-item>
@@ -239,20 +119,11 @@ const submitting = ref(false)
 // 表单数据
 const formData = reactive({
   he_bian: '',
-  name: '',
-  type: '企业',
   shuxing: '新签',
-  startDate: null,
-  endDate: null,
   qianPeople: '',
   phone: '',
-  louyu: '',
-  fangjian: '',
-  mian: 0,
-  jiajian: 0,
-  wuye: 0,
-  zujin: 0,
-  yajin: 0,
+  startDate: null,
+  endDate: null,
   beizhu: ''
 })
 
@@ -262,50 +133,22 @@ const formRules = {
     { required: true, message: '请输入合同编号', trigger: 'blur' },
     { min: 1, max: 50, message: '合同编号长度应在1-50个字符', trigger: 'blur' }
   ],
-  name: [
-    { required: true, message: '请输入租户名称', trigger: 'blur' },
-    { min: 1, max: 100, message: '租户名称长度应在1-100个字符', trigger: 'blur' }
-  ],
-  type: [
-    { required: true, message: '请选择租户类型', trigger: 'change' }
-  ],
   shuxing: [
     { required: true, message: '请选择合同属性', trigger: 'change' }
+  ],
+  qianPeople: [
+    { required: true, message: '请输入签订人', trigger: 'blur' },
+    { min: 1, max: 50, message: '签订人长度应在1-50个字符', trigger: 'blur' }
+  ],
+  phone: [
+    { required: true, message: '请输入联系方式', trigger: 'blur' },
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
   ],
   startDate: [
     { required: true, message: '请选择签订时间', trigger: 'change' }
   ],
   endDate: [
     { required: true, message: '请选择结束时间', trigger: 'change' }
-  ],
-  qianPeople: [
-    { required: true, message: '请输入签订人', trigger: 'blur' }
-  ],
-  phone: [
-    { required: true, message: '请输入联系方式', trigger: 'blur' },
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' }
-  ],
-  louyu: [
-    { required: true, message: '请选择所属楼宇', trigger: 'change' }
-  ],
-  fangjian: [
-    { required: true, message: '请输入房间名称', trigger: 'blur' }
-  ],
-  mian: [
-    { required: true, message: '请输入房间面积', trigger: 'blur' },
-    { message: '房间面积必须大于0', trigger: 'blur' }
-  ],
-  jiajian: [
-    { required: true, message: '请输入计价面积', trigger: 'blur' },
-    { message: '计价面积必须大于0', trigger: 'blur' }
-  ],
-  wuye: [
-    { required: true, message: '请输入物业费用', trigger: 'blur' },
-    { message: '物业费用不能小于0', trigger: 'blur' }
-  ],
-  zujin: [
-    { required: true, message: '请输入租金金额', trigger: 'blur' },
-    { message: '租金金额必须大于0', trigger: 'blur' }
   ]
 }
 
@@ -331,12 +174,8 @@ watch(() => props.contractData, (newData) => {
   } else {
     // 新增模式：重置表单
     Object.keys(formData).forEach(key => {
-      if (key === 'type') {
-        formData[key] = '企业'
-      } else if (key === 'shuxing') {
+      if (key === 'shuxing') {
         formData[key] = '新签'
-      } else if (key === 'mian' || key === 'jiajian' || key === 'wuye' || key === 'zujin' || key === 'yajin') {
-        formData[key] = 0
       } else if (key === 'startDate' || key === 'endDate') {
         formData[key] = null
       } else {
@@ -422,10 +261,6 @@ const handleCancel = () => {
 
 :deep(.el-textarea__inner) {
   resize: vertical;
-}
-
-:deep(.el-input-number) {
-  width: 100%;
 }
 
 .el-row {

@@ -13,7 +13,7 @@ const pingSchema = new mongoose.Schema({
   // 评论者ID（关联用户表）
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'AppUser',
     required: true
   },
   
@@ -34,8 +34,7 @@ const pingSchema = new mongoose.Schema({
   // 回复的目标用户ID（用于显示"张三回复李四"）
   replyToUserId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    
+    ref: 'AppUser',
     default: null
   },
   
@@ -47,7 +46,7 @@ const pingSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true,
-  collection: 'comments'
+  collection: 'Ping'
 });
 
-module.exports = mongoose.model('Ping', pingSchema);
+module.exports = mongoose.model('Ping', pingSchema, 'Ping'); 

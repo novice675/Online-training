@@ -13,7 +13,16 @@ let CompanySchema = new mongoose.Schema({
   type: String,        // 企业类型
   logo: String,        // 企业 logo
   house: String,       // 房间号或楼号
-  outaddress: String   // 企业所再地址
+  outaddress: String,  // 企业所再地址
+  // 新增外键字段，用于规范化数据结构
+  buildingId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Building',
+  },
+  houseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'House',
+  }
 })
 
 /**

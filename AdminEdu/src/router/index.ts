@@ -39,7 +39,7 @@ export const menuRoutes: RouteConfig[] = [
           menuIcon: 'list',
           parentModule: 'Operation',
           isLogin: true,
-        }
+                }
       },
       {
         name: 'ping',
@@ -53,7 +53,7 @@ export const menuRoutes: RouteConfig[] = [
           isLogin: true,
         }
       },
-    ]
+      ]
   },
   // 招商管理菜单
   {
@@ -157,6 +157,8 @@ export const menuRoutes: RouteConfig[] = [
       },
     ]
   },
+  // 资产管理菜单
+
   // 文章详情页面（不在菜单中显示）
   {
     name: 'xiang',
@@ -165,6 +167,20 @@ export const menuRoutes: RouteConfig[] = [
     meta: {
       roleName: ['teacher', 'student'],
       menuTitle: '文章详情',
+      menuIcon: 'document',
+      parentModule: 'Operation',
+      isLogin: true,
+      hideInMenu: true
+    }
+  },
+  // 文章评论详情页面（不在菜单中显示）
+  {
+    name: 'pingXiang',
+    path: 'pingXiang',
+    component: () => import('@/pages/Operation/OperationMenu/pingXiang.vue'),
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '文章评论详情',
       menuIcon: 'document',
       parentModule: 'Operation',
       isLogin: true,
@@ -253,6 +269,82 @@ export const menuRoutes: RouteConfig[] = [
           menuTitle: '车辆进出记录',
           menuIcon: 'list',
           parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+    ]
+  },
+  // 账单管理菜单
+  {
+    name: 'BillManagement',
+    path: 'BillManagement',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '账单管理',
+      menuIcon: 'document-text',
+      parentModule: 'Operation',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'VehicleBill',
+        path: 'VehicleBill',
+        component: () => import('@/pages/Operation/ZhangDan/Che.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '车辆缴费账单',
+          menuIcon: 'car',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'TenantBill',
+        path: 'TenantBill',
+        component: () => import('@/pages/Operation/ZhangDan/ZuHuZhangDan.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '租户账单管理',
+          menuIcon: 'user-group',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+    ]
+  },
+  // 资产管理菜单
+  {
+    name: 'ZiChan',
+    path: 'ZiChan',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '资产管理',
+      menuIcon: 'office-building',
+      parentModule: 'Operation',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'ZiChanLouYu',
+        path: 'LouYu',
+        component: () => import('@/pages/Operation/ZiChan/LouYu.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '楼宇信息管理',
+          menuIcon: 'office-building',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'ZiChanZiYuan',
+        path: 'ZiYuan',
+        component: () => import('@/pages/Operation/ZiChan/ZiYuan.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '房间资源管理',
+          menuIcon: 'box',
+          parentModule: 'Operation',
           isLogin: true,
         }
       },
@@ -437,12 +529,7 @@ const parentNameMap: Record<string, string> = {
   '/home/VisualData': 'VisualData',
   '/home/Configuration': 'Configuration'
 };
-const getParentName = (path: string) => {
-  for (const key in parentNameMap) {
-    if (path.startsWith(key)) return parentNameMap[key];
-  }
-  return 'home';
-};
+
 // 获取用户登录后，有权限访问的路由
 const getOwnRouters = () => {
   const userStore = useUserStore();
@@ -555,7 +642,7 @@ router.beforeEach((to, _, next) => {
     const hasRoutes = ownRoutes.every(route => router.hasRoute(route.name as string));
     if (!hasRoutes) {
       // 清除所有动态添加的路由
-      const staticRouteNames = ['home', 'login', 'situation', 'Operation', 'Estate', 'VisualData', 'Configuration'];
+      const staticRouteNames = ['home', 'login', 'situation', 'Operation', 'Estate', 'VisualData', 'Configuration', 'ZiChan', 'ZiChanLouYu', 'ZiChanZiYuan'];
       router.getRoutes().forEach(route => {
         if (route.name && !staticRouteNames.includes(route.name as string)) {
           router.removeRoute(route.name);

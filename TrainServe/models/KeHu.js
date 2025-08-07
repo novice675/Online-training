@@ -26,11 +26,11 @@ const keHuSchema = new mongoose.Schema({
     trim: true,
     comment: '所属行业'
   },
-  status: {
+  intentLevel: {
     type: String,
-    required: true,
-    enum: ['成交', '意向'],
-    comment: '跟进状态'
+    enum: ['高', '中', '低'],
+    default: '中',
+    comment: '意向等级'
   },
   followPerson: {
     type: String,
