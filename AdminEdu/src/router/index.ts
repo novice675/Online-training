@@ -492,15 +492,6 @@ const router = createRouter({
                 isLogin: true
               },
             },
-            {
-              name: 'Equipment',
-              path: 'Equipment',
-              component: () => import('@/pages/Estate/EstateMenu/Equipment/Equipment.vue'),
-              children: [],
-              meta: {  // 配置路由一些额外的信息
-                isLogin: true
-              },
-            },
           ],
         },
         {
