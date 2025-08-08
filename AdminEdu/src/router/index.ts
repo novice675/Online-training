@@ -39,7 +39,7 @@ export const menuRoutes: RouteConfig[] = [
           menuIcon: 'list',
           parentModule: 'Operation',
           isLogin: true,
-        }
+                }
       },
       {
         name: 'ping',
@@ -53,8 +53,112 @@ export const menuRoutes: RouteConfig[] = [
           isLogin: true,
         }
       },
+      ]
+  },
+  // 招商管理菜单
+  {
+    name: 'InvestmentManagement',
+    path: 'InvestmentManagement',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '招商管理',
+      menuIcon: 'user-group',
+      parentModule: 'Operation',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'keHu',
+        path: 'keHu',
+        component: () => import('@/pages/Operation/zhaoShang/keHu.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '客户管理',
+          menuIcon: 'user',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'heTong',
+        path: 'heTong',
+        component: () => import('@/pages/Operation/zhaoShang/heTong.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '合同管理',
+          menuIcon: 'document-text',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'hetongDetail',
+        path: 'hetongDetail',
+        component: () => import('@/pages/Operation/zhaoShang/xiang.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '合同详情',
+          menuIcon: 'document-text',
+          parentModule: 'Operation',
+          isLogin: true,
+          hideInMenu: true // 隐藏在菜单中，不显示为独立菜单项
+        }
+      },
     ]
   },
+  // 租户管理菜单
+  {
+    name: 'TenantManagement',
+    path: 'TenantManagement',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '租户管理',
+      menuIcon: 'building',
+      parentModule: 'Operation',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'ZuHuXinXi',
+        path: 'ZuHuXinXi',
+        component: () => import('@/pages/Operation/ZuHu/ZuHuXinXi.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '租户信息管理',
+          menuIcon: 'office-building',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'ZuHuDetail',
+        path: 'ZuHuXinXi/detail/:id',
+        component: () => import('@/pages/Operation/ZuHu/xiang.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '租户详情',
+          menuIcon: 'document',
+          parentModule: 'Operation',
+          isLogin: true,
+          hideInMenu: true // 隐藏在菜单中，只能通过跳转访问
+        }
+      },
+      {
+        name: 'ZuHuPeople',
+        path: 'ZuHuPeople',
+        component: () => import('@/pages/Operation/ZuHu/ZuHuPeople.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '租户人员管理',
+          menuIcon: 'user-group',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+    ]
+  },
+  // 资产管理菜单
+
   // 文章详情页面（不在菜单中显示）
   {
     name: 'xiang',
@@ -63,6 +167,20 @@ export const menuRoutes: RouteConfig[] = [
     meta: {
       roleName: ['teacher', 'student'],
       menuTitle: '文章详情',
+      menuIcon: 'document',
+      parentModule: 'Operation',
+      isLogin: true,
+      hideInMenu: true
+    }
+  },
+  // 文章评论详情页面（不在菜单中显示）
+  {
+    name: 'pingXiang',
+    path: 'pingXiang',
+    component: () => import('@/pages/Operation/OperationMenu/pingXiang.vue'),
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '文章评论详情',
       menuIcon: 'document',
       parentModule: 'Operation',
       isLogin: true,
@@ -151,6 +269,204 @@ export const menuRoutes: RouteConfig[] = [
           menuTitle: '车辆进出记录',
           menuIcon: 'list',
           parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+    ]
+  },
+  // 智能设备管理菜单
+  {
+    name: 'SmartDevice',
+    path: 'SmartDevice',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '设备管理',
+      menuIcon: 'cog',
+      parentModule: 'Estate',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'DeviceOverview',
+        path: 'DeviceOverview',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/DeviceOverview.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '设备总览',
+          menuIcon: 'view-grid',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'SecurityMonitor',
+        path: 'SecurityMonitor',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/SecurityMonitor.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '安防监控管理',
+          menuIcon: 'video-camera',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'AccessControl',
+        path: 'AccessControl',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/AccessControl.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '门禁管理',
+          menuIcon: 'lock-closed',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'ElevatorControl',
+        path: 'ElevatorControl',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/ElevatorControl.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '电梯控制',
+          menuIcon: 'arrow-up',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'LightingSystem',
+        path: 'LightingSystem',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/LightingSystem.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '智能照明',
+          menuIcon: 'light-bulb',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'AirCondition',
+        path: 'AirCondition',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/AirCondition.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '空调系统',
+          menuIcon: 'wind',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'FireSafety',
+        path: 'FireSafety',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/FireSafety.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '消防安全',
+          menuIcon: 'fire',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'WaterSystem',
+        path: 'WaterSystem',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/WaterSystem.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '给排水系统',
+          menuIcon: 'beaker',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'PowerManagement',
+        path: 'PowerManagement',
+        component: () => import('@/pages/Estate/EstateMenu/SmartDevice/PowerManagement.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '电力管理',
+          menuIcon: 'lightning-bolt',
+          parentModule: 'Estate',
+          isLogin: true,
+        }
+      },
+    ]
+  },
+  // 账单管理菜单
+  {
+    name: 'BillManagement',
+    path: 'BillManagement',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '账单管理',
+      menuIcon: 'document-text',
+      parentModule: 'Operation',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'VehicleBill',
+        path: 'VehicleBill',
+        component: () => import('@/pages/Operation/ZhangDan/Che.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '车辆缴费账单',
+          menuIcon: 'car',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'TenantBill',
+        path: 'TenantBill',
+        component: () => import('@/pages/Operation/ZhangDan/ZuHuZhangDan.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '租户账单管理',
+          menuIcon: 'user-group',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+    ]
+  },
+  // 资产管理菜单
+  {
+    name: 'ZiChan',
+    path: 'ZiChan',
+    meta: {
+      roleName: ['teacher', 'student'],
+      menuTitle: '资产管理',
+      menuIcon: 'office-building',
+      parentModule: 'Operation',
+      isLogin: true,
+    },
+    children: [
+      {
+        name: 'ZiChanLouYu',
+        path: 'LouYu',
+        component: () => import('@/pages/Operation/ZiChan/LouYu.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '楼宇信息管理',
+          menuIcon: 'office-building',
+          parentModule: 'Operation',
+          isLogin: true,
+        }
+      },
+      {
+        name: 'ZiChanZiYuan',
+        path: 'ZiYuan',
+        component: () => import('@/pages/Operation/ZiChan/ZiYuan.vue'),
+        meta: {
+          roleName: ['teacher', 'student'],
+          menuTitle: '房间资源管理',
+          menuIcon: 'box',
+          parentModule: 'Operation',
           isLogin: true,
         }
       },
@@ -247,7 +563,7 @@ const router = createRouter({
             },
           ],
         },
-        {
+        { 
           // 物业管理
           name: 'Estate',
           path: 'Estate',
@@ -263,15 +579,6 @@ const router = createRouter({
               name: 'EstateMenu',
               path: 'EstateMenu',
               component: () => import('@/pages/Estate/EstateMenu/EstateMenu.vue'),
-              children: [],
-              meta: {  // 配置路由一些额外的信息
-                isLogin: true
-              },
-            },
-            {
-              name: 'Equipment',
-              path: 'Equipment',
-              component: () => import('@/pages/Estate/EstateMenu/Equipment/Equipment.vue'),
               children: [],
               meta: {  // 配置路由一些额外的信息
                 isLogin: true
@@ -335,12 +642,7 @@ const parentNameMap: Record<string, string> = {
   '/home/VisualData': 'VisualData',
   '/home/Configuration': 'Configuration'
 };
-const getParentName = (path: string) => {
-  for (const key in parentNameMap) {
-    if (path.startsWith(key)) return parentNameMap[key];
-  }
-  return 'home';
-};
+
 // 获取用户登录后，有权限访问的路由
 const getOwnRouters = () => {
   const userStore = useUserStore();
@@ -436,7 +738,6 @@ const isOwnRouter = (to: RouteLocationNormalizedGeneric) => {
 
 // 路由守卫
 router.beforeEach((to, _, next) => {
-  console.log('🚦 路由守卫 - 准备跳转到:', to.path);
 
   // 从 localStorage 中获取持久化的用户数据
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -454,14 +755,15 @@ router.beforeEach((to, _, next) => {
     const hasRoutes = ownRoutes.every(route => router.hasRoute(route.name as string));
     if (!hasRoutes) {
       // 清除所有动态添加的路由
-      const staticRouteNames = ['home', 'login', 'situation', 'Operation', 'Estate', 'VisualData', 'Configuration'];
+      const staticRouteNames = ['home', 'login', 'situation', 'Operation', 'Estate', 'VisualData', 'Configuration', 'OperationDefault', 'EstateDefault', 'VisualDataDefault', 'ConfigurationDefault'];
       router.getRoutes().forEach(route => {
         if (route.name && !staticRouteNames.includes(route.name as string)) {
           router.removeRoute(route.name);
         }
       });
-      const mainRouteNames = ['home', 'Operation', 'Estate', 'VisualData', 'Configuration'];
-      const addRoutes = (routes: RouteConfig[], parentName = 'home') => {
+      
+      // 添加动态路由的函数
+      const addRoutes = (routes: RouteConfig[]) => {
         routes.forEach(route => {
           if (!router.hasRoute(route.name as string)) {
             const routeConfig: RouteRecordRaw = {
@@ -475,35 +777,27 @@ router.beforeEach((to, _, next) => {
 
             // 如果有子路由，递归添加
             if (route.children && route.children.length > 0) {
-              routeConfig.children = route.children.map(child => {
-                const childRoute = {
-                  name: child.name,
-                  path: child.path,
-                  component: child.component,
-                  meta: child.meta,
-                  children: child.children
-                } as RouteRecordRaw;
-                if (child.redirect) {
-                  childRoute.redirect = child.redirect;
-                }
-                return childRoute;
-              });
+              routeConfig.children = route.children.map(child => ({
+                name: child.name,
+                path: child.path,
+                component: child.component,
+                meta: child.meta,
+                children: child.children,
+                redirect: child.redirect
+              } as RouteRecordRaw));
             }
+
+            // 根据路由的parentModule属性确定父路由名称
+            const parentName = (route.meta && typeof route.meta.parentModule === 'string')
+              ? route.meta.parentModule
+              : 'home';
+            
             router.addRoute(parentName, routeConfig);
-          }
-          // 只在主路由名下递归添加
-          if (route.children && route.children.length > 0 && mainRouteNames.includes(route.name as string)) {
-            addRoutes(route.children, route.name as string);
           }
         });
       };
-      ownRoutes.forEach(route => {
-        // 根据路由的parentModule属性确定父路由名称
-        const parentName = (route.meta && typeof route.meta.parentModule === 'string')
-          ? route.meta.parentModule
-          : 'home';
-        addRoutes([route], parentName);
-      });
+      
+      addRoutes(ownRoutes);
       next({ ...to, replace: true });
       return;
     }
@@ -512,7 +806,6 @@ router.beforeEach((to, _, next) => {
   // 权限检查：如果系统中不存在这个路由，并且该路由是用户没有权限访问的路由，就进入404页面
   const routerExists = hasRouter(to);
   const hasPermission = isOwnRouter(to);
-  console.log('🔍 权限检查 - 路由存在:', routerExists, '有权限:', hasPermission);
 
   if (!routerExists && !hasPermission) {
     // 如果目标路径已经是404页面，直接放行
@@ -533,7 +826,6 @@ router.beforeEach((to, _, next) => {
     return;
   }
   // 其他情况，用户正常访问路由
-  console.log('✅ 路由守卫 - 允许访问:', to.path);
   next();
 });
 

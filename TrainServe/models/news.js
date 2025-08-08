@@ -9,7 +9,6 @@ const RENDER_TYPES = {
 };
 
 
-
 // 定义频道的枚举值
 const CHANNELS = {
   RECOMMEND: '推荐',
@@ -33,6 +32,7 @@ const newsSchema = new Schema({
     index: true // 用于标题搜索优化
   },
   
+
   // 频道（必选，只能是推荐或政策）
   channel: {
     type: String,
@@ -70,6 +70,7 @@ const newsSchema = new Schema({
     trim: true
   }],
   
+
   // 作者ID（关联AppUser）
   authorId: {
     type: Schema.Types.ObjectId,

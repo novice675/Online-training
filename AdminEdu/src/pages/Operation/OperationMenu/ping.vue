@@ -1,14 +1,10 @@
 <template>
-  <div>
-    评论
-  </div>
+  <div>评论</div>
 </template>
-
-<script lang="ts" setup>
-
-
+  
+  <script setup lang="ts">
 </script>
-
-<style scoped>
-
+  
+  <style scoped>
 </style>
+  

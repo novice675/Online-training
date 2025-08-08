@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const VehicleModel = require('../models/Vehicle');
+const VehiclesModel = require('../models/Vehicles');
 
 // 获取车辆列表（带搜索和分页）
 router.get('/list', async (req, res) => {
@@ -8,40 +8,58 @@ router.get('/list', async (req, res) => {
         const {
             page = 1,
             pageSize = 10,
-            ownerName = '',
+            licensePlate = '',
             contactWay = '',
-            vehicleType = ''
+            vehicleType = '',
+            exitTime = ''  // 新增exitTime参数
         } = req.query;
-
-        console.log('收到获取车辆列表请求，参数:', { page, pageSize, ownerName, contactWay, vehicleType });
 
         // 构建查询条件
         const query = {};
-        if (ownerName) {
-            query.ownerName = new RegExp(ownerName, 'i');
+        if (licensePlate) {
+            query.licensePlate = new RegExp(licensePlate, 'i');
         }
         if (contactWay) {
             query.contactWay = new RegExp(contactWay, 'i');
         }
         if (vehicleType) {
-            query.vehicleType = vehicleType;
+            query.vehicleType = new RegExp(vehicleType, 'i');
         }
 
-        console.log('查询条件:', query);
+        // 添加exitTime筛选逻辑
+        // 当exitTime存在时，筛选endTime在指定日期的记录
+        if (exitTime) {
+            const searchDate = new Date(exitTime);
+            const startOfDay = new Date(searchDate.getFullYear(), searchDate.getMonth(), searchDate.getDate());
+            const endOfDay = new Date(searchDate.getFullYear(), searchDate.getMonth(), searchDate.getDate() + 1);
+            
+            query.$or = [
+                {
+                    endTime: {
+                        $gte: startOfDay,
+                        $lt: endOfDay
+                    }
+                },
+                {
+                    startTime: {
+                        $gte: startOfDay,
+                        $lt: endOfDay
+                    }
+                }
+            ];
+        }
 
         // 计算跳过的记录数
         const skip = (parseInt(page) - 1) * parseInt(pageSize);
 
         // 查询数据
         const [list, total] = await Promise.all([
-            VehicleModel.find(query)
+            VehiclesModel.find(query)
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(parseInt(pageSize)),
-            VehicleModel.countDocuments(query)
+            VehiclesModel.countDocuments(query)
         ]);
-
-        console.log('查询结果:', { total, listLength: list.length });
 
         res.send({
             code: 200,
@@ -54,7 +72,6 @@ router.get('/list', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('获取车辆列表失败:', error);
         res.send({
             code: 500,
             msg: '获取车辆列表失败',
@@ -67,17 +84,15 @@ router.get('/list', async (req, res) => {
 router.post('/add', async (req, res) => {
     try {
         const { ownerName, contactWay, licensePlate, vehicleModel, vehicleType, startTime, endTime } = req.body;
-
         // 验证必填字段
-        if (!ownerName || !contactWay || !licensePlate || !vehicleModel || !vehicleType || !startTime || !endTime) {
+        if (!ownerName || !contactWay || !licensePlate || !VehiclesModel || !vehicleType || !startTime || !endTime) {
             return res.send({
                 code: 400,
                 msg: '请填写完整的车辆信息'
             });
         }
-
         // 检查车牌号是否已存在
-        const existingVehicle = await VehicleModel.findOne({ licensePlate });
+        const existingVehicle = await VehiclesModel.findOne({ licensePlate });
         if (existingVehicle) {
             return res.send({
                 code: 400,
@@ -86,7 +101,7 @@ router.post('/add', async (req, res) => {
         }
 
         // 创建新车辆记录
-        const newVehicle = await VehicleModel.create({
+        const newVehicle = await VehiclesModel.create({
             ownerName,
             contactWay,
             licensePlate,
@@ -95,7 +110,6 @@ router.post('/add', async (req, res) => {
             startTime: new Date(startTime),
             endTime: new Date(endTime)
         });
-
         res.send({
             code: 200,
             msg: '添加成功',
@@ -115,8 +129,7 @@ router.post('/add', async (req, res) => {
 router.delete('/delete/:id', async (req, res) => {
     try {
         const { id } = req.params;
-
-        const deletedVehicle = await VehicleModel.findByIdAndDelete(id);
+        const deletedVehicle = await VehiclesModel.findByIdAndDelete(id);
         if (!deletedVehicle) {
             return res.send({
                 code: 404,
@@ -141,7 +154,6 @@ router.delete('/delete/:id', async (req, res) => {
 router.delete('/batchDelete', async (req, res) => {
     try {
         const { ids } = req.body;
-
         if (!ids || !Array.isArray(ids) || ids.length === 0) {
             return res.send({
                 code: 400,
@@ -149,8 +161,7 @@ router.delete('/batchDelete', async (req, res) => {
             });
         }
 
-        const result = await VehicleModel.deleteMany({ _id: { $in: ids } });
-
+        const result = await VehiclesModel.deleteMany({ _id: { $in: ids } });
         res.send({
             code: 200,
             msg: `成功删除 ${result.deletedCount} 条记录`
@@ -173,7 +184,7 @@ router.put('/update/:id', async (req, res) => {
 
         // 如果更新车牌号，检查是否与其他车辆冲突
         if (updateData.licensePlate) {
-            const existingVehicle = await VehicleModel.findOne({
+            const existingVehicle = await VehiclesModel.findOne({
                 licensePlate: updateData.licensePlate,
                 _id: { $ne: id }
             });
@@ -185,7 +196,15 @@ router.put('/update/:id', async (req, res) => {
             }
         }
 
-        const updatedVehicle = await VehicleModel.findByIdAndUpdate(
+        // 处理日期字段
+        if (updateData.startTime) {
+            updateData.startTime = new Date(updateData.startTime);
+        }
+        if (updateData.endTime) {
+            updateData.endTime = new Date(updateData.endTime);
+        }
+
+        const updatedVehicle = await VehiclesModel.findByIdAndUpdate(
             id,
             { ...updateData, updatedAt: Date.now() },
             { new: true }
@@ -218,7 +237,7 @@ router.get('/detail/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        const vehicle = await VehicleModel.findById(id);
+        const vehicle = await VehiclesModel.findById(id);
         if (!vehicle) {
             return res.send({
                 code: 404,

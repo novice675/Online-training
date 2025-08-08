@@ -6,11 +6,44 @@
         <el-button @click="goBack" icon="ArrowLeft">返回列表</el-button>
         <div class="page-title">
           <div class="title-bar"></div>
-          <span>{{ getPageTitle(articleData?.type) }}</span>
+          <span>{{ getPageTitle(articleData?.articleType) }}</span>
         </div>
       </div>
       <div class="header-right">
-        <el-button type="primary" @click="editArticle" v-if="articleData">{{ getEditButtonText(articleData.type) }}</el-button>
+        <!-- 审核操作按钮 -->
+        <div class="audit-actions" v-if="articleData">
+          <!-- 未审核状态：显示审核通过和审核失败按钮 -->
+          <template v-if="articleData.status === '未审核'">
+            <el-button type="success" @click="handleAudit('审核成功')" :loading="auditLoading">
+              <el-icon><Check /></el-icon>
+              审核通过
+            </el-button>
+            <el-button type="danger" @click="handleAudit('审核失败')" :loading="auditLoading">
+              <el-icon><Close /></el-icon>
+              审核失败
+            </el-button>
+          </template>
+          
+          <!-- 审核成功状态：显示设为失败按钮 -->
+          <template v-else-if="articleData.status === '审核成功'">
+            <el-button type="warning" @click="handleAudit('审核失败')" :loading="auditLoading">
+              <el-icon><Close /></el-icon>
+              设为审核失败
+            </el-button>
+          </template>
+          
+          <!-- 审核失败状态：显示重新审核按钮 -->
+          <template v-else-if="articleData.status === '审核失败'">
+            <el-button type="success" @click="handleAudit('审核成功')" :loading="auditLoading">
+              <el-icon><Check /></el-icon>
+              审核通过
+            </el-button>
+            <el-button type="primary" @click="handleAudit('未审核')" :loading="auditLoading">
+              <el-icon><RefreshRight /></el-icon>
+              重新审核
+            </el-button>
+          </template>
+                 </div>
       </div>
     </div>
 
@@ -23,70 +56,95 @@
         <div class="article-meta">
           <div class="meta-item">
             <span class="meta-label">内容类型：</span>
-            <el-tag :type="getTypeTagType(articleData.type)" effect="light">
-              {{ articleData.type }}
+            <el-tag :type="getTypeTagType(articleData.articleType)" effect="light">
+              {{ articleData.articleType }}
             </el-tag>
           </div>
           
           <div class="meta-item">
             <span class="meta-label">发布频道：</span>
-            <el-tag :type="articleData.channel === '今日热点' ? 'danger' : 'primary'" effect="light">
+            <el-tag :type="getChannelTagType(articleData.channel)" effect="light">
               {{ articleData.channel }}
             </el-tag>
           </div>
           
           <div class="meta-item">
-            <span class="meta-label">发布状态：</span>
+            <span class="meta-label">审核状态：</span>
             <el-tag :type="getStatusTagType(articleData.status)" effect="light">
-              {{ articleData.status || '草稿' }}
+              {{ articleData.status || '未审核' }}
             </el-tag>
+          </div>
+          
+          <div class="meta-item" v-if="articleData.renderType">
+            <span class="meta-label">渲染类型：</span>
+            <span class="meta-value">{{ getRenderTypeLabel(articleData.renderType) }}</span>
+          </div>
+          
+          <div class="meta-item" v-if="articleData.author">
+            <span class="meta-label">作者：</span>
+            <span class="meta-value">{{ articleData.author }}</span>
           </div>
           
           <div class="meta-item">
             <span class="meta-label">发布时间：</span>
-            <span class="meta-value">{{ formatDate(articleData.published_at || articleData.created_at) }}</span>
+            <span class="meta-value">{{ formatDate(articleData.publishTime || articleData.createdAt) }}</span>
           </div>
           
-          <div class="meta-item" v-if="articleData.keywords">
+          <div class="meta-item" v-if="articleData.keywords && articleData.keywords.length > 0">
             <span class="meta-label">关键词：</span>
-            <span class="meta-value">{{ articleData.keywords }}</span>
+            <span class="meta-value">{{ Array.isArray(articleData.keywords) ? articleData.keywords.join(', ') : articleData.keywords }}</span>
+          </div>
+          
+          <div class="meta-item" v-if="articleData.tags && articleData.tags.length > 0">
+            <span class="meta-label">标签：</span>
+            <div class="tags-container">
+              <el-tag v-for="tag in articleData.tags" :key="tag" size="small" class="tag-item">{{ tag }}</el-tag>
+            </div>
           </div>
         </div>
 
         <!-- 内容摘要 -->
         <div class="article-summary" v-if="articleData.summary">
-          <h3>{{ getContentSummaryTitle(articleData.type) }}</h3>
+          <h3>{{ getContentSummaryTitle(articleData.articleType) }}</h3>
           <p>{{ articleData.summary }}</p>
         </div>
       </div>
 
       <!-- 文章封面 -->
-      <div class="article-cover-card" v-if="articleData.cover">
+      <div class="article-cover-card" v-if="articleData.coverImage">
         <h3>文章封面</h3>
         <div class="cover-container">
-          <img :src="articleData.cover" alt="文章封面" class="cover-image" />
+          <img :src="articleData.coverImage" alt="文章封面" class="cover-image" />
+        </div>
+      </div>
+      
+      <!-- 右侧小图 -->
+      <div class="article-cover-card" v-if="articleData.rightImage">
+        <h3>右侧小图</h3>
+        <div class="cover-container">
+          <img :src="articleData.rightImage" alt="右侧小图" class="cover-image" style="max-width: 200px;" />
         </div>
       </div>
 
       <!-- 文章主体内容 -->
       <div class="article-body-card">
-        <!-- 图文内容 -->
-        <div v-if="articleData.type === '图文'" class="content-text">
+        <!-- 文章内容 -->
+        <div v-if="articleData.articleType === '文章'" class="content-text">
           <h3>文章内容</h3>
-          <div v-if="cleanContent(articleData.content)" class="rich-content" v-html="cleanContent(articleData.content)"></div>
+          <div v-if="cleanContent(articleData.detailContent)" class="rich-content" v-html="cleanContent(articleData.detailContent)"></div>
           <div v-else class="no-media">
             <el-empty description="暂无文章内容" />
           </div>
         </div>
 
         <!-- 视频内容 -->
-        <div v-else-if="articleData.type === '视频'" class="content-video">
+        <div v-else-if="articleData.articleType === '视频'" class="content-video">
           <!-- 视频播放器 -->
-          <div v-if="articleData.video_url" class="video-section">
+          <div v-if="articleData.video" class="video-section">
             <h3>视频内容</h3>
             <div class="video-container">
               <video 
-                :src="articleData.video_url" 
+                :src="articleData.video" 
                 controls 
                 preload="metadata"
                 class="video-player"
@@ -98,55 +156,34 @@
           </div>
           
           <!-- 视频描述 -->
-          <div v-if="cleanContent(articleData.content)" class="media-description">
+          <div v-if="cleanContent(articleData.detailContent)" class="media-description">
             <h3>视频介绍</h3>
-            <div class="rich-content" v-html="cleanContent(articleData.content)"></div>
+            <div class="rich-content" v-html="cleanContent(articleData.detailContent)"></div>
           </div>
           
           <!-- 如果没有视频URL和内容，显示提示 -->
-          <div v-if="!articleData.video_url && !cleanContent(articleData.content)" class="no-media">
+          <div v-if="!articleData.video && !cleanContent(articleData.detailContent)" class="no-media">
             <h3>视频内容</h3>
             <el-empty description="暂无视频内容" />
           </div>
         </div>
 
-        <!-- 音频内容 -->
-        <div v-else-if="articleData.type === '音频'" class="content-audio">
-          <!-- 音频播放器 -->
-          <div v-if="articleData.audio_url" class="audio-section">
-            <h3>音频内容</h3>
-            <div class="audio-container">
-              <audio 
-                :src="articleData.audio_url" 
-                controls 
-                preload="metadata"
-                class="audio-player"
-                @error="handleMediaError"
-              >
-                您的浏览器不支持音频播放
-              </audio>
-            </div>
-          </div>
-          
-          <!-- 音频描述 -->
-          <div v-if="cleanContent(articleData.content)" class="media-description">
-            <h3>音频介绍</h3>
-            <div class="rich-content" v-html="cleanContent(articleData.content)"></div>
-          </div>
-          
-          <!-- 如果没有音频URL和内容，显示提示 -->
-          <div v-if="!articleData.audio_url && !cleanContent(articleData.content)" class="no-media">
-            <h3>音频内容</h3>
-            <el-empty description="暂无音频内容" />
-          </div>
-        </div>
-
         <!-- 其他类型或无类型 -->
         <div v-else class="content-default">
-          <h3>文章内容</h3>
-          <div v-if="cleanContent(articleData.content)" class="rich-content" v-html="cleanContent(articleData.content)"></div>
+          <h3>内容详情</h3>
+          <div v-if="cleanContent(articleData.detailContent)" class="rich-content" v-html="cleanContent(articleData.detailContent)"></div>
           <div v-else class="no-media">
             <el-empty description="暂无内容" />
+          </div>
+        </div>
+      </div>
+      
+      <!-- 详情页额外图片 -->
+      <div class="article-images-card" v-if="articleData.detailImages && articleData.detailImages.length > 0">
+        <h3>详情图片</h3>
+        <div class="images-grid">
+          <div v-for="(image, index) in articleData.detailImages" :key="index" class="image-item">
+            <img :src="image" :alt="`详情图片${index + 1}`" class="detail-image" />
           </div>
         </div>
       </div>
@@ -156,20 +193,20 @@
         <h3>统计信息</h3>
         <div class="stats-grid">
           <div class="stat-item">
-            <div class="stat-number">{{ articleData.view_count || 0 }}</div>
-            <div class="stat-label">浏览量</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">{{ articleData.like_count || 0 }}</div>
+            <div class="stat-number">{{ articleData.likeCount || 0 }}</div>
             <div class="stat-label">点赞数</div>
           </div>
           <div class="stat-item">
-            <div class="stat-number">{{ articleData.comment_count || 0 }}</div>
-            <div class="stat-label">评论数</div>
+            <div class="stat-number">{{ formatDate(articleData.createdAt) }}</div>
+            <div class="stat-label">创建时间</div>
           </div>
           <div class="stat-item">
-            <div class="stat-number">{{ articleData.share_count || 0 }}</div>
-            <div class="stat-label">分享数</div>
+            <div class="stat-number">{{ formatDate(articleData.updatedAt) }}</div>
+            <div class="stat-label">更新时间</div>
+          </div>
+          <div class="stat-item" v-if="articleData.auditRemark">
+            <div class="stat-number">{{ articleData.auditRemark }}</div>
+            <div class="stat-label">审核备注</div>
           </div>
         </div>
       </div>
@@ -193,18 +230,21 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { wenDetail } from '../../../api/auth.js'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Check, Close, RefreshRight } from '@element-plus/icons-vue'
+import { wenDetail, updateNewsStatus } from '../../../api/auth.js'
 
 const route = useRoute()
 const router = useRouter()
 
 const loading = ref(false)
+const auditLoading = ref(false)
 const articleData = ref<any>(null)
 
 // 获取文章详情
 const getArticleDetail = async () => {
   const articleId = route.params.id as string
+  
   if (!articleId) {
     ElMessage.error('文章ID不存在')
     goBack()
@@ -217,9 +257,6 @@ const getArticleDetail = async () => {
     
     if (response.data.code === 200) {
       articleData.value = response.data.data
-      console.log('文章数据:', articleData.value)
-      console.log('文章类型:', articleData.value?.type)
-      console.log('文章内容:', articleData.value?.content)
     } else {
       ElMessage.error(response.data.msg || '获取文章详情失败')
       goBack()
@@ -236,66 +273,90 @@ const getArticleDetail = async () => {
 // 返回列表
 const goBack = () => {
   try {
-    // 先尝试使用路由名称跳转
     if (router.hasRoute('zhang')) {
-      console.log('使用路由名称跳转到zhang')
       router.push({ name: 'zhang' })
     } else {
-      console.log('zhang路由不存在，尝试路径跳转')
-      // 直接使用路径跳转
-      router.push('/home/Operation/zhang').catch(err => {
-        console.error('路径跳转失败:', err)
-        // 使用浏览器历史记录回退
+      router.push('/home/Operation/zhang').catch(() => {
         window.history.back()
       })
     }
   } catch (error) {
     console.error('路由跳转失败:', error)
-    // 最后的兜底方案，使用浏览器历史记录回退
     window.history.back()
   }
 }
 
-// 编辑文章
-const editArticle = () => {
+// 审核文章
+const handleAudit = async (targetStatus: string) => {
   try {
-    const editQuery = { 
-      action: 'edit',
-      id: articleData.value._id 
+    let confirmMessage = ''
+    let remark = ''
+
+    // 根据目标状态设置确认消息
+    switch (targetStatus) {
+      case '审核成功':
+        confirmMessage = '确认审核通过这篇文章吗？'
+        break
+      case '审核失败':
+        confirmMessage = '确认将这篇文章设置为审核失败吗？'
+        // 如果是设置为审核失败，询问备注
+        const { value } = await ElMessageBox.prompt('请输入审核失败原因（可选）', '审核备注', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPlaceholder: '请输入审核失败原因...'
+        }).catch(() => ({ value: null }))
+        
+        if (value === null) return // 用户取消了操作
+        remark = value || ''
+        break
+      case '未审核':
+        confirmMessage = '确认重新设置为未审核状态吗？'
+        break
     }
     
-    // 先尝试使用路由名称跳转
-    if (router.hasRoute('zhang')) {
-      router.push({ 
-        name: 'zhang',
-        query: editQuery
-      })
+    // 最终确认
+    await ElMessageBox.confirm(confirmMessage, '确认操作', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+
+    auditLoading.value = true
+
+    const response = await updateNewsStatus(articleData.value._id, {
+      status: targetStatus,
+      remark: remark
+    })
+
+    if (response.data.code === 200) {
+      ElMessage.success('审核状态更新成功')
+      // 更新本地数据
+      articleData.value.status = targetStatus
+      if (remark) {
+        articleData.value.auditRemark = remark
+      }
     } else {
-      // 如果路由不存在，跳转到运营管理主页，然后延迟跳转
-      router.push('/home/Operation').then(() => {
-        setTimeout(() => {
-          router.push({
-            path: '/home/Operation/zhang',
-            query: editQuery
-          })
-        }, 100)
-      })
+      ElMessage.error(response.data.msg || '更新失败')
     }
-  } catch (error) {
-    console.error('编辑跳转失败:', error)
-    ElMessage.error('跳转失败，请稍后重试')
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      console.error('审核操作失败:', error)
+      ElMessage.error('操作失败，请稍后重试')
+  }
+  } finally {
+    auditLoading.value = false
   }
 }
 
+
+
 // 获取文章类型标签样式
-const getTypeTagType = (type: string) => {
-  switch (type) {
-    case '图文':
+const getTypeTagType = (articleType: string) => {
+  switch (articleType) {
+    case '文章':
       return 'primary'
     case '视频':
       return 'success'
-    case '音频':
-      return 'warning'
     default:
       return 'info'
   }
@@ -304,16 +365,40 @@ const getTypeTagType = (type: string) => {
 // 获取文章状态标签样式
 const getStatusTagType = (status: string) => {
   switch (status) {
-    case '已发布':
+    case '审核成功':
       return 'success'
-    case '草稿':
-      return 'info'
-    case '待审核':
+    case '未审核':
       return 'warning'
-    case '已下架':
+    case '审核失败':
       return 'danger'
     default:
       return 'info'
+  }
+}
+
+// 获取频道标签样式
+const getChannelTagType = (channel: string) => {
+  switch (channel) {
+    case '推荐':
+      return 'primary'
+    case '政策':
+      return 'success'
+    default:
+      return 'info'
+  }
+}
+
+// 获取渲染类型标签
+const getRenderTypeLabel = (renderType: string) => {
+  switch (renderType) {
+    case 'TEXT_ONLY':
+      return '纯文字'
+    case 'IMAGE_FULL':
+      return '大图图文'
+    case 'IMAGE_RIGHT':
+      return '右侧小图'
+    default:
+      return renderType || '-'
   }
 }
 
@@ -350,45 +435,29 @@ const cleanContent = (content: string) => {
 }
 
 // 根据内容类型获取摘要标题
-const getContentSummaryTitle = (type: string) => {
-  switch (type) {
+const getContentSummaryTitle = (articleType: string) => {
+  switch (articleType) {
     case '视频':
       return '视频简介'
-    case '音频':
-      return '音频简介'
-    case '图文':
+    case '文章':
     default:
       return '内容简介'
   }
 }
 
 // 根据内容类型获取页面标题
-const getPageTitle = (type: string) => {
-  switch (type) {
+const getPageTitle = (articleType: string) => {
+  switch (articleType) {
     case '视频':
       return '视频详情'
-    case '音频':
-      return '音频详情'
-    case '图文':
+    case '文章':
       return '文章详情'
     default:
       return '内容详情'
   }
 }
 
-// 根据内容类型获取编辑按钮文字
-const getEditButtonText = (type: string) => {
-  switch (type) {
-    case '视频':
-      return '编辑视频'
-    case '音频':
-      return '编辑音频'
-    case '图文':
-      return '编辑文章'
-    default:
-      return '编辑内容'
-  }
-}
+
 
 onMounted(() => {
   getArticleDetail()
@@ -425,6 +494,18 @@ onMounted(() => {
   gap: 20px;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.audit-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .page-title {
   display: flex;
   align-items: center;
@@ -451,11 +532,32 @@ onMounted(() => {
 .article-info-card,
 .article-cover-card,
 .article-body-card,
-.article-stats-card {
+.article-stats-card,
+.article-images-card {
   background: white;
   border-radius: 8px;
   padding: 24px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 详情图片网格 */
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.image-item {
+  text-align: center;
+}
+
+.detail-image {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
 }
 
 /* 文章标题 */
@@ -492,6 +594,16 @@ onMounted(() => {
   color: #333;
 }
 
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag-item {
+  margin: 0;
+}
+
 /* 文章摘要 */
 .article-summary {
   margin-top: 20px;
@@ -526,10 +638,11 @@ onMounted(() => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* 内容区域 */
+/* 内容区域卡片标题通用样式 */
 .article-body-card h3,
 .article-cover-card h3,
-.article-stats-card h3 {
+.article-stats-card h3,
+.article-images-card h3 {
   margin: 0 0 20px 0;
   font-size: 18px;
   font-weight: 600;

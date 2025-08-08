@@ -118,8 +118,11 @@ const handleCurrentChange = (page) => {
 <style scoped>
 .table-layout {
   padding: 20px;
-  min-height: 100vh;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
   background-color: #f5f7fa;
+  box-sizing: border-box;
 }
 
 .header-area {

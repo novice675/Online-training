@@ -9,15 +9,24 @@ let CompanySchema = new mongoose.Schema({
     type: String,      // 企业名称，唯一
     unique: true
   },
-  inaddress: String,   // 入驻地址
+  inaddress: String,   // 所属楼宇
   type: String,        // 企业类型
   logo: String,        // 企业 logo
   house: String,       // 房间号或楼号
-  outaddress: String   // 企业所再地址
+  outaddress: String,  // 企业所再地址
+  // 新增外键字段，用于规范化数据结构
+  buildingId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Building',
+  },
+  houseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'House',
+  }
 })
 
 /**
- * 人员表 Person
+ * 人员表 Person·
  */
 let EmployeeSchema = new mongoose.Schema({
   company_id: {
