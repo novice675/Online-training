@@ -10,6 +10,9 @@ export default function Main() {
       case 'chat':
         navigate('/autochat')
         break
+      case 'publish':
+        navigate('/publish')
+        break
       default:
         console.log(`点击了 ${menuType}`)
     }
@@ -82,6 +85,11 @@ export default function Main() {
         <div className="menu-item" onClick={() => handleMenuClick('chat')}>
           <div className="menu-icon">🤖</div>
           <div className="menu-text">智能客服</div>
+          <div className="menu-arrow">{'>'}</div>
+        </div>
+        <div className="menu-item" onClick={() => handleMenuClick('publish')}>
+          <div className="menu-icon">📝</div>
+          <div className="menu-text">发布新闻</div>
           <div className="menu-arrow">{'>'}</div>
         </div>
       </div>

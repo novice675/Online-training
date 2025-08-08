@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import NewsAPI from "../../api/news";
 import type { NewsItem } from "../../types/news";
-import { RenderType } from "../../types/news";
+import { RenderType, Channel } from "../../types/news";
 import { Swiper, Grid } from "antd-mobile";
 import styles from '../../cssmodule/recommend.module.css'
 import { useNavigate } from "react-router-dom";
@@ -19,23 +19,15 @@ export default function Recommend() {
       setLoading(true);
       setError(null);
       
-      const response = await NewsAPI.getNewsList({
+      // 只获取推荐频道的新闻
+      const response = await NewsAPI.getNewsByChannel(Channel.RECOMMEND, {
         page: 1,
         limit: 20,
       });
       
       if (response.success) {
-        // 对新闻列表进行排序：置顶的排在前面
-        const sortedNews = response.data.list.sort((a, b) => {
-          const aIsTop = a.tags.some(tag => tag.includes('置顶'));
-          const bIsTop = b.tags.some(tag => tag.includes('置顶'));
-          
-          if (aIsTop && !bIsTop) return -1; // a置顶，b不置顶，a排在前面
-          if (!aIsTop && bIsTop) return 1;  // a不置顶，b置顶，b排在前面
-          return 0; // 都置顶或都不置顶，保持原有顺序
-        });
-        
-        setNewsList(sortedNews);
+        // 后端已经按优先级排序：置顶 > 热点 > 普通文章
+        setNewsList(response.data.list);
       } else {
         setError("获取新闻数据失败");
       }
@@ -50,8 +42,8 @@ export default function Recommend() {
   // 处理新闻点击
   const handleNewsClick = (news: NewsItem) => {
     console.log("点击新闻:", news.title);
-    // 这里可以添加跳转到详情页的逻辑
-    // 例如：navigate(`/news/${news._id}`);
+    // 跳转到详情页
+    navigate(`/news/${news._id}`);
   };
 
   // 格式化日期
@@ -91,7 +83,7 @@ export default function Recommend() {
             <h3 className="news-title">{news.title}</h3>
             <div className="news-footer">
               {renderTags(news.tags)}
-              {news.author && <span className="news-author">{news.author}</span>}
+              {news.authorId?.username && <span className="news-author">{news.authorId.username}</span>}
               <span className="news-date">{formatDate(news.publishTime)}</span>
               <span className="news-likes">{news.likeCount}</span>
             </div>
@@ -112,7 +104,7 @@ export default function Recommend() {
             )}
             <div className="news-footer">
               {renderTags(news.tags)}
-              {news.author && <span className="news-author">{news.author}</span>}
+              {news.authorId?.username && <span className="news-author">{news.authorId.username}</span>}
               <span className="news-date">{formatDate(news.publishTime)}</span>
               <span className="news-likes">{news.likeCount}</span>
             </div>
@@ -136,7 +128,7 @@ export default function Recommend() {
               </div>
               <div className="news-footer">
                 {renderTags(news.tags)}
-                {news.author && <span className="news-author">{news.author}</span>}
+                {news.authorId?.username && <span className="news-author">{news.authorId.username}</span>}
                 <span className="news-date">
                   {formatDate(news.publishTime)}
                 </span>
@@ -160,7 +152,7 @@ export default function Recommend() {
             <h3 className="news-title">{news.title}</h3>
             <div className="news-footer">
               {renderTags(news.tags)}
-              {news.author && <span className="news-author">{news.author}</span>}
+              {news.authorId?.username && <span className="news-author">{news.authorId.username}</span>}
               <span className="news-date">{formatDate(news.publishTime)}</span>
               <span className="news-likes">{news.likeCount}</span>
             </div>

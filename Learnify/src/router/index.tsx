@@ -22,6 +22,10 @@ import Comment from "../pages/Comment";
 import Middle from "../pages/Middle";
 import Visitors_detail from "../pages/grids/Visitors_detail";
 import AutoChat from '../pages/chat/AutoChat';
+import NewsDetail from '../pages/NewsDetail';
+import CommentPage from '../pages/CommentPage';
+import ReplyDetailPage from '../pages/ReplyDetailPage';
+import PublishNews from '../pages/PublishNews';
 const App = React.lazy(() => import("../App"));
 const Login = React.lazy(() => import("../pages/Login"));
 
@@ -88,6 +92,22 @@ const routes = createBrowserRouter([
   {
     path: '/autochat',
     element: <AutoChat />,
+  },
+  {
+    path: '/news/:id',
+    element: <NewsDetail />,
+  },
+  {
+    path: '/comments/:newsId',
+    element: <CommentPage />,
+  },
+  {
+    path: '/news/:newsId/replies',
+    element: <ReplyDetailPage />,
+  },
+  {
+    path: '/publish',
+    element: <PublishNews />,
   },
 ]);
 

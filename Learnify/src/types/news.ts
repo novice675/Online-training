@@ -5,13 +5,28 @@ export enum RenderType {
   IMAGE_RIGHT = 'IMAGE_RIGHT'    // 右侧小图/头像样式
 }
 
+// 新闻频道枚举
+export enum Channel {
+  RECOMMEND = '推荐',
+  POLICY = '政策'
+}
+
+// 作者信息接口
+export interface AuthorInfo {
+  _id: string;
+  username: string;
+  nickname?: string;
+  avatar?: string;
+}
+
 // 新闻数据接口
 export interface NewsItem {
   _id: string;
   title: string;
   renderType: RenderType;
+  channel: Channel;
   tags: string[];
-  author?: string;
+  authorId?: AuthorInfo;
   publishTime: string;
   likeCount: number;
   coverImage?: string;
@@ -51,4 +66,5 @@ export interface GetNewsParams {
   limit?: number;
   renderType?: RenderType;
   tag?: string;
+  channel?: Channel;
 } 

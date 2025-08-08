@@ -4,7 +4,7 @@ import type {
   NewsDetailResponse, 
   GetNewsParams 
 } from '../types/news';
-import { RenderType } from '../types/news';
+import { RenderType, Channel } from '../types/news';
 
 // 新闻API服务类
 export class NewsAPI {
@@ -48,6 +48,45 @@ export class NewsAPI {
     params: Omit<GetNewsParams, 'tag'> = {}
   ): Promise<NewsListResponse> {
     return this.getNewsList({ ...params, tag });
+  }
+
+  /**
+   * 根据频道获取新闻
+   * @param channel 频道
+   * @param params 其他查询参数
+   */
+  static async getNewsByChannel(
+    channel: Channel, 
+    params: Omit<GetNewsParams, 'channel'> = {}
+  ): Promise<NewsListResponse> {
+    return this.getNewsList({ ...params, channel });
+  }
+
+  /**
+   * 点赞/取消点赞新闻
+   * @param id 新闻ID
+   * @param action 操作类型：'like' 或 'unlike'
+   */
+  static async toggleLike(id: string, action: 'like' | 'unlike'): Promise<{ success: boolean; data: { likeCount: number } }> {
+    return http.post(`${this.baseURL}/news/${id}/like`, { action });
+  }
+
+  /**
+   * 发布新闻
+   * @param newsData 新闻数据
+   */
+  static async publishNews(newsData: {
+    title: string;
+    channel: Channel;
+    renderType: RenderType;
+    authorId: string;
+    rightImage?: string;
+    detailContent: string;
+    detailImages?: string[];
+    publishTime: string;
+    likeCount: number;
+  }): Promise<{ success: boolean; data: { _id: string } }> {
+    return http.post(`${this.baseURL}/news`, newsData);
   }
 }
 

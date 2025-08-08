@@ -1,0 +1,263 @@
+.news-detail-container {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 头部样式 */
+.news-detail-header {
+  background-color: #fff;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e8e8e8;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  margin-bottom: 12px;
+}
+
+.back-button:hover {
+  background-color: #f0f0f0;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 12px;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-details {
+  flex: 1;
+}
+
+.profile-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.verified-badge {
+  background-color: #ffd700;
+  color: #333;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  font-weight: bold;
+}
+
+.profile-meta {
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  align-items: center;
+}
+
+.edited-tag {
+  margin-left: 8px;
+  color: #999;
+}
+
+.follow-button {
+  background-color: #ff6b35;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.follow-button:hover {
+  background-color: #e55a2b;
+}
+
+/* 内容区域样式 */
+.news-detail-content {
+  flex: 1;
+  background-color: #fff;
+  padding: 16px;
+  margin: 8px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.news-tags {
+  margin-bottom: 16px;
+}
+
+.news-tag {
+  display: inline-block;
+  background-color: #f0f8ff;
+  color: #1890ff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.news-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.news-body {
+  margin-bottom: 16px;
+}
+
+.news-body p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.news-image {
+  margin-bottom: 16px;
+}
+
+.news-image img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.news-detail-images {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-image img {
+  width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 底部操作栏样式 */
+.news-detail-actions {
+  background-color: #fff;
+  padding: 16px;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  justify-content: space-around;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+}
+
+.action-button {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.action-button:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.action-button span {
+  font-size: 12px;
+}
+
+/* 点赞状态样式 */
+.action-button.liked {
+  color: #ff4757;
+  background-color: #ffe8e8;
+}
+
+.action-button.liked:hover {
+  background-color: #ffd8d8;
+}
+
+.action-button.liked svg {
+  fill: #ff4757;
+}
+
+/* 加载和错误状态 */
+.loading,
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: #666;
+}
+
+.error button {
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+.error button:hover {
+  background-color: #40a9ff;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .news-detail-content {
+    margin: 4px;
+    padding: 12px;
+  }
+  
+  .news-title {
+    font-size: 18px;
+  }
+  
+  .news-body p {
+    font-size: 15px;
+  }
+} 

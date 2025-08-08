@@ -7,11 +7,13 @@ var cors = require('cors');
 
 const RbacRouter = require('./routes/RBACinit')
 const LCY = require('./routes/LCY')
+const LCYping = require('./routes/LCYping')
 const LCYchat = require('./routes/LCYchat')
 const WYQ = require('./routes/WYQ')
 const Menjin = require('./routes/Menjin')
 const Vehicle = require('./routes/Vehicle')
 const Wen = require('./routes/Wenzhang')
+const Upload = require('./routes/upload')
 
 
 var app = express();
@@ -31,11 +33,13 @@ app.use('/upload', express.static(path.join(__dirname, 'upload')));
 
 app.use('/', RbacRouter);
 app.use('/LCY',LCY)
+app.use('/LCYping',LCYping)
 app.use('/LCYchat',LCYchat)
 app.use('/WYQ',WYQ)
 app.use('/menjin',Menjin)
 app.use('/vehicle',Vehicle)
 app.use('/wen', Wen)
+app.use('/upload', Upload)
 
 
 // catch 404 and forward to error handler
