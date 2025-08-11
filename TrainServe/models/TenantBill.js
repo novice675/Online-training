@@ -148,6 +148,12 @@ TenantBillSchema.index({ paymentStatus: 1 });
 TenantBillSchema.index({ dueDate: 1 });
 TenantBillSchema.index({ createdAt: -1 });
 
-const TenantBill = mongoose.model('TenantBill', TenantBillSchema,'TenantBill');
+// 检查模型是否已存在，避免重复定义
+let TenantBill;
+try {
+  TenantBill = mongoose.model('TenantBill');
+} catch (error) {
+  TenantBill = mongoose.model('TenantBill', TenantBillSchema,'TenantBill');
+}
 
 module.exports = TenantBill; 

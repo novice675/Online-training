@@ -15,9 +15,10 @@ export default function AutoChat() {
     return sessionStorage.getItem('sessionId') || ''
   })
   const [userId] = useState<string>(()=>{
-    return localStorage.getItem('userId') || ''
-  }) // 使用固定用户ID
+    return localStorage.getItem('user_id') || ''
+  }) // 使用当前登录用户的ID
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const isInitialized = useRef(false) // 用于防止重复初始化
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -29,15 +30,19 @@ export default function AutoChat() {
 
   // 初始化聊天会话
   useEffect(() => {
+    // 防止重复初始化
+    if (isInitialized.current) {
+      return
+    }
+
     const initializeChat = async () => {
       try {
-        console.log('初始化聊天，sessionId:', sessionId)
-        console.log('useId',localStorage.getItem('userId'))
+        // 直接从sessionStorage获取最新的sessionId
+        const currentSessionId = sessionStorage.getItem('sessionId') || ''
         
-        if (sessionId && sessionId !== '') {
+        if (currentSessionId && currentSessionId !== '') {
           // 使用保存的会话ID
           console.log('使用现有会话:', sessionId)
-          console.log('用户ID:', userId)
           
           try {
             const historyResponse = await chatAPI.getChatHistory(sessionId, userId, 1, 10)
@@ -47,7 +52,28 @@ export default function AutoChat() {
             
             if (historyResponse.data.messages && historyResponse.data.messages.length > 0) {
               console.log('设置历史消息到状态:', historyResponse.data.messages)
-              setMessages(historyResponse.data.messages)
+              
+              // 检查是否需要添加欢迎消息
+              const messages = historyResponse.data.messages;
+              const firstMessage = messages[0];
+              const hasWelcomeMessage = firstMessage && 
+                !firstMessage.isUser && 
+                firstMessage.content.includes('您好') && 
+                firstMessage.content.includes('智能客服');
+              
+              if (!hasWelcomeMessage) {
+                // 如果没有欢迎消息，在开头添加
+                const welcomeMessage: ChatMessage = {
+                  content: '您好！我是智能客服小助手，有什么可以帮助您的吗？',
+                  isUser: false,
+                  timestamp: new Date(),
+                  sessionId: currentSessionId
+                };
+                setMessages([welcomeMessage, ...messages]);
+              } else {
+                setMessages(messages);
+              }
+              
               setHasMore(historyResponse.data.hasMore)
               setCurrentPage(historyResponse.data.currentPage)
             } else {
@@ -57,7 +83,7 @@ export default function AutoChat() {
                 content: '您好！我是智能客服小助手，有什么可以帮助您的吗？',
                 isUser: false,
                 timestamp: new Date(),
-                sessionId: sessionId
+                sessionId: currentSessionId
               }
               setMessages([welcomeMessage])
             }
@@ -68,27 +94,57 @@ export default function AutoChat() {
               content: '您好！我是智能客服小助手，有什么可以帮助您的吗？',
               isUser: false,
               timestamp: new Date(),
-              sessionId: sessionId
+              sessionId: currentSessionId
             }
             setMessages([welcomeMessage])
           }
         } else {
           // 没有现有会话，创建新会话
-          console.log('创建新会话')
-          const sessionResponse = await chatAPI.createSession(userId)
-          const newSessionId = sessionResponse.data.sessionId
-          setSessionId(newSessionId)
-          sessionStorage.setItem('sessionId', newSessionId)
           
-          // 添加欢迎消息
-          const welcomeMessage: ChatMessage = {
-            content: '您好！我是智能客服小助手，有什么可以帮助您的吗？',
-            isUser: false,
-            timestamp: new Date(),
-            sessionId: newSessionId
+          // 使用sessionStorage作为锁，防止重复创建
+          const lockKey = `chat_initializing_${userId}`
+          if (sessionStorage.getItem(lockKey)) {
+            return
           }
-          setMessages([welcomeMessage])
+          
+          // 设置锁
+          sessionStorage.setItem(lockKey, 'true')
+          
+          try {
+            const sessionResponse = await chatAPI.createSession(userId)
+            const newSessionId = sessionResponse.data.sessionId
+            
+            // 更新state和sessionStorage
+            setSessionId(newSessionId)
+            sessionStorage.setItem('sessionId', newSessionId)
+            
+            // 创建欢迎消息（后端已经包含，这里只是前端显示）
+            const welcomeMessage: ChatMessage = {
+              content: '您好！我是智能客服小助手，有什么可以帮助您的吗？',
+              isUser: false,
+              timestamp: new Date(),
+              sessionId: newSessionId
+            }
+            
+            // 在前端显示欢迎消息
+            setMessages([welcomeMessage])
+          } catch (sessionError) {
+            // 如果创建会话失败，显示错误消息
+            const errorMessage: ChatMessage = {
+              content: '抱歉，创建聊天会话失败，请稍后重试。',
+              isUser: false,
+              timestamp: new Date(),
+              sessionId: 'error'
+            }
+            setMessages([errorMessage])
+          } finally {
+            // 清除锁
+            sessionStorage.removeItem(lockKey)
+          }
         }
+        
+        // 标记为已初始化
+        isInitialized.current = true
       } catch (error) {
         console.error('初始化聊天失败:', error)
         // 添加错误消息
@@ -99,11 +155,24 @@ export default function AutoChat() {
           sessionId: 'error'
         }
         setMessages([errorMessage])
+        isInitialized.current = true
       }
     }
 
-    initializeChat()
-  }, [userId]) // 移除 sessionId 依赖
+    // 只有在userId存在且不为空时才初始化
+    if (userId && userId !== '') {
+      initializeChat()
+    } else {
+      console.log('userId不存在，跳过初始化')
+    }
+  }, [userId]) // 只依赖userId，避免重复执行
+
+  // 组件卸载时清理
+  useEffect(() => {
+    return () => {
+      isInitialized.current = false
+    }
+  }, [])
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !sessionId) return
@@ -134,11 +203,11 @@ export default function AutoChat() {
       // 只有在API调用成功（内容安全）时才添加用户消息到状态
       const userMessage: ChatMessage = {
         content: messageToSend,
-      isUser: true,
+        isUser: true,
         timestamp: new Date(),
         sessionId: sessionId
-    }
-    setMessages(prev => [...prev, userMessage])
+      }
+      setMessages(prev => [...prev, userMessage])
 
       // 如果成功且有AI回复，添加AI回复
       if (response.data?.aiMessage) {
@@ -156,7 +225,7 @@ export default function AutoChat() {
       setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsTyping(false) // 隐藏正在输入指示器
-  }
+    }
   }
 
   const formatTime = (date: Date) => {
@@ -295,3 +364,4 @@ export default function AutoChat() {
     </div>
   )
 }
+

@@ -5,6 +5,9 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var cors = require('cors');
 
+// 确保数据库连接在应用启动时建立
+require('./db');
+
 const RbacRouter = require('./routes/RBACinit')
 const LCY = require('./routes/LCY')
 const LCYping = require('./routes/LCYping')

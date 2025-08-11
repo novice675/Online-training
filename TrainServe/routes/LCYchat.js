@@ -1,100 +1,56 @@
 var express = require('express');
 var router = express.Router();
 const { ChatSession, Message } = require('../models/chat');
-const axios = require('axios');
+const AppUser = require('../models/AppUser');
 
-// 通义千问API配置
-const QWEN_API_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation';
-const QWEN_API_KEY = 'sk-4f71e382f5ed4c32a80041e645862980';
+// 引入新的混合查询系统
+const HybridQuerySystem = require('../services/ai/HybridQuerySystem');
+const { callQwenAPI, checkContentSafety } = require('../utils/aiService');
+
+// 初始化混合查询系统
+const hybridQuerySystem = new HybridQuerySystem();
 
 // 生成会话ID
 function generateSessionId() {
   return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
 
-// 调用通义千问API
-async function callQwenAPI(userMessage, conversationHistory = []) {
+// 使用新的混合查询系统处理用户消息
+async function processUserMessage(userMessage, userId, userRole, conversationHistory = []) {
   try {
-    const messages = [
-      {
-        role: 'system',
-        content: '你是一个智能客服助手，专门为用户提供帮助和解答问题。请用友好、专业的语气回答用户的问题。'
-      },
-      ...conversationHistory.map(msg => ({
-        role: msg.isUser ? 'user' : 'assistant',
-        content: msg.content
-      })),
-      {
-        role: 'user',
-        content: userMessage
-      }
-    ];
-
-    const response = await axios.post(QWEN_API_URL, {
-      model: 'qwen-turbo',
-      input: {
-        messages: messages
-      },
-      parameters: {
-        temperature: 0.7,
-        max_tokens: 1000
-      }
-    }, {
-      headers: {
-        'Authorization': `Bearer ${QWEN_API_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    return response.data.output.text;
+    console.log('使用混合查询系统处理消息:', { userMessage, userId, userRole });
+    
+    // 调用混合查询系统
+    const result = await hybridQuerySystem.processQuery(
+      userMessage, 
+      userId, 
+      userRole, 
+      conversationHistory
+    );
+    
+    console.log('混合查询系统处理结果:', result);
+    return result;
+    
   } catch (error) {
-    console.error('通义千问API调用失败:', error);
-    return '抱歉，我现在无法回答您的问题，请稍后再试。';
+    console.error('混合查询系统处理失败:', error);
+    // 降级到简单的AI回复
+    return {
+      type: 'fallback',
+      content: '抱歉，系统暂时无法处理您的请求，请稍后重试。',
+      needsData: false
+    };
   }
 }
 
-// AI内容审核函数
-async function checkContentSafety(message) {
+// 获取用户角色（简化实现，实际应该从数据库或JWT中获取）
+async function getUserRole(userId) {
   try {
-    const auditPrompt = `请判断以下内容是否包含不当、违法、政治敏感或色情信息。请严格按照以下格式回答：
-    
-    内容：${message}
-    
-    请只回答"安全"或"不安全"，不要添加任何其他内容。`;
-    
-    const response = await axios.post(QWEN_API_URL, {
-      model: 'qwen-turbo',
-      input: {
-        messages: [
-          {
-            role: 'system',
-            content: '你是一个内容审核助手，专门判断内容是否安全。请严格按照要求回答。'
-          },
-          {
-            role: 'user',
-            content: auditPrompt
-          }
-        ]
-      },
-      parameters: {
-        temperature: 0.1,
-        max_tokens: 10
-      }
-    }, {
-      headers: {
-        'Authorization': `Bearer ${QWEN_API_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    const result = response.data.output.text.trim();
-    console.log('内容审核结果:', result);
-    
-    return result === '安全';
+    // 这里应该根据实际业务逻辑获取用户角色
+    // 暂时返回默认角色
+    return 'user';
   } catch (error) {
-    console.error('内容审核API调用失败:', error);
-    // 如果审核失败，默认允许发送（避免误杀）
-    return true;
+    console.error('获取用户角色失败:', error);
+    return 'user'; // 默认角色
   }
 }
 
@@ -109,7 +65,7 @@ router.get('/history/:sessionId', async (req, res) => {
     const session = await ChatSession.findOne({ 
       sessionId: sessionId,
       userId: userId 
-    });
+    }).populate('userId', 'username avatar');
     
     console.log('查询到的会话:', session);
 
@@ -228,14 +184,13 @@ router.post('/send', async (req, res) => {
 
     console.log('内容审核通过，继续处理消息');
 
-    // 查找或创建会话
+    // 查找会话
     let session = await ChatSession.findOne({ sessionId, userId });
     
     if (!session) {
-      session = new ChatSession({
-        sessionId,
-        userId,
-        messages: []
+      return res.status(404).json({
+        success: false,
+        message: '会话不存在，请先创建会话'
       });
     }
 
@@ -252,8 +207,28 @@ router.post('/send', async (req, res) => {
     // 获取对话历史用于AI回复
     const conversationHistory = session.messages.slice(-10); // 最近10条消息
 
-    // 调用通义千问API获取回复
-    const aiResponse = await callQwenAPI(message, conversationHistory);
+    // 获取用户角色
+    const userRole = await getUserRole(userId);
+
+    // 使用新的混合查询系统处理消息
+    console.log('开始处理用户消息:', { message, userId, userRole });
+    const aiResult = await processUserMessage(message, userId, userRole, conversationHistory);
+
+    // 根据处理结果生成AI回复
+    let aiResponse;
+    if (aiResult.type === 'query' && aiResult.needsData) {
+      // 数据库查询结果
+      aiResponse = `基于数据库查询结果：\n\n${aiResult.content}\n\n查询类型：${aiResult.queryPlan?.queryType || 'unknown'}\n目标表：${aiResult.queryPlan?.targetTable || 'unknown'}`;
+    } else if (aiResult.type === 'conversation') {
+      // 简单对话回复
+      aiResponse = aiResult.content;
+    } else if (aiResult.type === 'fallback') {
+      // 降级回复
+      aiResponse = aiResult.content;
+    } else {
+      // 默认回复
+      aiResponse = aiResult.content || '抱歉，我暂时无法理解您的问题，请稍后重试。';
+    }
 
     // 添加AI回复
     const aiMessage = {
@@ -288,8 +263,9 @@ router.get('/sessions/:userId', async (req, res) => {
     const { userId } = req.params;
     
     const sessions = await ChatSession.find({ userId })
+      .populate('userId', 'username avatar')
       .sort({ updatedAt: -1 })
-      .select('sessionId createdAt updatedAt messages')
+      .select('sessionId createdAt updatedAt messages userId')
       .limit(20);
 
     res.json({
@@ -325,6 +301,69 @@ router.delete('/session/:sessionId', async (req, res) => {
     res.status(500).json({
       success: false,
       message: '删除会话失败'
+    });
+  }
+});
+
+// 系统状态查询
+router.get('/status', async (req, res) => {
+  try {
+    const systemStatus = hybridQuerySystem.getSystemStatus();
+    
+    res.json({
+      success: true,
+      data: {
+        system: 'Hybrid Query System',
+        status: systemStatus.status,
+        modules: systemStatus.modules,
+        timestamp: systemStatus.timestamp
+      }
+    });
+  } catch (error) {
+    console.error('获取系统状态失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取系统状态失败'
+    });
+  }
+});
+
+// 测试混合查询系统
+router.post('/test', async (req, res) => {
+  try {
+    const { message, userId, userRole } = req.body;
+    
+    if (!message || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: '缺少必要参数'
+      });
+    }
+
+    console.log('测试混合查询系统:', { message, userId, userRole: userRole || 'user' });
+    
+    const result = await hybridQuerySystem.processQuery(
+      message, 
+      userId, 
+      userRole || 'user', 
+      []
+    );
+
+    res.json({
+      success: true,
+      data: {
+        testMessage: message,
+        result: result,
+        timestamp: new Date().toISOString()
+      }
+    });
+    
+  } catch (error) {
+    console.error('测试混合查询系统失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '测试失败',
+      error: error.message
     });
   }
 });

@@ -109,6 +109,12 @@ BuildingSchema.pre('findOneAndUpdate', function(next) {
     next();
 });
 
-const BuildingModel = mongoose.model('Building', BuildingSchema, 'Building');
+// 检查模型是否已存在，避免重复定义
+let BuildingModel;
+try {
+  BuildingModel = mongoose.model('Building');
+} catch (error) {
+  BuildingModel = mongoose.model('Building', BuildingSchema, 'Building');
+}
 
 module.exports = BuildingModel;

@@ -23,6 +23,8 @@ export interface CommentItem {
   createdAt: string;
   updatedAt: string;
   replies?: CommentItem[];
+  // 前端本地用来稳定渲染用的键，避免乐观更新替换导致节点重建
+  clientKey?: string;
 }
 
 // 分页信息接口

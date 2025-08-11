@@ -20,52 +20,21 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
   const [replyTo, setReplyTo] = useState<CommentItem | null>(null);
   const [commentContent, setCommentContent] = useState("");
 
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const repliesListRef = useRef<HTMLDivElement>(null);
 
   // 滚动到新评论
-  const scrollToNewComment = (commentId: string) => {
-    console.log('开始滚动到回复:', commentId);
-    
-    // 立即滚动，不需要等待DOM更新
-    setTimeout(() => {
-      const commentElement = document.getElementById(`reply-${commentId}`);
-      console.log('查找回复元素:', commentElement);
-      
-      if (commentElement) {
-        // 计算元素相对于当前视口的位置
-        const elementRect = commentElement.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const currentScrollTop = window.pageYOffset;
-        
-        // 计算需要滚动的距离，让元素显示在视口中心偏下位置
-        const targetScrollTop = currentScrollTop + elementRect.top - (viewportHeight * 0.3);
-        
-        // 平滑滚动到目标位置
-        window.scrollTo({
-          top: targetScrollTop,
-          behavior: 'smooth'
-        });
-        
-        // 添加高亮效果
-        commentElement.style.backgroundColor = '#fff3cd';
-        commentElement.style.transition = 'background-color 0.3s';
-        setTimeout(() => {
-          commentElement.style.backgroundColor = '';
-        }, 2000);
-        
-        console.log('滚动完成');
-      } else {
-        console.log('未找到回复元素，滚动到页面底部');
-        // 如果找不到元素，滚动到页面底部
-        window.scrollTo({
-          top: document.body.scrollHeight,
-          behavior: 'smooth'
-        });
-      }
-    }, 50); // 减少延迟，立即滚动
+  const scrollToNewComment = (domKey: string) => {
+    const id = `reply-${domKey}`;
+    requestAnimationFrame(() => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const targetTop = window.pageYOffset + rect.top - window.innerHeight * 0.3;
+      window.scrollTo({ top: targetTop, behavior: 'smooth' });
+      el.style.backgroundColor = '#fff3cd';
+      el.style.transition = 'background-color 0.3s';
+      setTimeout(() => { el.style.backgroundColor = ''; }, 1600);
+    });
   };
 
   // 获取主评论
@@ -95,20 +64,18 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
   };
 
   // 获取回复列表
-  const fetchReplies = async (pageNum = 1) => {
+  const fetchReplies = async () => {
     if (!newsId || !mainComment) return;
     
     try {
       setLoading(true);
       const response = await CommentAPI.getReplies(mainComment._id, { 
-        page: pageNum, 
-        limit: 20 
+        page: 1, 
+        limit: 1000 // 获取所有回复，不使用分页
       });
       
       if (response.success) {
         setReplies(response.data.list);
-        setHasMore(response.data.list.length === 20);
-        setPage(pageNum);
       }
     } catch (err) {
       console.error("获取回复失败:", err);
@@ -129,7 +96,7 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
   // 主评论获取后加载回复
   useEffect(() => {
     if (mainComment) {
-      fetchReplies(1);
+      fetchReplies();
     }
   }, [mainComment]);
 
@@ -159,8 +126,10 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
       const userInfo = userResponse.data;
 
       // 创建临时回复对象
+      const tempClientKey = `ck-${Date.now()}`;
       const tempReply: CommentItem = {
         _id: `temp-${Date.now()}`,
+        clientKey: tempClientKey,
         newsId: newsId || '',
         content: commentContent,
         userId: {
@@ -178,11 +147,11 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
         rootId: mainComment._id
       };
 
-      // 立即添加到回复列表
+      // 立即添加到回复列表末尾（乐观渲染）
       setReplies(prev => [...prev, tempReply]);
       
       // 立即滚动到新位置
-      scrollToNewComment(tempReply._id);
+      scrollToNewComment(tempReply.clientKey || tempReply._id);
       
       // 清空表单
       setCommentContent("");
@@ -199,7 +168,9 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
       if (response.success) {
         setReplies(prev => 
           prev.map(reply => 
-            reply._id === tempReply._id ? response.data : reply
+            reply._id === tempReply._id 
+              ? { ...response.data, clientKey: tempReply.clientKey }
+              : reply
           )
         );
       } else {
@@ -262,11 +233,11 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
         rootId: replyTo.rootId || replyTo._id
       };
 
-      // 立即添加到回复列表
+      // 立即添加到回复列表末尾（乐观渲染）
       setReplies(prev => [...prev, tempReply]);
       
       // 立即滚动到新位置
-      scrollToNewComment(tempReply._id);
+      scrollToNewComment(tempReply.clientKey || tempReply._id);
       
       // 清空表单
       setCommentContent("");
@@ -284,7 +255,7 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
       if (response.success) {
         setReplies(prev => 
           prev.map(reply => 
-            reply._id === tempReply._id ? response.data : reply
+            reply._id === tempReply._id ? { ...response.data, clientKey: tempReply.clientKey } : reply
           )
         );
       } else {
@@ -325,47 +296,11 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
     }
   };
 
-  // 加载更多回复
-  const loadMoreReplies = async () => {
-    if (loadingMore || !hasMore || !mainComment) return;
-    
-    try {
-      // 1. 记录当前滚动位置
-      const currentScrollTop = window.pageYOffset;
-      
-      // 2. 设置加载状态
-      setLoadingMore(true);
-      
-      // 3. 获取下一页数据
-      const response = await CommentAPI.getReplies(mainComment._id, { 
-        page: page + 1, 
-        limit: 20 
-      });
-      
-      if (response.success) {
-        // 4. 追加新数据到现有列表
-        setReplies(prev => [...prev, ...response.data.list]);
-        setPage(page + 1);
-        setHasMore(response.data.list.length === 20);
-        
-        // 5. 恢复滚动位置
-        requestAnimationFrame(() => {
-          window.scrollTo({ top: currentScrollTop, behavior: 'auto' });
-        });
-      }
-    } catch (error) {
-      console.error('加载更多失败:', error);
-      setError('加载更多失败，请重试');
-    } finally {
-      setLoadingMore(false);
-    }
-  };
-
   // 渲染单个回复
   const renderReply = (reply: CommentItem) => (
     <div 
-      key={reply._id} 
-      id={`reply-${reply._id}`}
+      key={reply.clientKey || reply._id}
+      id={`reply-${reply.clientKey || reply._id}`}
       className="reply-item"
     >
       <div className="reply-header">
@@ -477,33 +412,20 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
 
       {/* 回复列表 */}
       <div className="replies-list" ref={repliesListRef}>
-        {loading && page === 1 ? (
+        {loading ? (
           <div className="loading">加载中...</div>
         ) : error ? (
           <div className="error">
             <p>{error}</p>
-            <button onClick={() => fetchReplies(1)}>重试</button>
+            <button onClick={() => fetchReplies()}>重试</button>
           </div>
         ) : replies.length === 0 ? (
           <div className="empty">暂无回复，快来抢沙发吧！</div>
         ) : (
           <>
-            {replies.map((reply, index) => (
-              <div key={`${reply._id}-${index}`}>
-                {renderReply(reply)}
-              </div>
+            {replies.map((reply) => (
+              renderReply(reply)
             ))}
-            {hasMore && (
-              <div className="load-more">
-                <button 
-                  className="load-more-btn"
-                  onClick={loadMoreReplies}
-                  disabled={loadingMore}
-                >
-                  {loadingMore ? '加载中...' : '加载更多'}
-                </button>
-              </div>
-            )}
           </>
         )}
       </div>

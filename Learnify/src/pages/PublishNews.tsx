@@ -90,7 +90,7 @@ const PublishNews: React.FC = () => {
           className="back-button"
           onClick={() => navigate(-1)}
         >
-          ← 返回
+          ← 
         </button>
         <h1>发布新闻</h1>
       </div>

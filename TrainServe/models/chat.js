@@ -30,7 +30,8 @@ const chatSessionSchema = new mongoose.Schema({
     unique: true
   },
   userId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'AppUser',
     required: true
   },
   messages: [messageSchema],

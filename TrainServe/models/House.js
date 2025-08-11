@@ -164,6 +164,12 @@ HouseSchema.pre('findOneAndUpdate', async function(next) {
 // 创建复合索引，确保同一楼宇内房间号唯一
 HouseSchema.index({ buildingId: 1, number: 1 }, { unique: true });
 
-const HouseModel = mongoose.model('House', HouseSchema, 'House');
+// 检查模型是否已存在，避免重复定义
+let HouseModel;
+try {
+  HouseModel = mongoose.model('House');
+} catch (error) {
+  HouseModel = mongoose.model('House', HouseSchema, 'House');
+}
 
 module.exports = HouseModel;

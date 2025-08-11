@@ -79,6 +79,12 @@ HeTongSchema.methods.getStatus = function() {
   return this.end_date > now ? '生效中' : '已到期';
 };
 
-const HeTong = mongoose.model('HeTong', HeTongSchema,'HeTong');
+// 检查模型是否已存在，避免重复定义
+let HeTong;
+try {
+  HeTong = mongoose.model('HeTong');
+} catch (error) {
+  HeTong = mongoose.model('HeTong', HeTongSchema, 'HeTong');
+}
 
 module.exports = { HeTong };

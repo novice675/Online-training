@@ -74,8 +74,10 @@ export default function CommentSection({ newsId }: CommentSectionProps) {
       const userInfo = userResponse.data;
 
       // 创建临时评论对象
+      const tempClientKey = `ck-${Date.now()}`;
       const tempComment: CommentItem = {
         _id: `temp-${Date.now()}`,
+        clientKey: tempClientKey,
         newsId: newsId,
         content: commentContent,
         userId: {
@@ -94,8 +96,8 @@ export default function CommentSection({ newsId }: CommentSectionProps) {
       // 立即添加到UI
       setComments(prev => [...prev, tempComment]);
       
-      // 立即滚动到新位置
-      scrollToNewComment(tempComment._id);
+      // 立即滚动到新位置（使用稳定的 clientKey）
+      scrollToNewComment(tempComment.clientKey || tempComment._id);
       
       // 清空表单
       setCommentContent("");
@@ -107,12 +109,12 @@ export default function CommentSection({ newsId }: CommentSectionProps) {
         userId: user_id
       });
 
-      // 用真实数据替换临时数据
+      // 用真实数据替换临时数据（保留 clientKey 防止节点重建）
       if (response.success) {
         setComments(prev => 
           prev.map(comment => 
             comment._id === tempComment._id 
-              ? response.data 
+              ? { ...response.data, clientKey: tempComment.clientKey }
               : comment
           )
         );
@@ -157,8 +159,10 @@ export default function CommentSection({ newsId }: CommentSectionProps) {
       const userInfo = userResponse.data;
 
       // 创建临时回复对象
+      const tempClientKey = `ck-${Date.now()}`;
       const tempReply: CommentItem = {
         _id: `temp-${Date.now()}`,
+        clientKey: tempClientKey,
         newsId: newsId,
         content: commentContent,
         userId: {
@@ -212,7 +216,7 @@ export default function CommentSection({ newsId }: CommentSectionProps) {
               ? {
                   ...comment,
                   replies: comment.replies?.map(reply => 
-                    reply._id === tempReply._id ? response.data : reply
+                    reply._id === tempReply._id ? { ...response.data, clientKey: tempReply.clientKey } : reply
                   ) || []
                 }
               : comment
@@ -285,46 +289,26 @@ export default function CommentSection({ newsId }: CommentSectionProps) {
   };
 
   // 滚动到新评论
-  const scrollToNewComment = (commentId: string) => {
-    console.log('开始滚动到评论:', commentId);
-    
-    // 立即滚动，不需要等待DOM更新
-    setTimeout(() => {
-      const commentElement = document.getElementById(`comment-${commentId}`);
+  const scrollToNewComment = (domKey: string) => {
+    // 与DOM id保持一致（clientKey优先）
+    const id = `comment-${domKey}`;
+    requestAnimationFrame(() => {
+      const commentElement = document.getElementById(id);
       console.log('查找元素:', commentElement);
       
       if (commentElement) {
-        // 计算元素相对于当前视口的位置
         const elementRect = commentElement.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
         const currentScrollTop = window.pageYOffset;
-        
-        // 计算需要滚动的距离，让元素显示在视口中心偏下位置
         const targetScrollTop = currentScrollTop + elementRect.top - (viewportHeight * 0.3);
-        
-        // 平滑滚动到目标位置
-        window.scrollTo({
-          top: targetScrollTop,
-          behavior: 'smooth'
-        });
-        
-        // 添加高亮效果
+        window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
         commentElement.style.backgroundColor = '#fff3cd';
         commentElement.style.transition = 'background-color 0.3s';
-        setTimeout(() => {
-          commentElement.style.backgroundColor = '';
-        }, 2000);
-        
-        console.log('滚动完成');
+        setTimeout(() => { commentElement.style.backgroundColor = ''; }, 2000);
       } else {
-        console.log('未找到元素，滚动到页面底部');
-        // 如果找不到元素，滚动到页面底部
-        window.scrollTo({
-          top: document.body.scrollHeight,
-          behavior: 'smooth'
-        });
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
       }
-    }, 50); // 减少延迟，立即滚动
+    });
   };
 
   // 组件挂载时获取数据
@@ -337,8 +321,8 @@ export default function CommentSection({ newsId }: CommentSectionProps) {
   // 渲染单个评论
   const renderComment = (comment: CommentItem, isReply = false) => (
     <div 
-      key={comment._id} 
-      id={`comment-${comment._id}`}
+      key={comment.clientKey || comment._id}
+      id={`comment-${comment.clientKey || comment._id}`}
       className={`comment-item ${isReply ? 'reply' : ''}`}
     >
       <div className="comment-header">
