@@ -16,74 +16,15 @@
     </div>
 
     <!-- 筛选面板 -->
-    <el-card class="filter-card" shadow="never">
-      <el-form :model="filterForm" inline>
-        <el-form-item label="租户名称：">
-          <el-input 
-            v-model="filterForm.companyName" 
-            placeholder="请输入租户名称"
-            clearable
-            style="width: 200px"
-          />
-        </el-form-item>
-        
-        <el-form-item label="所属楼宇：">
-          <el-input 
-            v-model="filterForm.buildingName" 
-            placeholder="请输入楼宇名称"
-            clearable
-            style="width: 150px"
-          />
-        </el-form-item>
-        
-        <el-form-item label="房间名称：">
-          <el-input 
-            v-model="filterForm.roomNumber" 
-            placeholder="请输入房间名称"
-            clearable
-            style="width: 200px"
-          />
-        </el-form-item>
-        
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
-        </el-form-item>
-      </el-form>
-      
-      <el-form :model="filterForm" inline style="margin-top: 10px">
-        <el-form-item label="账单类型：">
-          <el-select 
-            v-model="filterForm.billType" 
-            placeholder="请选择"
-            clearable
-            style="width: 150px"
-          >
-            <el-option label="全部" value="" />
-            <el-option label="水电费" value="水电费" />
-            <el-option label="物业费" value="物业费" />
-          </el-select>
-        </el-form-item>
-
-        
-        <el-form-item label="缴费状态：">
-          <el-select 
-            v-model="filterForm.paymentStatus" 
-            placeholder="请选择"
-            clearable
-            style="width: 150px"
-          >
-            <el-option label="全部" value="" />
-            <el-option label="未缴费" value="未缴费" />
-            <el-option label="已缴费" value="已缴费" />
-            <el-option label="逾期" value="逾期" />
-          </el-select>
-        </el-form-item>
-      </el-form>
-    </el-card>
+    <FilterPanel 
+      v-model="filterForm"
+      :filter-fields="filterFields"
+      @search="handleSearch"
+      @reset="handleReset"
+    />
 
     <!-- 数据表格 -->
-    <el-card shadow="never">
+    <div class="table-container">
       <el-table 
         :data="tableData" 
         v-loading="loading"
@@ -155,7 +96,7 @@
           @current-change="handleCurrentChange"
         />
       </div>
-    </el-card>
+    </div>
 
     <!-- 详情弹窗 -->
     <el-dialog 
@@ -469,6 +410,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import FilterPanel from '@/components/FilterPanel.vue'
 import { 
   getTenantBillList, 
   addTenantBill, 
@@ -524,12 +466,45 @@ const pagination = reactive({
 // 筛选表单
 const filterForm = reactive({
   companyName: '',
-  buildingName: '',
-  roomNumber: '',
   billType: '',
   startDate: '',
   paymentStatus: ''
 })
+
+// 筛选字段配置
+const filterFields = [
+  {
+    key: 'companyName',
+    label: '租户名称',
+    type: 'input' as const,
+    placeholder: '请输入租户名称',
+    width: '280px'
+  },
+  {
+    key: 'billType',
+    label: '账单类型',
+    type: 'select' as const,
+    placeholder: '请选择账单类型',
+    width: '200px',
+    options: [
+      { label: '水电费', value: '水电费' },
+      { label: '物业费', value: '物业费' }
+    ]
+  },
+  {
+    key: 'paymentStatus',
+    label: '缴费状态',
+    type: 'select' as const,
+    placeholder: '请选择缴费状态',
+    width: '200px',
+    options: [
+      { label: '未缴费', value: '未缴费' },
+      { label: '已缴费', value: '已缴费' },
+      { label: '部分缴费', value: '部分缴费' },
+      { label: '逾期', value: '逾期' }
+    ]
+  }
+]
 
 // 表单数据
 const formData = ref<TenantBillData>({
@@ -811,7 +786,19 @@ onMounted(() => {
 
 <style scoped>
 .tenant-bill-container {
-  padding: 20px;
+  padding: 24px;
+  background: #f8fafc;
+  min-height: calc(100vh - 165px);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .page-header {
@@ -831,17 +818,7 @@ onMounted(() => {
   gap: 10px;
 }
 
-.filter-card {
-  margin-bottom: 20px;
-}
 
-.filter-card :deep(.el-card__body) {
-  padding: 20px;
-}
-
-.filter-card :deep(.el-form-item) {
-  margin-bottom: 10px;
-}
 
 .pagination-container {
   display: flex;
@@ -917,5 +894,55 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+}
+
+/* 表格样式优化 */
+:deep(.el-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-table th) {
+  background-color: #f8fafc;
+  color: #303133;
+  font-weight: 600;
+  border-bottom: 2px solid #e4e7ed;
+}
+
+:deep(.el-table td) {
+  padding: 16px 0;
+}
+
+:deep(.el-table tbody tr:hover > td) {
+  background-color: #f0f9ff;
+}
+
+/* 标签样式优化 */
+:deep(.el-tag) {
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+/* 按钮样式优化 */
+:deep(.el-button) {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-button:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 分页样式优化 */
+:deep(.el-pagination) {
+  justify-content: center;
+}
+
+:deep(.el-pagination .el-pager li) {
+  border-radius: 6px;
+  margin: 0 2px;
 }
 </style>

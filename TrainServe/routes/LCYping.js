@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+const mongoose = require('mongoose');
 const { Comments } = require('../models/Comment');
 const AppUser = require('../models/AppUser');
 
@@ -55,10 +56,20 @@ router.get('/news/:newsId/comments', async (req, res) => {
         .sort({ createdAt: 1 })
         .lean();
         
+        console.log(`📊 [后端] 评论 ${comment._id} 的回复统计:`, {
+          commentTitle: comment.content?.substring(0, 20) + '...',
+          repliesFound: replies.length,
+          originalReplyCount: comment.replyCount,
+          userInfo: comment.userId ? {
+            username: comment.userId.username,
+            type: typeof comment.userId
+          } : 'no user'
+        });
+        
         return {
           ...comment,
           replies,
-          replyCount: replies.length
+          replyCount: replies.length // 使用实际查询到的回复数量
         };
       })
     );
@@ -297,6 +308,139 @@ router.post('/comments/:commentId/like', async (req, res) => {
     res.status(500).json({
       success: false,
       message: '点赞评论失败',
+      error: error.message
+    });
+  }
+});
+
+// 删除单个评论
+router.delete('/comments/:commentId', async (req, res) => {
+  try {
+    const { commentId } = req.params;
+    
+    console.log('🗑️ [后端] 删除评论请求，ID:', commentId);
+    
+    // 验证评论ID格式
+    if (!commentId || !mongoose.Types.ObjectId.isValid(commentId)) {
+      console.log('❌ [后端] 评论ID格式无效:', commentId);
+      return res.status(400).json({
+        success: false,
+        message: '评论ID格式无效'
+      });
+    }
+    
+    // 查找要删除的评论
+    const comment = await Comments.findById(commentId);
+    if (!comment) {
+      console.log('❌ [后端] 评论不存在，ID:', commentId);
+      return res.status(404).json({
+        success: false,
+        message: '评论不存在'
+      });
+    }
+    
+    // 删除评论及其所有回复
+    if (!comment.parentId) {
+      // 这是根评论，需要删除所有回复
+      const deleteCount = await Comments.deleteMany({
+        $or: [
+          { _id: commentId },
+          { rootId: commentId }
+        ]
+      });
+      console.log(`✅ [后端] 删除根评论及其回复，共删除 ${deleteCount.deletedCount} 条`);
+    } else {
+      // 这是回复，只删除这条回复
+      await Comments.findByIdAndDelete(commentId);
+      
+      // 更新父评论的回复数
+      if (comment.parentId) {
+        await Comments.findByIdAndUpdate(comment.parentId, {
+          $inc: { replyCount: -1 }
+        });
+      }
+      console.log('✅ [后端] 删除回复评论成功');
+    }
+    
+    res.json({
+      success: true,
+      message: '删除评论成功'
+    });
+  } catch (error) {
+    console.error('❌ [后端] 删除评论失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '删除评论失败',
+      error: error.message
+    });
+  }
+});
+
+// 批量删除评论
+router.delete('/comments/batch', async (req, res) => {
+  try {
+    const { ids } = req.body;
+    
+    console.log('🗑️ [后端] 批量删除评论请求，IDs:', ids);
+    
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: '请提供要删除的评论ID列表'
+      });
+    }
+    
+    // 验证所有ID格式
+    const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+    if (validIds.length !== ids.length) {
+      return res.status(400).json({
+        success: false,
+        message: '存在无效的评论ID格式'
+      });
+    }
+    
+    // 查找要删除的评论
+    const comments = await Comments.find({ _id: { $in: validIds } });
+    
+    let totalDeleted = 0;
+    
+    // 处理每个评论的删除
+    for (const comment of comments) {
+      if (!comment.parentId) {
+        // 根评论：删除评论及其所有回复
+        const deleteResult = await Comments.deleteMany({
+          $or: [
+            { _id: comment._id },
+            { rootId: comment._id }
+          ]
+        });
+        totalDeleted += deleteResult.deletedCount;
+      } else {
+        // 回复：只删除这条回复
+        await Comments.findByIdAndDelete(comment._id);
+        totalDeleted += 1;
+        
+        // 更新父评论的回复数
+        if (comment.parentId) {
+          await Comments.findByIdAndUpdate(comment.parentId, {
+            $inc: { replyCount: -1 }
+          });
+        }
+      }
+    }
+    
+    console.log(`✅ [后端] 批量删除评论成功，共删除 ${totalDeleted} 条`);
+    
+    res.json({
+      success: true,
+      message: `成功删除 ${totalDeleted} 条评论`,
+      deletedCount: totalDeleted
+    });
+  } catch (error) {
+    console.error('❌ [后端] 批量删除评论失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '批量删除评论失败',
       error: error.message
     });
   }

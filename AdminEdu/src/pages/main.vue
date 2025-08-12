@@ -46,22 +46,6 @@
             </el-dropdown>
         </header>
 
-        <div class="campus-selector">
-            <div class="selector-container">
-                <div class="selector-left">
-                    <span class="selector-label">选择校区:</span>
-                    <el-select v-model="selectedCampus" placeholder="xxxx校区" class="campus-select" clearable>
-                        <el-option label="北京校区" value="beijing" />
-                        <el-option label="上海校区" value="shanghai" />
-                        <el-option label="广州校区" value="guangzhou" />
-                        <el-option label="深圳校区" value="shenzhen" />
-                    </el-select>
-                </div>
-                <div>
-                    <span class="time-display">{{ currentTime }}</span>
-                </div>
-            </div>
-        </div>
         <div class="router-container">
             <router-view></router-view>
         </div>
@@ -434,10 +418,32 @@ onMounted(() => {
 
 /* Router容器样式 */
 .router-container {
-    height: calc(100vh - 85px - 80px);
+    min-height: calc(100vh - 85px - 80px);
     /* 100vh - headerTop高度 - campus-selector高度 */
-    overflow: hidden;
+    overflow: auto;
     background-color: #f0f2f5;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Router容器滚动条样式 */
+.router-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.router-container::-webkit-scrollbar-thumb {
+    background: #c0c4cc;
+    border-radius: 4px;
+}
+
+.router-container::-webkit-scrollbar-thumb:hover {
+    background: #909399;
+}
+
+.router-container::-webkit-scrollbar-track {
+    background: #f5f7fa;
+    border-radius: 4px;
 }
 
 /* 移动端响应式 */
@@ -463,7 +469,7 @@ onMounted(() => {
     }
 
     .router-container {
-        height: calc(100vh - 85px - 120px);
+        min-height: calc(100vh - 85px - 120px);
         /* 移动端campus-selector更高 */
     }
 }

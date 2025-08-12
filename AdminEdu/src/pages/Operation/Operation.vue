@@ -15,7 +15,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import Menu from '@/components/Menu.vue'
+import Menu from '../../components/Menu.vue'
 import { RouterView } from 'vue-router'
 const isCollapse = ref(false)
 </script>
@@ -24,14 +24,14 @@ const isCollapse = ref(false)
 .container {
     display: flex;
     width: 100%;
-    height: 100%;
+    min-height: calc(100vh - 165px); /* 100vh - header(85px) - campus-selector(80px) */
     background-color: #f0f2f5;
     overflow: hidden;
 }
 
 .menu {
     width: 240px;
-    min-height: 100%;
+    height: 2000px ;/* 确保侧边栏有完整高度 */
     background-color: #304156;
     color: #fff;
     display: flex;
@@ -40,7 +40,7 @@ const isCollapse = ref(false)
     transition: all 0.3s ease-in-out;
     z-index: 1000;
     position: relative;
-    overflow: hidden;
+    overflow: hidden; /* 保持无滚动条，但使用正确的高度 */
 }
 
 .menu.collapse {

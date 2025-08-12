@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
+const mongoose = require('mongoose');
 const {News} = require('../models/news')
+const socketManager = require('../socket/index')
 const AppUser = require('../models/AppUser');
 
 
@@ -189,6 +191,12 @@ router.post('/news', async (req, res) => {
 
     const savedNews = await news.save();
 
+    // 通知移动端
+    socketManager.notifyArticleCreated({
+      title: savedNews.title,
+      content: savedNews.detailContent
+    });
+
     res.status(201).json({
       success: true,
       data: {
@@ -342,6 +350,9 @@ router.delete('/news/:id', async (req, res) => {
       });
     }
     
+    // 通知移动端
+    socketManager.notifyArticleDeleted(id, deletedNews.title);
+    
     res.json({
       success: true,
       message: '删除成功',
@@ -370,6 +381,11 @@ router.delete('/news/batch', async (req, res) => {
     }
     
     const result = await News.deleteMany({ _id: { $in: ids } });
+    
+    // 通知移动端批量删除
+    if (result.deletedCount > 0) {
+      socketManager.notifyArticleDeleted('batch', `${result.deletedCount}篇新闻`);
+    }
     
     res.json({
       success: true,
@@ -441,12 +457,19 @@ router.get('/admin/news', async (req, res) => {
     // 计算跳过的文档数量
     const skip = (parseInt(page) - 1) * parseInt(pageSize);
     
-    // 查询新闻数据
+    // 查询新闻数据，并关联作者信息
     const news = await News.find(query)
+      .populate('authorId', 'username avatar') // 关联作者信息
       .sort({ publishTime: -1, createdAt: -1 })
       .skip(skip)
       .limit(parseInt(pageSize))
       .lean();
+    
+    console.log('📋 [后端] 管理端新闻列表查询结果样例:', news.length > 0 ? {
+      title: news[0].title,
+      authorId: news[0].authorId,
+      hasAuthor: !!news[0].authorId
+    } : '无数据');
     
     // 获取总数
     const total = await News.countDocuments(query);
@@ -477,6 +500,7 @@ router.get('/admin/news', async (req, res) => {
 router.get('/admin/news/:id', async (req, res) => {
   try {
     const { id } = req.params;
+    console.log('📖 [后端] 获取文章详情，ID:', id);
     
     // 验证ID格式
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -487,13 +511,26 @@ router.get('/admin/news/:id', async (req, res) => {
       });
     }
     
-    const news = await News.findById(id).lean();
+    const news = await News.findById(id)
+      .populate('authorId', 'username avatar') // 关联作者信息
+      .lean();
+    
+    if (!news) {
+      console.log('❌ [后端] 文章不存在，ID:', id);
+      return res.status(404).json({
+        code: 404,
+        msg: '文章不存在'
+      });
+    }
+    
+    console.log('✅ [后端] 文章详情获取成功，标题:', news.title);
     res.json({
       code: 200,
       msg: '获取成功',
       data: news
     });
   } catch (error) {
+    console.error('❌ [后端] 获取文章详情失败:', error);
     res.status(500).json({
       code: 500,
       msg: '获取新闻详情失败',

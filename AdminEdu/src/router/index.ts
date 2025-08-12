@@ -409,18 +409,6 @@ export const menuRoutes: RouteConfig[] = [
     },
     children: [
       {
-        name: 'VehicleBill',
-        path: 'VehicleBill',
-        component: () => import('@/pages/Operation/ZhangDan/Che.vue'),
-        meta: {
-          roleName: ['teacher', 'student'],
-          menuTitle: '车辆缴费账单',
-          menuIcon: 'car',
-          parentModule: 'Operation',
-          isLogin: true,
-        }
-      },
-      {
         name: 'TenantBill',
         path: 'TenantBill',
         component: () => import('@/pages/Operation/ZhangDan/ZuHuZhangDan.vue'),

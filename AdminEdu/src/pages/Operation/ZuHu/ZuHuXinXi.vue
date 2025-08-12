@@ -62,14 +62,7 @@
         <span v-else>暂无</span>
       </template>
 
-      <template #status="{ row }">
-        <el-tag 
-          :type="getStatusType(row.status)"
-          size="small"
-        >
-          {{ row.status }}
-        </el-tag>
-      </template>
+
 
       <template #created_at="{ row }">
         {{ formatDate(row.created_at) }}
@@ -263,49 +256,28 @@ const {
   })
 })
 
-// 筛选字段配置 - 使用新的搜索参数
+// 筛选字段配置 - 优化布局和用户体验
 const filterFields = [
   {
     key: 'companyName',
     label: '企业名称',
     type: 'input' as const,
-    placeholder: '请输入企业名称'
+    placeholder: '请输入企业名称进行搜索',
+    width: '280px'
   },
   {
     key: 'employeeName',
-    label: '负责人姓名',
+    label: '负责人',
     type: 'input' as const,
-    placeholder: '请输入负责人姓名'
-  },
-  {
-    key: 'contractNumber',
-    label: '合同编号',
-    type: 'input' as const,
-    placeholder: '请输入合同编号'
-  },
-  {
-    key: 'industry',
-    label: '企业行业',
-    type: 'input' as const,
-    placeholder: '请输入企业行业'
-  },
-  {
-    key: 'building',
-    label: '楼宇',
-    type: 'input' as const,
-    placeholder: '请输入楼宇'
-  },
-  {
-    key: 'room',
-    label: '房间',
-    type: 'input' as const,
-    placeholder: '请输入房间'
+    placeholder: '请输入负责人姓名',
+    width: '260px'
   },
   {
     key: 'status',
     label: '租户状态',
     type: 'select' as const,
-    placeholder: '请选择',
+    placeholder: '请选择状态',
+    width: '200px',
     options: [
       { label: '正常', value: '正常' },
       { label: '暂停', value: '暂停' },
@@ -314,7 +286,7 @@ const filterFields = [
   }
 ]
 
-// 表格列配置 - 使用关联表数据
+// 表格列配置 - 移除状态列
 const columns: any[] = [
   { type: 'selection', width: 55 },
   { type: 'index', label: '序号', width: 60 },
@@ -324,7 +296,6 @@ const columns: any[] = [
   { prop: 'building', label: '楼宇', width: 100, slot: 'building' },
   { prop: 'room', label: '房间', width: 80, slot: 'room' },
   { prop: 'contractNumber', label: '合同编号', width: 120, slot: 'contractNumber' },
-  { prop: 'status', label: '状态', width: 80, slot: 'status' },
   { prop: 'created_at', label: '创建时间', width: 120, slot: 'created_at' },
   { type: 'actions', label: '操作', width: 180, fixed: 'right' }
 ]
@@ -390,14 +361,7 @@ const formatDate = (dateStr: string | undefined): string => {
   return new Date(dateStr).toLocaleDateString('zh-CN')
 }
 
-const getStatusType = (status: string): string => {
-  const typeMap: Record<string, string> = {
-    '正常': 'success',
-    '暂停': 'warning',
-    '终止': 'danger'
-  }
-  return typeMap[status] || 'info'
-}
+
 
 // 查看详情 - 跳转到详情页面
 const handleView = (row: ZuhuData): void => {
@@ -457,29 +421,115 @@ onMounted(() => {
 
 <style scoped>
 .zuhu-container {
-  padding: 20px;
-  background: #f5f5f5;
+  padding: 24px;
+  background: #f8fafc;
   height: 100%;
   min-height: 0;
   overflow-y: auto;
   box-sizing: border-box;
-  box-sizing: border-box;
 }
 
+/* 深色主题适配 */
+@media (prefers-color-scheme: dark) {
+  .zuhu-container {
+    background: #0f0f0f;
+}
+}
+
+/* 表单样式优化 */
 :deep(.el-form-item__label) {
   font-weight: 500;
+  color: #303133;
+}
+
+/* 表格样式优化 */
+:deep(.el-table) {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 :deep(.el-table th) {
-  background-color: #fafafa;
+  background-color: #f8fafc;
+  color: #303133;
+  font-weight: 600;
+  border-bottom: 2px solid #e4e7ed;
 }
 
+:deep(.el-table td) {
+  padding: 16px 0;
+}
+
+:deep(.el-table tbody tr:hover > td) {
+  background-color: #f0f9ff;
+}
+
+/* 标签样式优化 */
 :deep(.el-tag) {
   font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 4px 8px;
 }
 
+:deep(.el-tag.el-tag--info) {
+  background-color: #f0f9ff;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+:deep(.el-tag.el-tag--warning) {
+  background-color: #fefce8;
+  color: #a16207;
+  border-color: #fde047;
+}
+
+/* 输入框样式优化 */
 :deep(.el-input.is-disabled .el-input__wrapper) {
   background-color: #f5f7fa;
   color: #606266;
+}
+
+:deep(.el-input__wrapper) {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-input__wrapper:hover) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 按钮样式优化 */
+:deep(.el-button) {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-button:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 分页样式优化 */
+:deep(.el-pagination) {
+  justify-content: center;
+  margin-top: 24px;
+}
+
+:deep(.el-pagination .el-pager li) {
+  border-radius: 6px;
+  margin: 0 2px;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .zuhu-container {
+    padding: 16px;
+  }
+  
+  :deep(.el-table td) {
+    padding: 12px 0;
+  }
 }
 </style>

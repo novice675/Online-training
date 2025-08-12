@@ -1,10 +1,11 @@
 const express = require('express')
 const router = express.Router()
 const TenantBillModel = require('../models/TenantBill')
-const HeTongModel = require('../models/HeTong')
-const CompanyModel = require('../models/KeHu')
+const { HeTong: HeTongModel } = require('../models/HeTong')
+const { Company: CompanyModel } = require('../models/database')
 const BuildingModel = require('../models/Building')
 const HouseModel = require('../models/House')
+const { News: NewsModel } = require('../models/news')
 
 // 获取运营总览数据
 router.get('/overview', async (req, res) => {
@@ -17,7 +18,8 @@ router.get('/overview', async (req, res) => {
       totalHouses,
       totalBills,
       pendingBills,
-      paidBills
+      paidBills,
+      totalArticles
     ] = await Promise.all([
       CompanyModel.countDocuments(),
       HeTongModel.countDocuments(),
@@ -25,19 +27,23 @@ router.get('/overview', async (req, res) => {
       HouseModel.countDocuments(),
       TenantBillModel.countDocuments(),
       TenantBillModel.countDocuments({ paymentStatus: '未缴费' }),
-      TenantBillModel.countDocuments({ paymentStatus: '已缴费' })
+      TenantBillModel.countDocuments({ paymentStatus: '已缴费' }),
+      NewsModel.countDocuments()
     ])
 
     // 计算入住率
-    const occupiedHouses = await HouseModel.countDocuments({ status: '已租赁' })
+    const occupiedHouses = await HouseModel.countDocuments({ status: '已租' })
     const occupancyRate = totalHouses > 0 ? ((occupiedHouses / totalHouses) * 100).toFixed(1) : 0
 
-    // 计算本月新增合同
+    // 计算本月新增合同和文章
     const currentMonth = new Date()
     currentMonth.setDate(1)
     currentMonth.setHours(0, 0, 0, 0)
     const newContracts = await HeTongModel.countDocuments({
       startDate: { $gte: currentMonth }
+    })
+    const monthArticles = await NewsModel.countDocuments({
+      createdAt: { $gte: currentMonth }
     })
 
     // 计算总收入和本月收入
@@ -78,7 +84,9 @@ router.get('/overview', async (req, res) => {
         pendingAmount,
         totalBuildings,
         totalHouses,
-        paidBills
+        paidBills,
+        totalArticles,
+        monthArticles
       }
     })
   } catch (error) {
@@ -87,76 +95,81 @@ router.get('/overview', async (req, res) => {
   }
 })
 
-// 获取统计数据（用于图表）
+// 获取统计数据（用于前端仪表板）
 router.get('/stats', async (req, res) => {
   try {
-    // 租户类型分布
-    const tenantTypeStats = await CompanyModel.aggregate([
-      { $group: { _id: '$companyType', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }
+    // 基础数据统计
+    const [
+      totalTenants,
+      activeContracts,
+      totalHouses,
+      occupiedHouses
+    ] = await Promise.all([
+      CompanyModel.countDocuments(),
+      HeTongModel.countDocuments({ status: '生效中' }),
+      HouseModel.countDocuments(),
+      HouseModel.countDocuments({ status: '已租' })
     ])
 
-    // 缴费状态统计
-    const paymentStatusStats = await TenantBillModel.aggregate([
-      { $group: { _id: '$paymentStatus', count: { $sum: 1 } } }
+    // 计算平均入住率
+    const averageOccupancy = totalHouses > 0 ? Math.round((occupiedHouses / totalHouses) * 100) : 0
+
+    // 计算本月收入
+    const currentMonth = new Date()
+    currentMonth.setDate(1)
+    currentMonth.setHours(0, 0, 0, 0)
+    
+    const monthRevenueData = await TenantBillModel.aggregate([
+      { 
+        $match: { 
+          paymentStatus: '已缴费',
+          paymentDate: { $gte: currentMonth }
+        } 
+      },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ])
+    const monthlyRevenue = monthRevenueData.length > 0 ? monthRevenueData[0].total : 0
+
+    // 计算上月数据用于变化趋势
+    const lastMonth = new Date(currentMonth)
+    lastMonth.setMonth(lastMonth.getMonth() - 1)
+    
+    const lastMonthData = await Promise.all([
+      CompanyModel.countDocuments({ createdAt: { $lt: currentMonth } }),
+      HeTongModel.countDocuments({ status: '生效中', startDate: { $lt: currentMonth } }),
+      TenantBillModel.aggregate([
+        { 
+          $match: { 
+            paymentStatus: '已缴费',
+            paymentDate: { $gte: lastMonth, $lt: currentMonth }
+          } 
+        },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ])
     ])
 
-    // 账单类型统计
-    const billTypeStats = await TenantBillModel.aggregate([
-      { $group: { _id: '$billType', count: { $sum: 1 } } }
-    ])
+    const lastMonthRevenue = lastMonthData[2].length > 0 ? lastMonthData[2][0].total : 0
 
-    // 楼宇入住率统计
-    const buildingOccupancy = await BuildingModel.aggregate([
-      {
-        $lookup: {
-          from: 'houses',
-          localField: '_id',
-          foreignField: 'buildingId',
-          as: 'houses'
-        }
-      },
-      {
-        $addFields: {
-          totalRooms: { $size: '$houses' },
-          occupiedRooms: {
-            $size: {
-              $filter: {
-                input: '$houses',
-                cond: { $eq: ['$$this.status', '已租赁'] }
-              }
-            }
-          }
-        }
-      },
-      {
-        $addFields: {
-          occupancyRate: {
-            $cond: {
-              if: { $gt: ['$totalRooms', 0] },
-              then: { $multiply: [{ $divide: ['$occupiedRooms', '$totalRooms'] }, 100] },
-              else: 0
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          name: 1,
-          totalRooms: 1,
-          occupiedRooms: 1,
-          occupancyRate: 1
-        }
-      }
-    ])
+    // 计算变化百分比
+    const tenantsChange = lastMonthData[0] > 0 ? Math.round(((totalTenants - lastMonthData[0]) / lastMonthData[0]) * 100) : 0
+    const contractsChange = lastMonthData[1] > 0 ? Math.round(((activeContracts - lastMonthData[1]) / lastMonthData[1]) * 100) : 0
+    const revenueChange = lastMonthRevenue > 0 ? Math.round(((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100) : 0
+    const occupancyChange = 5 // 模拟数据，实际可以通过历史数据计算
 
     res.send({
       code: 200,
       data: {
-        tenantTypeStats,
-        paymentStatusStats,
-        billTypeStats,
-        buildingOccupancy
+        totalTenants,
+        tenantsChange,
+        activeContracts,
+        contractsChange,
+        monthlyRevenue,
+        revenueChange,
+        averageOccupancy,
+        occupancyChange,
+        totalOccupiedRooms: occupiedHouses,
+        totalVacantRooms: totalHouses - occupiedHouses,
+        totalRooms: totalHouses
       }
     })
   } catch (error) {
@@ -171,22 +184,17 @@ router.get('/revenue', async (req, res) => {
     const { timeRange = '30days' } = req.query
     
     let startDate = new Date()
-    let groupFormat = '%Y-%m-%d'
+    let groupFormat = '%Y-%m'
+    let monthNames = []
     
-    switch (timeRange) {
-      case '7days':
-        startDate.setDate(startDate.getDate() - 7)
-        break
-      case '30days':
-        startDate.setDate(startDate.getDate() - 30)
-        break
-      case '3months':
-        startDate.setMonth(startDate.getMonth() - 3)
-        groupFormat = '%Y-%m'
-        break
-      default:
-        startDate.setDate(startDate.getDate() - 30)
+    // 生成最近6个月的数据
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date()
+      date.setMonth(date.getMonth() - i)
+      monthNames.push(`${date.getMonth() + 1}月`)
     }
+
+    startDate.setMonth(startDate.getMonth() - 6)
 
     const revenueData = await TenantBillModel.aggregate([
       {
@@ -198,16 +206,29 @@ router.get('/revenue', async (req, res) => {
       {
         $group: {
           _id: { $dateToString: { format: groupFormat, date: '$paymentDate' } },
-          revenue: { $sum: '$amount' },
+          amount: { $sum: '$amount' },
           count: { $sum: 1 }
         }
       },
       { $sort: { _id: 1 } }
     ])
 
+    // 创建完整的6个月数据，没有数据的月份填充0
+    const completeData = monthNames.map((month, index) => {
+      const date = new Date()
+      date.setMonth(date.getMonth() - (5 - index))
+      const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      
+      const existingData = revenueData.find(item => item._id === yearMonth)
+      return {
+        month: month,
+        amount: existingData ? existingData.amount : 0
+      }
+    })
+
     res.send({
       code: 200,
-      data: revenueData
+      data: completeData
     })
   } catch (error) {
     console.error('获取收入趋势数据失败:', error)
