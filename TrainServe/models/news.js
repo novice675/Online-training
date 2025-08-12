@@ -99,12 +99,6 @@ const newsSchema = new Schema({
     trim: true
   },
   
-  // 右侧小图/头像（可选，仅IMAGE_RIGHT类型使用）
-  rightImage: {
-    type: String,
-    trim: true
-  },
-  
   // 详情页内容（必选）
   detailContent: {
     type: String,

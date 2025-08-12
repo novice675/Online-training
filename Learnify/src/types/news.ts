@@ -30,7 +30,6 @@ export interface NewsItem {
   publishTime: string;
   likeCount: number;
   coverImage?: string;
-  rightImage?: string;
   detailContent: string;
   detailImages?: string[];
   createdAt: string;

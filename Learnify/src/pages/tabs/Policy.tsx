@@ -132,9 +132,9 @@ export default function Policy() {
                 <span className="news-likes">{news.likeCount}</span>
         </div>
       </div>
-            {news.rightImage && (
+            {news.coverImage && (
               <div className="news-right-image">
-                <img src={news.rightImage} alt={news.title} />
+                <img src={news.coverImage} alt={news.title} />
               </div>
             )}
           </div>

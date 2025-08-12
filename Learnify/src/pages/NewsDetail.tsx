@@ -180,7 +180,11 @@ export default function NewsDetail() {
 
         {/* 正文内容 */}
         <div className="news-body">
-          <p>{news.detailContent}</p>
+          <div 
+            dangerouslySetInnerHTML={{ 
+              __html: news.detailContent.replace(/\n/g, '<br>') 
+            }} 
+          />
         </div>
 
         {/* 图片内容 */}
@@ -217,7 +221,7 @@ export default function NewsDetail() {
           onClick={handleLike}
         >
           <ThumbsUp size={20} />
-          <span>赞 {likeCount > 0 ? `(${likeCount})` : ''}</span>
+          <span>赞 {likeCount > 0 ? likeCount : ''}</span>
         </button>
       </div>
     </div>

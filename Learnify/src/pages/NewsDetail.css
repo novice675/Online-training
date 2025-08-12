@@ -141,14 +141,15 @@
 }
 
 .news-body {
-  margin-bottom: 16px;
-}
-
-.news-body p {
-  font-size: 16px;
+  margin: 20px 0;
   line-height: 1.6;
   color: #333;
-  margin-bottom: 12px;
+}
+
+.news-body > div {
+  margin: 0 0 16px 0;
+  white-space: pre-wrap; /* 保持换行和空格 */
+  word-wrap: break-word; /* 长单词自动换行 */
 }
 
 .news-image {
@@ -183,6 +184,7 @@
   position: sticky;
   bottom: 0;
   z-index: 100;
+  align-items: stretch; /* 确保所有按钮高度一致 */
 }
 
 .action-button {
@@ -197,6 +199,10 @@
   align-items: center;
   gap: 4px;
   transition: all 0.2s;
+  min-width: 80px; /* 设置最小宽度 */
+  justify-content: center; /* 居中对齐 */
+  flex: 1; /* 平均分配空间 */
+  max-width: 120px; /* 设置最大宽度 */
 }
 
 .action-button:hover {

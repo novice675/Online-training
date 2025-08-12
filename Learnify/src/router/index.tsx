@@ -26,6 +26,7 @@ import NewsDetail from '../pages/NewsDetail';
 import CommentPage from '../pages/CommentPage';
 import ReplyDetailPage from '../pages/ReplyDetailPage';
 import PublishNews from '../pages/PublishNews';
+import AuditMessages from '../pages/AuditMessages';
 const App = React.lazy(() => import("../App"));
 const Login = React.lazy(() => import("../pages/Login"));
 
@@ -106,9 +107,10 @@ const routes = createBrowserRouter([
     element: <ReplyDetailPage />,
   },
   {
-    path: '/publish',
+    path: '/publish-news',
     element: <PublishNews />,
   },
+  { path: "/audit-messages", element: <AuditMessages></AuditMessages> },
 ]);
 
 export default routes;

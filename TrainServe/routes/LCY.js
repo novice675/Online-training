@@ -150,7 +150,7 @@ router.post('/news', async (req, res) => {
       channel,
       renderType,
       authorId,
-      rightImage,
+      coverImage,
       detailContent,
       detailImages = [],
       publishTime,
@@ -180,7 +180,7 @@ router.post('/news', async (req, res) => {
       channel,
       renderType,
       authorId,
-      rightImage,
+      coverImage,
       detailContent,
       detailImages,
       publishTime: publishTime || new Date(),
@@ -321,6 +321,200 @@ router.get('/user/:id', async (req, res) => {
     res.status(500).json({
       success: false,
       message: '获取用户信息失败',
+      error: error.message
+    });
+  }
+});
+
+// 获取用户文章列表接口
+router.get('/user/:userId/articles', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { page = 1, limit = 10, status, search } = req.query;
+    
+    // 构建查询条件
+    const query = { authorId: userId };
+    
+    // 如果指定了状态筛选
+    if (status && status !== '全部') {
+      query.status = status;
+    }
+    
+    // 如果指定了搜索关键词
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { detailContent: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    // 计算跳过的文档数量
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    
+    // 查询文章列表
+    const articles = await News.find(query)
+      .sort({ publishTime: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate('authorId', 'username nickname avatar')
+      .lean();
+    
+    // 获取总数
+    const total = await News.countDocuments(query);
+    
+    res.json({
+      success: true,
+      data: {
+        list: articles,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / parseInt(limit))
+        }
+      }
+    });
+    
+  } catch (error) {
+    console.error('获取用户文章列表失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取用户文章列表失败',
+      error: error.message
+    });
+  }
+});
+
+// 重新提交文章审核接口
+router.put('/news/:id/resubmit', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // 查找文章
+    const article = await News.findById(id);
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: '文章不存在'
+      });
+    }
+    
+    // 更新文章状态为未审核
+    const updatedArticle = await News.findByIdAndUpdate(
+      id,
+      { 
+        status: '未审核',
+        updatedAt: new Date()
+      },
+      { new: true }
+    );
+    
+    res.json({
+      success: true,
+      message: '重新提交审核成功',
+      data: updatedArticle
+    });
+    
+  } catch (error) {
+    console.error('重新提交审核失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '重新提交审核失败',
+      error: error.message
+    });
+  }
+});
+
+// 更新文章接口
+router.put('/news/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      channel,
+      renderType,
+      coverImage,
+      detailContent,
+      detailImages,
+      status
+    } = req.body;
+
+    // 验证必填字段
+    if (!title || !channel || !renderType || !detailContent) {
+      return res.status(400).json({
+        success: false,
+        message: '缺少必填字段'
+      });
+    }
+
+    // 查找文章
+    const article = await News.findById(id);
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: '文章不存在'
+      });
+    }
+
+    // 更新文章
+    const updatedArticle = await News.findByIdAndUpdate(
+      id,
+      {
+        title,
+        channel,
+        renderType,
+        coverImage,
+        detailContent,
+        detailImages: detailImages || [],
+        status: status || '未审核', // 支持传入状态，默认为未审核
+        updatedAt: new Date()
+      },
+      { new: true }
+    );
+
+    res.json({
+      success: true,
+      message: '文章更新成功',
+      data: updatedArticle
+    });
+    
+  } catch (error) {
+    console.error('更新文章失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '更新文章失败',
+      error: error.message
+    });
+  }
+});
+
+// 删除文章接口
+router.delete('/news/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // 查找文章
+    const article = await News.findById(id);
+    if (!article) {
+      return res.status(404).json({
+        success: false,
+        message: '文章不存在'
+      });
+    }
+
+    // 删除文章
+    await News.findByIdAndDelete(id);
+
+    res.json({
+      success: true,
+      message: '文章删除成功'
+    });
+    
+  } catch (error) {
+    console.error('删除文章失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '删除文章失败',
       error: error.message
     });
   }

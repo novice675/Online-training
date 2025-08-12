@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { NewsAPI } from '../api/news';
 import { Channel, RenderType } from '../types/news';
 import SingleImageUploader from '../components/SingleImageUploader';
@@ -10,18 +10,24 @@ interface PublishFormData {
   title: string;
   channel: Channel;
   renderType: RenderType;
-  rightImage: string;
+  coverImage: string;
   detailContent: string;
   detailImages: string[];
 }
 
 const PublishNews: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // 检查是否为编辑模式
+  const isEditMode = location.state?.editMode || false;
+  const articleId = location.state?.articleId || null;
+  
   const [formData, setFormData] = useState<PublishFormData>({
     title: '',
     channel: Channel.RECOMMEND,
     renderType: RenderType.TEXT_ONLY,
-    rightImage: '',
+    coverImage: '',
     detailContent: '',
     detailImages: []
   });
@@ -33,6 +39,40 @@ const PublishNews: React.FC = () => {
   
   // 获取所有已上传文件的哈希值
   const existingHashes = fileInfos.map(info => info.hash);
+
+  // 如果是编辑模式，获取文章数据
+  useEffect(() => {
+    if (isEditMode && articleId) {
+      fetchArticleData(articleId);
+    }
+  }, [isEditMode, articleId]);
+
+  // 获取文章数据
+  const fetchArticleData = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await NewsAPI.getNewsDetail(id);
+      
+      if (response.success) {
+        const article = response.data;
+        setFormData({
+          title: article.title,
+          channel: article.channel as Channel,
+          renderType: article.renderType as RenderType,
+          coverImage: article.coverImage || '',
+          detailContent: article.detailContent,
+          detailImages: article.detailImages || []
+        });
+      } else {
+        setError('获取文章数据失败');
+      }
+    } catch (err) {
+      console.error('获取文章数据失败:', err);
+      setError('获取文章数据失败，请重试');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleInputChange = (field: keyof PublishFormData, value: any) => {
     setFormData(prev => ({
@@ -54,33 +94,66 @@ const PublishNews: React.FC = () => {
         return;
       }
 
-      // 构建提交数据
-      const submitData = {
-        title: formData.title,
-        channel: formData.channel,
-        renderType: formData.renderType,
-        authorId: userId,
-        detailContent: formData.detailContent,
-        publishTime: new Date().toISOString(),
-        likeCount: 0,
-        // 只在非纯文本布局时包含图片字段
-        ...(formData.renderType !== RenderType.TEXT_ONLY && {
-          rightImage: formData.rightImage,
-          detailImages: formData.detailImages
-        })
-      };
-
-      // 调用API发布新闻
-      await NewsAPI.publishNews(submitData);
+      if (isEditMode && articleId) {
+        // 编辑模式：更新文章
+        await handleUpdateArticle(articleId, userId);
+      } else {
+        // 发布模式：创建新文章
+        await handleCreateArticle(userId);
+      }
       
-      // 发布成功后跳转到推荐页面
-      navigate('/');
     } catch (err) {
-      setError('发布失败，请重试');
-      console.error('发布新闻失败:', err);
+      setError(isEditMode ? '更新失败，请重试' : '发布失败，请重试');
+      console.error(isEditMode ? '更新文章失败:' : '发布新闻失败:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  // 处理创建新文章
+  const handleCreateArticle = async (userId: string) => {
+    const submitData = {
+      title: formData.title,
+      channel: formData.channel,
+      renderType: formData.renderType,
+      authorId: userId,
+      detailContent: formData.detailContent,
+      publishTime: new Date().toISOString(),
+      likeCount: 0,
+      // 只在非纯文本布局时包含图片字段
+      ...(formData.renderType !== RenderType.TEXT_ONLY && {
+        coverImage: formData.coverImage,
+        detailImages: formData.detailImages
+      })
+    };
+
+    // 调用API发布新闻
+    await NewsAPI.publishNews(submitData);
+    
+    // 发布成功后跳转到推荐页面
+    navigate('/');
+  };
+
+  // 处理更新文章
+  const handleUpdateArticle = async (id: string, userId: string) => {
+    const updateData = {
+      title: formData.title,
+      channel: formData.channel,
+      renderType: formData.renderType,
+      detailContent: formData.detailContent,
+      status: '未审核', // 编辑后状态变为未审核
+      // 只在非纯文本布局时包含图片字段
+      ...(formData.renderType !== RenderType.TEXT_ONLY && {
+        coverImage: formData.coverImage,
+        detailImages: formData.detailImages
+      })
+    };
+
+    // 调用API更新文章
+    await NewsAPI.updateNews(id, updateData);
+    
+    // 更新成功后跳转到审核消息页面
+    navigate('/audit-messages');
   };
 
   return (
@@ -92,7 +165,7 @@ const PublishNews: React.FC = () => {
         >
           ← 
         </button>
-        <h1>发布新闻</h1>
+        <h1>{isEditMode ? '编辑新闻' : '发布新闻'}</h1>
       </div>
 
       <form className="publish-form" onSubmit={handleSubmit}>
@@ -138,11 +211,11 @@ const PublishNews: React.FC = () => {
         {formData.renderType !== RenderType.TEXT_ONLY && (
           <>
             <div className="form-group">
-              <label>右侧图片</label>
+              <label>主页图片</label>
               <SingleImageUploader
-                value={formData.rightImage}
-                onChange={(url) => handleInputChange('rightImage', url)}
-                placeholder="点击或拖拽上传右侧图片"
+                value={formData.coverImage}
+                onChange={(url) => handleInputChange('coverImage', url)}
+                placeholder="点击或拖拽上传主页图片"
                 existingHashes={existingHashes}
                 existingFiles={fileInfos}
                 onFileInfo={(fileInfo) => {
@@ -179,8 +252,6 @@ const PublishNews: React.FC = () => {
           />
         </div>
 
-
-
         <div className="form-actions">
           <button
             type="button"
@@ -195,7 +266,7 @@ const PublishNews: React.FC = () => {
             className="submit-button"
             disabled={loading}
           >
-            {loading ? '发布中...' : '发布'}
+            {loading ? (isEditMode ? '更新中...' : '发布中...') : (isEditMode ? '确定' : '发布')}
           </button>
         </div>
       </form>

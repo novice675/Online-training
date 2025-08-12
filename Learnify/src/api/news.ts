@@ -80,13 +80,87 @@ export class NewsAPI {
     channel: Channel;
     renderType: RenderType;
     authorId: string;
-    rightImage?: string;
+    coverImage?: string;
     detailContent: string;
     detailImages?: string[];
     publishTime: string;
     likeCount: number;
   }): Promise<{ success: boolean; data: { _id: string } }> {
     return http.post(`${this.baseURL}/news`, newsData);
+  }
+
+  /**
+   * 获取用户文章列表
+   * @param userId 用户ID
+   * @param params 查询参数
+   */
+  static async getUserArticles(userId: string, params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+  }): Promise<{
+    success: boolean;
+    data: {
+      list: any[];
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+      };
+    };
+  }> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.search) queryParams.append('search', params.search);
+    
+    return http.get(`${this.baseURL}/user/${userId}/articles?${queryParams.toString()}`);
+  }
+
+  /**
+   * 重新提交文章审核
+   * @param articleId 文章ID
+   */
+  static async resubmitArticle(articleId: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    return http.put(`${this.baseURL}/news/${articleId}/resubmit`);
+  }
+
+  /**
+   * 更新文章
+   * @param articleId 文章ID
+   * @param updateData 更新数据
+   */
+  static async updateNews(articleId: string, updateData: {
+    title?: string;
+    channel?: Channel;
+    renderType?: RenderType;
+    coverImage?: string;
+    detailContent?: string;
+    detailImages?: string[];
+    status?: string;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    data?: any;
+  }> {
+    return http.put(`${this.baseURL}/news/${articleId}`, updateData);
+  }
+
+  /**
+   * 删除文章
+   * @param articleId 文章ID
+   */
+  static async deleteNews(articleId: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    return http.delete(`${this.baseURL}/news/${articleId}`);
   }
 }
 

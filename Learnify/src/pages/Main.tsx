@@ -11,7 +11,10 @@ export default function Main() {
         navigate('/autochat')
         break
       case 'publish':
-        navigate('/publish')
+        navigate('/publish-news')
+        break
+      case 'audit':
+        navigate('/audit-messages')
         break
       default:
         console.log(`点击了 ${menuType}`)
@@ -90,6 +93,11 @@ export default function Main() {
         <div className="menu-item" onClick={() => handleMenuClick('publish')}>
           <div className="menu-icon">📝</div>
           <div className="menu-text">发布新闻</div>
+          <div className="menu-arrow">{'>'}</div>
+        </div>
+        <div className="menu-item" onClick={() => handleMenuClick('audit')}>
+          <div className="menu-icon">📋</div>
+          <div className="menu-text">审核消息</div>
           <div className="menu-arrow">{'>'}</div>
         </div>
       </div>
