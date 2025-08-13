@@ -5,58 +5,16 @@
       <h2>租户人员管理</h2>
     </div>
 
-    <!-- 搜索筛选区域 -->
-    <el-card class="search-card" shadow="never">
-      <el-form :model="searchForm" inline>
-        <el-form-item label="姓名">
-          <el-input
-            v-model="searchForm.name"
-            placeholder="请输入人员姓名"
-            clearable
-            style="width: 200px"
-          />
-        </el-form-item>
-        
-        <el-form-item label="手机号">
-          <el-input
-            v-model="searchForm.phone"
-            placeholder="请输入手机号"
-            clearable
-            style="width: 200px"
-          />
-        </el-form-item>
-        
-        <el-form-item label="单位名称">
-          <el-input
-            v-model="searchForm.companyName"
-            placeholder="请输入单位名称"
-            clearable
-            style="width: 200px"
-          />
-        </el-form-item>
-        
-        <el-form-item label="人员类型">
-          <el-select
-            v-model="searchForm.role"
-            placeholder="请选择人员类型"
-            clearable
-            style="width: 150px"
-          >
-            <el-option label="员工" value="员工" />
-            <el-option label="负责人" value="负责人" />
-            <el-option label="临时人员" value="临时人员" />
-          </el-select>
-        </el-form-item>
-        
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">搜索</el-button>
-          <el-button @click="handleReset">重置</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+    <!-- 筛选面板 -->
+    <FilterPanel 
+      v-model="searchForm"
+      :filter-fields="filterFields"
+      @search="handleSearch"
+      @reset="handleReset"
+    />
 
     <!-- 数据表格 -->
-    <el-card class="table-card" shadow="never">
+    <div class="table-container">
       <el-table
         v-loading="loading"
         :data="tableData"
@@ -89,14 +47,6 @@
         </el-table-column>
         
         <el-table-column prop="phone" label="手机号" width="130" />
-        
-        <el-table-column label="人员类型" width="100">
-          <template #default="scope">
-            <el-tag :type="getRoleTagType(scope.row.role)" size="small">
-              {{ scope.row.role || '员工' }}
-            </el-tag>
-          </template>
-        </el-table-column>
         
         <el-table-column label="单位信息" width="200">
           <template #default="scope">
@@ -143,21 +93,11 @@
           </template>
         </el-table-column>
         
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column label="操作" width="80" fixed="right">
           <template #default="scope">
             <el-button type="primary" link size="small" @click="handleView(scope.row)">
               查看
             </el-button>
-            <el-popconfirm
-              title="确定要删除这个人员吗？"
-              @confirm="handleDelete(scope.row)"
-            >
-              <template #reference>
-                <el-button type="danger" link size="small">
-                  删除
-                </el-button>
-              </template>
-            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -174,7 +114,7 @@
           @current-change="handleCurrentChange"
         />
           </div>
-    </el-card>
+    </div>
 
     <!-- 人员详情弹窗 -->
     <el-dialog
@@ -193,7 +133,6 @@
           />
           <div class="basic-info">
             <h3>{{ currentEmployee.name }}</h3>
-            <p>{{ currentEmployee.role || '员工' }}</p>
             <p>{{ currentEmployee.companyName }}</p>
           </div>
         </div>
@@ -207,7 +146,6 @@
           <el-descriptions-item label="身份证号">{{ currentEmployee.sfz }}</el-descriptions-item>
           <el-descriptions-item label="邮箱">{{ currentEmployee.email || '未填写' }}</el-descriptions-item>
           <el-descriptions-item label="微信">{{ currentEmployee.weixin || '未填写' }}</el-descriptions-item>
-          <el-descriptions-item label="人员类型">{{ currentEmployee.role || '员工' }}</el-descriptions-item>
           <el-descriptions-item label="单位名称">{{ currentEmployee.companyName }}</el-descriptions-item>
           <el-descriptions-item label="单位类型">{{ currentEmployee.companyType || '未知' }}</el-descriptions-item>
           <el-descriptions-item label="所属楼宇">{{ currentEmployee.inaddress || '未知' }}</el-descriptions-item>
@@ -227,7 +165,8 @@
 import { ref, onMounted, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Phone, Message, ChatDotRound, OfficeBuilding, House } from '@element-plus/icons-vue'
-import { employeeList, deleteEmployee } from '@/api/auth'
+import FilterPanel from '@/components/FilterPanel.vue'
+import { employeeList } from '@/api/auth'
 
 // 响应式数据
 const loading = ref(false)
@@ -242,8 +181,7 @@ const currentEmployee = ref(null)
 const searchForm = reactive({
   name: '',
   phone: '',
-  companyName: '',
-  role: ''
+  companyName: ''
 })
 
 // 分页数据
@@ -252,6 +190,31 @@ const pagination = reactive({
   size: 10,
   total: 0
 })
+
+// 筛选字段配置
+const filterFields = [
+  {
+    key: 'name',
+    label: '姓名',
+    type: 'input' as const,
+    placeholder: '请输入人员姓名',
+    width: '200px'
+  },
+  {
+    key: 'phone',
+    label: '手机号',
+    type: 'input' as const,
+    placeholder: '请输入手机号',
+    width: '200px'
+  },
+  {
+    key: 'companyName',
+    label: '单位名称',
+    type: 'input' as const,
+    placeholder: '请输入单位名称',
+    width: '200px'
+  }
+]
 
 // 获取人员列表
 const fetchEmployeeList = async () => {
@@ -290,8 +253,7 @@ const handleReset = () => {
   Object.assign(searchForm, {
     name: '',
     phone: '',
-    companyName: '',
-    role: ''
+    companyName: ''
   })
   pagination.page = 1
   fetchEmployeeList()
@@ -314,18 +276,7 @@ const handleSelectionChange = (selection: any[]) => {
   selectedRows.value = selection
 }
 
-// 获取角色标签类型
-const getRoleTagType = (role: string) => {
-  switch (role) {
-    case '负责人':
-      return 'warning'
-    case '临时人员':
-      return 'info'
-    case '员工':
-    default:
-      return 'primary'
-  }
-}
+
 
 // 查看人员详情
 const handleView = (row: any) => {
@@ -336,22 +287,7 @@ const handleView = (row: any) => {
 
 
 
-// 删除人员
-const handleDelete = async (row: any) => {
-  try {
-    const response = await deleteEmployee(row._id)
-    
-    if (response.data.code === 200) {
-      ElMessage.success('删除成功')
-      fetchEmployeeList() // 重新获取列表
-    } else {
-      ElMessage.error(response.data.msg || '删除失败')
-    }
-  } catch (error) {
-    console.error('删除员工失败:', error)
-    ElMessage.error('删除失败')
-  }
-}
+
 
 
 
@@ -369,12 +305,10 @@ onMounted(() => {
 
 <style scoped>
 .zuhu-people-container {
-  padding: 20px;
-  background: #f5f5f5;
-  height: 100%;
-  min-height: 0;
+  padding: 24px;
+  background: #f8fafc;
+  min-height: calc(100vh - 165px);
   overflow-y: auto;
-  box-sizing: border-box;
   box-sizing: border-box;
 }
 
@@ -388,12 +322,12 @@ onMounted(() => {
   font-size: 24px;
 }
 
-.search-card {
+.table-container {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
   margin-bottom: 20px;
-}
-
-.table-card {
-  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .pagination-container {
@@ -457,5 +391,55 @@ onMounted(() => {
 
 :deep(.el-descriptions__label) {
   font-weight: 600;
+}
+
+/* 表格样式优化 */
+:deep(.el-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-table th) {
+  background-color: #f8fafc;
+  color: #303133;
+  font-weight: 600;
+  border-bottom: 2px solid #e4e7ed;
+}
+
+:deep(.el-table td) {
+  padding: 16px 0;
+}
+
+:deep(.el-table tbody tr:hover > td) {
+  background-color: #f0f9ff;
+}
+
+/* 标签样式优化 */
+:deep(.el-tag) {
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+/* 按钮样式优化 */
+:deep(.el-button) {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-button:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 分页样式优化 */
+:deep(.el-pagination) {
+  justify-content: center;
+}
+
+:deep(.el-pagination .el-pager li) {
+  border-radius: 6px;
+  margin: 0 2px;
 }
 </style>

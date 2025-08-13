@@ -1,6 +1,7 @@
 
 const { Company, Employee, Visitor, Moment, Comment } = require('../models/database')
 const mongoose = require('mongoose')
+const socketManager = require('../socket/index')
 
 var express = require('express')
 var multiparty = require('multiparty')
@@ -41,12 +42,43 @@ router.post('/comupload', (req, res) => {
 
 // addcom_em
 router.post('/addcomem', async (req, res) => {
-  console.log(req.body)
-  await Employee.create(req.body)
-  res.send({
-    code: 200,
-    msg: "添加成功"
-  })
+  try {
+    console.log(req.body)
+    const newEmployee = await Employee.create(req.body)
+    
+    // 获取完整的员工信息用于通知
+    const employeeWithCompany = await Employee.aggregate([
+      { $match: { _id: newEmployee._id } },
+      {
+        $lookup: {
+          from: 'company',
+          localField: 'company_id',
+          foreignField: '_id',
+          as: 'company'
+        }
+      },
+      {
+        $addFields: {
+          companyInfo: { $arrayElemAt: ['$company', 0] }
+        }
+      }
+    ]);
+
+    // 通知移动端
+    socketManager.notifyPersonCreated({ name: req.body.name });
+    
+    res.send({
+      code: 200,
+      msg: "添加成功",
+      data: newEmployee
+    })
+  } catch (error) {
+    console.error('添加员工失败:', error);
+    res.send({
+      code: 500,
+      msg: "添加失败"
+    });
+  }
 })
 
 // upload,addcomem
@@ -321,11 +353,62 @@ router.delete('/visitor/batchDelete', async (req, res) => {
 });
 
 router.post("/addmoment", async (req, res) => {
-  // console.log(req.body);
-  await Moment.create(req.body);
-  res.send({
-    code: 200,
-  });
+  try {
+    // console.log(req.body);
+    const newMoment = await Moment.create(req.body);
+    
+    // 获取完整的文章信息用于通知
+    const momentWithUser = await Moment.aggregate([
+      { $match: { _id: newMoment._id } },
+      {
+        $lookup: {
+          from: 'employee',
+          foreignField: "_id",
+          localField: "user_id",
+          as: "employee",
+          pipeline: [{ $project: { picture: 1, name: 1 } }]
+        }
+      },
+      {
+        $lookup: {
+          from: "visitor",
+          localField: "user_id",
+          foreignField: "_id",
+          as: "visitor",
+          pipeline: [{ $project: { picture: 1, name: 1 } }]
+        }
+      },
+      {
+        $addFields: {
+          user: {
+            $cond: {
+              if: { $eq: ["$type", "员工"] },
+              then: { $arrayElemAt: ["$employee", 0] },
+              else: { $arrayElemAt: ["$visitor", 0] }
+            }
+          }
+        }
+      }
+    ]);
+
+    // 通知移动端
+    socketManager.notifyArticleCreated({
+      title: req.body.title || '新动态',
+      content: req.body.content
+    });
+
+    res.send({
+      code: 200,
+      msg: "发布成功",
+      data: newMoment
+    });
+  } catch (error) {
+    console.error('发布文章失败:', error);
+    res.send({
+      code: 500,
+      msg: "发布失败"
+    });
+  }
 });
 
 router.get("/moment", async (req, res) => {
@@ -440,34 +523,130 @@ router.get("/comment", async (req, res) => {
 
 
 router.post("/addcomment", async (req, res) => {
-  // console.log(req.body,'comment');
-  await Comment.create(req.body);
-  res.send({
-    code: 200,
-  });
+  try {
+    // console.log(req.body,'comment');
+    const newComment = await Comment.create(req.body);
+    
+    // 获取完整的评论信息用于通知
+    const commentWithUser = await Comment.aggregate([
+      { $match: { _id: newComment._id } },
+      {
+        $lookup: {
+          from: 'employee',
+          foreignField: '_id',
+          localField: 'user_id',
+          as: 'employee'
+        }
+      },
+      {
+        $lookup: {
+          from: 'visitor',
+          foreignField: '_id',
+          localField: 'user_id',
+          as: 'visitor'
+        }
+      },
+      {
+        $addFields: {
+          user: {
+            $cond: [
+              { $eq: ['$type', '员工'] },
+              { $arrayElemAt: ["$employee", 0] },
+              { $arrayElemAt: ["$visitor", 0] }
+            ]
+          }
+        }
+      }
+    ]);
+
+    // 通知移动端
+    socketManager.notifyCommentCreated({ content: req.body.content });
+
+    res.send({
+      code: 200,
+      msg: "评论成功",
+      data: newComment
+    });
+  } catch (error) {
+    console.error('添加评论失败:', error);
+    res.send({
+      code: 500,
+      msg: "评论失败"
+    });
+  }
 });
 
 router.delete('/delcomment', async (req, res) => {
-  // console.log(req.query._id);
-  const { _id } = req.query
-  const didel = async (id) => {
-    let delcomments = await Comment.find({ pid: id })
-    // console.log(delcomments);
-    if (delcomments.length) {
-      for (let i of delcomments) {
-        await didel(i._id)
-        console.log("删除了id为", i._id);
-
+  try {
+    // console.log(req.query._id);
+    const { _id } = req.query;
+    
+    // 获取要删除的评论信息
+    const commentToDelete = await Comment.findById(_id);
+    
+    const didel = async (id) => {
+      let delcomments = await Comment.find({ pid: id })
+      // console.log(delcomments);
+      if (delcomments.length) {
+        for (let i of delcomments) {
+          await didel(i._id)
+          console.log("删除了id为", i._id);
+          
+          // 通知删除子评论
+          socketManager.notifyCommentDeleted(i._id, i.moment_id);
+        }
       }
+      await Comment.deleteOne({ _id: id })
+      // console.log("删除了当前");
     }
-    await Comment.deleteOne({ _id: id })
-    // console.log("删除了当前");
+    
+    await didel(_id);
+    
+    // 通知移动端
+    socketManager.notifyCommentDeleted(_id);
+    
+    res.send({
+      code: 200,
+      msg: "删除成功"
+    })
+  } catch (error) {
+    console.error('删除评论失败:', error);
+    res.send({
+      code: 500,
+      msg: "删除失败"
+    });
   }
-  await didel(_id)
-  res.send({
-    code: 200
-  })
 })
+
+// 删除文章
+router.delete('/delmoment/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const deletedMoment = await Moment.findByIdAndDelete(id);
+    
+    if (deletedMoment) {
+      // 通知移动端
+      socketManager.notifyArticleDeleted(id, deletedMoment.title || '文章');
+      
+      res.send({
+        code: 200,
+        msg: '删除成功'
+      });
+    } else {
+      res.send({
+        code: 404,
+        msg: '文章不存在'
+      });
+    }
+  } catch (error) {
+    console.error('删除文章失败:', error);
+    res.send({
+      code: 500,
+      msg: '删除失败'
+    });
+  }
+});
 
 // 新增：获取租户人员列表接口（支持分页和筛选）
 router.get("/employee/list", async (req, res) => {
@@ -615,6 +794,9 @@ router.delete('/employee/delete/:id', async (req, res) => {
     const result = await Employee.findByIdAndDelete(id);
     
     if (result) {
+      // 通知移动端
+      socketManager.notifyPersonDeleted(id, result.name);
+      
       res.send({
         code: 200,
         msg: '删除成功'

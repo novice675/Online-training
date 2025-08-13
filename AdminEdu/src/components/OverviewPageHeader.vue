@@ -5,25 +5,16 @@
         <div class="title-bar"></div>
         <div>
           <h1 class="page-title">{{ title }}</h1>
+          <p class="page-subtitle">{{ subtitle }}</p>
         </div>
       </div>
-      <div class="actions-section">
+      <div class="refresh-section">
         <el-button
-          v-if="showAdd"
-          type="primary"
-          @click="$emit('add')"
-          icon="Plus"
+          @click="$emit('refresh')"
+          :loading="loading"
+          icon="Refresh"
         >
-          {{ addText || '新增' }}
-        </el-button>
-        <el-button
-          v-if="showBatchDelete"
-          type="danger"
-          :disabled="!selectedCount"
-          @click="$emit('batch-delete')"
-          icon="Delete"
-        >
-          批量删除 ({{ selectedCount || 0 }})
+          刷新数据
         </el-button>
       </div>
     </div>
@@ -33,15 +24,12 @@
 <script setup lang="ts">
 defineProps<{
   title: string;
-  showAdd?: boolean;
-  showBatchDelete?: boolean;
-  selectedCount?: number;
-  addText?: string;
+  subtitle?: string;
+  loading?: boolean;
 }>();
 
 defineEmits<{
-  add: [];
-  'batch-delete': [];
+  refresh: [];
 }>();
 </script>
 
@@ -52,22 +40,18 @@ defineEmits<{
   padding: 24px;
   margin-bottom: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .header-content {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  width: 100% !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .title-section {
-  display: flex !important;
-  align-items: center !important;
+  display: flex;
+  align-items: center;
   gap: 16px;
-  flex: 1; /* 让标题区域占据剩余空间 */
 }
 
 .title-bar {
@@ -84,12 +68,10 @@ defineEmits<{
   margin: 0;
 }
 
-.actions-section {
-  display: flex !important;
-  gap: 12px;
-  align-items: center !important;
-  flex-shrink: 0; /* 防止按钮区域被压缩 */
-  margin-left: auto; /* 强制右对齐 */
+.page-subtitle {
+  font-size: 14px;
+  color: #909399;
+  margin: 4px 0 0 0;
 }
 
 /* 响应式设计 */
@@ -112,11 +94,6 @@ defineEmits<{
 
   .page-title {
     font-size: 24px;
-  }
-
-  .actions-section {
-    width: 100%;
-    justify-content: flex-end;
   }
 }
 </style> 

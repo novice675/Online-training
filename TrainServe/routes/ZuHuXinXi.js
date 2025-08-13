@@ -4,6 +4,7 @@ const ZuHuXinXi = require('../models/ZuHuXinXi');
 const { HeTong } = require('../models/HeTong');
 const { Company, Employee } = require('../models/database');
 const mongoose = require('mongoose');
+const socketManager = require('../socket/index');
 
 /**
  * 获取租户信息列表
@@ -736,6 +737,9 @@ router.post('/', async (req, res) => {
       }
     ]);
 
+    // 通知移动端
+    socketManager.notifyTenantCreated(result[0]);
+
     res.status(201).json({
       code: 201,
       message: '创建成功',
@@ -898,6 +902,9 @@ router.put('/:id', async (req, res) => {
       }
     ]);
 
+    // 通知移动端
+    socketManager.notifyTenantUpdated(result[0]);
+
     res.json({
       code: 200,
       message: '更新成功',
@@ -920,14 +927,35 @@ router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deletedTenant = await ZuHuXinXi.findByIdAndDelete(id);
-    
-    if (!deletedTenant) {
+    // 先获取要删除的租户信息（包含关联数据）
+    const tenantToDelete = await ZuHuXinXi.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      {
+        $lookup: {
+          from: 'company',
+          localField: 'companyId',
+          foreignField: '_id',
+          as: 'company'
+        }
+      },
+      {
+        $addFields: {
+          company: { $arrayElemAt: ['$company', 0] }
+        }
+      }
+    ]);
+
+    if (!tenantToDelete || tenantToDelete.length === 0) {
       return res.status(404).json({
         code: 404,
         message: '租户信息不存在'
       });
     }
+
+    const deletedTenant = await ZuHuXinXi.findByIdAndDelete(id);
+    
+    // 通知移动端
+    socketManager.notifyTenantDeleted(id, tenantToDelete[0].company?.name);
 
     res.json({
       code: 200,

@@ -162,6 +162,7 @@ const getIcon = (iconName: string) => {
 <style scoped>
 .el-menu-vertical {
   height: 100%;
+  min-height: calc(100vh - 165px); /* 确保菜单有足够的高度 */
   border-right: none;
   transition: width 0.3s ease-in-out;
 }

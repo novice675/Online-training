@@ -94,6 +94,40 @@ export const uploadFile = (data) => {
     return api.post('/wen/upload', data)
 }
 
+// ==================== 评论管理相关接口 ====================
+
+// 获取文章评论列表
+export const getCommentsByNews = (newsId, params = {}) => {
+    return api.get(`/LCYping/news/${newsId}/comments`, { params })
+}
+
+// 获取评论详情
+export const getCommentDetail = (commentId) => {
+    return api.get(`/LCYping/comments/${commentId}`)
+}
+
+// 删除评论
+export const deleteComment = (commentId) => {
+    return api.delete(`/LCYping/comments/${commentId}`)
+}
+
+// 批量删除评论
+export const batchDeleteComments = (commentIds) => {
+    return api.delete('/LCYping/comments/batch', {
+        data: { ids: commentIds }
+    })
+}
+
+// 获取评论回复列表
+export const getCommentReplies = (commentId, params = {}) => {
+    return api.get(`/LCYping/comments/${commentId}/replies`, { params })
+}
+
+// 更新评论状态（如隐藏/显示）
+export const updateCommentStatus = (commentId, data) => {
+    return api.put(`/LCYping/comments/${commentId}/status`, data)
+}
+
 // ==================== 合同管理相关接口 ====================
 
 // 获取合同列表
@@ -394,15 +428,15 @@ export const getOperationStats = () => {
 }
 
 export const getRecentContracts = (params = {}) => {
-  return api.get('/heTong', { params: { ...params, page: 1, pageSize: 5 } })
+  return api.get('/hetong/list', { params: { ...params, page: 1, size: 5 } })
 }
 
 export const getRecentTenantBills = (params = {}) => {
-  return api.get('/tenantbill', { params: { ...params, page: 1, pageSize: 10 } })
+  return api.get('/tenantbill', { params: { ...params, page: 1, size: 10 } })
 }
 
 export const getBuildingOccupancy = () => {
-  return api.get('/building/occupancy')
+  return api.get('/Building/occupancy')
 }
 
 export const getRevenueStats = (timeRange = '30days') => {

@@ -32,16 +32,12 @@
             </el-button>
           </template>
           
-          <!-- 审核失败状态：显示重新审核按钮 -->
+          <!-- 审核失败状态：不显示任何审核按钮 -->
           <template v-else-if="articleData.status === '审核失败'">
-            <el-button type="success" @click="handleAudit('审核成功')" :loading="auditLoading">
-              <el-icon><Check /></el-icon>
-              审核通过
-            </el-button>
-            <el-button type="primary" @click="handleAudit('未审核')" :loading="auditLoading">
-              <el-icon><RefreshRight /></el-icon>
-              重新审核
-            </el-button>
+            <el-tag type="danger" size="large">
+              <el-icon><Close /></el-icon>
+              文章审核失败
+            </el-tag>
           </template>
                  </div>
       </div>
@@ -54,12 +50,6 @@
         <h1 class="article-title">{{ articleData.title }}</h1>
         
         <div class="article-meta">
-          <div class="meta-item">
-            <span class="meta-label">内容类型：</span>
-            <el-tag :type="getTypeTagType(articleData.articleType)" effect="light">
-              {{ articleData.articleType }}
-            </el-tag>
-          </div>
           
           <div class="meta-item">
             <span class="meta-label">发布频道：</span>
@@ -80,9 +70,9 @@
             <span class="meta-value">{{ getRenderTypeLabel(articleData.renderType) }}</span>
           </div>
           
-          <div class="meta-item" v-if="articleData.author">
+          <div class="meta-item" v-if="articleData.authorId?.username || articleData.author">
             <span class="meta-label">作者：</span>
-            <span class="meta-value">{{ articleData.author }}</span>
+            <span class="meta-value">{{ articleData.authorId?.username || articleData.author || '未知用户' }}</span>
           </div>
           
           <div class="meta-item">
@@ -214,7 +204,7 @@
 
     <!-- 加载状态 -->
     <div v-else-if="loading" class="loading-container">
-      <el-loading-spinner />
+      <el-icon class="is-loading"><Loading /></el-icon>
       <p>正在加载文章详情...</p>
     </div>
 
@@ -231,7 +221,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Check, Close, RefreshRight } from '@element-plus/icons-vue'
+import { Check, Close, Loading } from '@element-plus/icons-vue'
 import { wenDetail, updateNewsStatus } from '../../../api/auth.js'
 
 const route = useRoute()
@@ -245,6 +235,8 @@ const articleData = ref<any>(null)
 const getArticleDetail = async () => {
   const articleId = route.params.id as string
   
+  console.log('📖 [前端] 开始获取文章详情，ID:', articleId)
+  
   if (!articleId) {
     ElMessage.error('文章ID不存在')
     goBack()
@@ -255,15 +247,31 @@ const getArticleDetail = async () => {
     loading.value = true
     const response = await wenDetail(articleId)
     
+    console.log('📖 [前端] API响应:', response.data)
+    
     if (response.data.code === 200) {
+      if (response.data.data) {
       articleData.value = response.data.data
+        console.log('✅ [前端] 文章详情获取成功:', response.data.data.title)
+      } else {
+        console.log('❌ [前端] 文章数据为空')
+        ElMessage.error('文章数据不存在')
+        goBack()
+      }
     } else {
+      console.log('❌ [前端] API返回错误:', response.data)
       ElMessage.error(response.data.msg || '获取文章详情失败')
       goBack()
     }
   } catch (error) {
-    console.error('获取文章详情失败:', error)
-    ElMessage.error('获取文章详情失败')
+    console.error('❌ [前端] 获取文章详情失败:', error)
+    if (error.response) {
+      console.error('错误响应状态:', error.response.status)
+      console.error('错误响应数据:', error.response.data)
+      ElMessage.error(`请求失败: ${error.response.status} - ${error.response.data?.msg || '服务器错误'}`)
+    } else {
+      ElMessage.error('网络请求失败，请检查网络连接')
+    }
     goBack()
   } finally {
     loading.value = false
@@ -309,9 +317,7 @@ const handleAudit = async (targetStatus: string) => {
         if (value === null) return // 用户取消了操作
         remark = value || ''
         break
-      case '未审核':
-        confirmMessage = '确认重新设置为未审核状态吗？'
-        break
+
     }
     
     // 最终确认
@@ -335,6 +341,11 @@ const handleAudit = async (targetStatus: string) => {
       if (remark) {
         articleData.value.auditRemark = remark
       }
+      
+      // 延迟1秒后返回列表页面
+      setTimeout(() => {
+        goBack()
+      }, 1000)
     } else {
       ElMessage.error(response.data.msg || '更新失败')
     }
@@ -821,5 +832,36 @@ onMounted(() => {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* ==================== 加载状态 ==================== */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.loading-container .el-icon {
+  font-size: 40px;
+  color: #409eff;
+  margin-bottom: 16px;
+}
+
+.loading-container p {
+  color: #666;
+  font-size: 14px;
+  margin: 0;
+}
+
+.error-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 40px;
 }
 </style>

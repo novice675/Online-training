@@ -313,4 +313,73 @@ router.get('/stats', async (req, res) => {
     }
 });
 
+// 获取楼宇入住率信息（用于运营总览）
+router.get('/occupancy', async (req, res) => {
+    try {
+        const HouseModel = require('../models/House');
+        
+        // 获取所有楼宇及其房间信息
+        const buildingsWithOccupancy = await BuildingModel.aggregate([
+            {
+                $lookup: {
+                    from: 'houses',
+                    localField: '_id',
+                    foreignField: 'buildingId',
+                    as: 'houses'
+                }
+            },
+            {
+                $addFields: {
+                    totalRooms: { $size: '$houses' },
+                    occupiedRooms: {
+                        $size: {
+                            $filter: {
+                                input: '$houses',
+                                cond: { $eq: ['$$this.status', '已租赁'] }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    occupancyRate: {
+                        $cond: {
+                            if: { $gt: ['$totalRooms', 0] },
+                            then: { 
+                                $round: [
+                                    { $multiply: [{ $divide: ['$occupiedRooms', '$totalRooms'] }, 100] },
+                                    1
+                                ]
+                            },
+                            else: 0
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    address: 1,
+                    totalRooms: 1,
+                    occupiedRooms: 1,
+                    occupancyRate: 1
+                }
+            },
+            { $sort: { name: 1 } }
+        ]);
+
+        res.send({
+            code: 200,
+            data: buildingsWithOccupancy
+        });
+    } catch (error) {
+        console.error('获取楼宇入住率失败:', error);
+        res.send({
+            code: 500,
+            msg: '获取楼宇入住率失败'
+        });
+    }
+});
+
 module.exports = router;
