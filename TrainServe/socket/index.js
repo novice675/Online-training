@@ -34,6 +34,10 @@ class SocketManager {
     this.notifyMobile('article_created', data)
   }
 
+  notifyArticleUpdated(data) {
+    this.notifyMobile('article_updated', data)
+  }
+
   notifyArticleDeleted(id, title) {
     this.notifyMobile('article_deleted', { id, title })
   }
@@ -41,6 +45,10 @@ class SocketManager {
   // 评论事件
   notifyCommentCreated(data) {
     this.notifyMobile('comment_created', data)
+  }
+
+  notifyCommentUpdated(data) {
+    this.notifyMobile('comment_updated', data)
   }
 
   notifyCommentDeleted(id) {
@@ -63,6 +71,10 @@ class SocketManager {
   // 人员事件
   notifyPersonCreated(data) {
     this.notifyMobile('person_created', data)
+  }
+
+  notifyPersonUpdated(data) {
+    this.notifyMobile('person_updated', data)
   }
 
   notifyPersonDeleted(id, name) {

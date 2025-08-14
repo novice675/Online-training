@@ -1,6 +1,7 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Main.css'
+import SocketStatus from '../components/SocketStatus'
 
 export default function Main() {
   const navigate = useNavigate()
@@ -23,6 +24,9 @@ export default function Main() {
 
   return (
     <div className="personal-center">
+      {/* Socket连接状态 */}
+      <SocketStatus showDetails={true} />
+      
       {/* 头部区域 */}
       <div className="header-section">
         <div className="profile-info">

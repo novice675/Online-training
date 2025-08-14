@@ -8,6 +8,9 @@ var cors = require('cors');
 // 确保数据库连接在应用启动时建立
 require('./db');
 
+// MongoDB监听服务
+const mongoWatcher = require('./services/mongoWatcher');
+
 const RbacRouter = require('./routes/RBACinit')
 const LCY = require('./routes/LCY')
 const LCYping = require('./routes/LCYping')
@@ -23,6 +26,7 @@ const Building = require('./routes/Building')
 const House = require('./routes/House')
 const TenantBill = require('./routes/TenantBill')
 const OperationOverview = require('./routes/OperationOverview')
+const MongoStatus = require('./routes/mongoStatus')
 
 
 var app = express();
@@ -55,6 +59,7 @@ app.use('/Building', Building)
 app.use('/House', House)
 app.use('/tenantbill', TenantBill)
 app.use('/operation', OperationOverview)
+app.use('/mongo', MongoStatus)
 
 
 // catch 404 and forward to error handler
@@ -72,5 +77,32 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+// 启动MongoDB监听服务
+async function startMongoWatcher() {
+  try {
+    await mongoWatcher.connect();
+    await mongoWatcher.startWatching();
+    console.log('✅ MongoDB监听服务已启动');
+  } catch (error) {
+    console.error('❌ 启动MongoDB监听服务失败:', error);
+  }
+}
+
+// 应用启动后启动监听服务
+setTimeout(startMongoWatcher, 2000); // 延迟2秒启动，确保数据库连接稳定
+
+// 优雅关闭
+process.on('SIGINT', async () => {
+  console.log('🛑 正在关闭应用...');
+  await mongoWatcher.stopWatching();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('🛑 正在关闭应用...');
+  await mongoWatcher.stopWatching();
+  process.exit(0);
+});
+
 module.exports = app;
 

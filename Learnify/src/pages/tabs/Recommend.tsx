@@ -1,43 +1,27 @@
-import React, { useState, useEffect } from "react";
-import NewsAPI from "../../api/news";
+import React from "react";
 import type { NewsItem } from "../../types/news";
 import { RenderType, Channel } from "../../types/news";
 import { Swiper, Grid } from "antd-mobile";
 import styles from '../../cssmodule/recommend.module.css'
 import { useNavigate } from "react-router-dom";
+import { useRealTimeNews } from "../../composables/useRealTimeNews";
 
 export default function Recommend() {
-  const [newsList, setNewsList] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const navigate=useNavigate()
+  const navigate = useNavigate();
   const items = ["/images/3.png", "/images/2.png", "/images/1.png"];
 
-    // 获取新闻数据
-  const fetchNews = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // 只获取推荐频道的新闻
-      const response = await NewsAPI.getNewsByChannel(Channel.RECOMMEND, {
-        page: 1,
-        limit: 20,
-      });
-      
-      if (response.success) {
-        // 后端已经按优先级排序：置顶 > 热点 > 普通文章
-        setNewsList(response.data.list);
-      } else {
-        setError("获取新闻数据失败");
-      }
-    } catch (err) {
-      console.error("获取新闻数据错误:", err);
-      setError("网络错误，请稍后重试");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // 使用实时新闻Hook
+  const {
+    newsList,
+    loading,
+    error,
+    refresh
+  } = useRealTimeNews({
+    channel: Channel.RECOMMEND,
+    page: 1,
+    limit: 20,
+    autoRefresh: true
+  });
 
   // 处理新闻点击
   const handleNewsClick = (news: NewsItem) => {
@@ -161,11 +145,6 @@ export default function Recommend() {
     }
   };
 
-  // 组件挂载时获取数据
-  useEffect(() => {
-    fetchNews();
-  }, []);
-
   // 加载状态
   if (loading) {
     return (
@@ -181,7 +160,7 @@ export default function Recommend() {
       <div className="content-area">
         <div className="error">
           <p>{error}</p>
-          <button onClick={fetchNews}>重试</button>
+          <button onClick={refresh}>重试</button>
         </div>
       </div>
     );
