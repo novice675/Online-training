@@ -8,12 +8,14 @@ var cors = require('cors');
 const RbacRouter = require('./routes/RBACinit')
 const LCY = require('./routes/LCY')
 const WYQ = require('./routes/WYQ')
+const Service=require('./routes/Service')
+// const Service=require('./routes/Service')
 
 
 var app = express();
 
 app.use(cors());
-
+app.use('/_AMapService',Service)
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');

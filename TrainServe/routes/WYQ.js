@@ -2,7 +2,10 @@ const {Company,Employee,Visitor,Moment,Comment}=require('../models/database')
 const mongoose=require('mongoose')
 var express = require('express')
 var multiparty=require('multiparty')
+const wsevent=require('../bin/wsevent')
 var router = express.Router()
+const {createProxyMiddleware}=require('http-proxy-middleware')
+require('dotenv').config()
 router.post('/addcom',async (req,res)=>{
     console.log(req.body);
     const exists = await Company.findOne({ name: req.body.name });
@@ -157,6 +160,7 @@ router.get("/infovisitor", async (req, res) => {
 router.post("/addmoment", async (req, res) => {
   console.log(req.body);
   await Moment.create(req.body);
+  wsevent.
   res.send({
     code: 200,
   });
@@ -195,7 +199,7 @@ router.get("/moment", async (req, res) => {
         }
     },
   ])
-  console.log(list);
+  // console.log(list);
   res.send({
     code: 200,
     list
@@ -238,7 +242,7 @@ router.get("/comment", async (req, res) => {
       }
     }
   ])
-  console.log(list,'list');
+  // console.log(list,'list');
 
   let commentmap={}
   let toplevel=[]
@@ -255,7 +259,7 @@ router.get("/comment", async (req, res) => {
       if(pcomment){
         i.pname=pcomment.user.name
         pcomment.replies.push(i)
-        console.log(pcomment,'pcomment');
+        // console.log(pcomment,'pcomment');
         
       }else{
         console.log(`${i._id}子评论找不到对应的父评论`);
@@ -263,7 +267,7 @@ router.get("/comment", async (req, res) => {
       }
     }
   })
-  console.log(toplevel,'toplevel');
+  // console.log(toplevel,'toplevel');
   // console.log(toplevel[0].replies[0].replies.length,999);
   
   res.send({
@@ -279,11 +283,21 @@ router.post("/addcomment", async (req, res) => {
   res.send({
     code: 200,
   });
+  const wss=req.app.locals.wss
+  // 只用send..的话..应该只会发给一个人吧,行吧,wss根本没有这个send方法
+
+  // wss.send(JSON.stringify({type:'add'}))
+
+  const momentid=req.body.moment_id
+  wss.broadcast(momentid,{type:'add'})
+  console.log('====================================');
+  console.log('add');
+  console.log('====================================');
 });
 
 router.delete('/delcomment',async(req,res)=>{
   console.log(req.query._id);
-  const {_id}=req.query
+  const {_id,moment_id}=req.query
   const didel=async(id)=>{
     let delcomments=await Comment.find({pid:id})
     console.log(delcomments);
@@ -302,5 +316,9 @@ router.delete('/delcomment',async(req,res)=>{
   res.send({
     code:200
   })  
+  const wss=req.app.locals.wss
+  const data={type:'del'}
+  wss.broadcast(moment_id,data)
 })
+
 module.exports = router

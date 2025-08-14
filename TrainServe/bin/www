@@ -7,7 +7,8 @@
 var app = require('../app');
 var debug = require('debug')('rbac-pro:server');
 var http = require('http');
-
+var WebSocket=require('ws')
+var wsevent=require('./wsevent')
 /**
  * Get port from environment and store in Express.
  */
@@ -20,7 +21,10 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
-
+// websocket建立在后端服务器上
+var wss=new WebSocket.Server({server})
+wsevent(wss)
+app.locals.wss=wss
 /**
  * Listen on provided port, on all network interfaces.
  */

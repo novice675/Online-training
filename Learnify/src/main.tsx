@@ -9,12 +9,12 @@ import router from './router'
 import store from './store'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <Provider store={store}>
       <Suspense fallback={<div>loading...</div>}>
         <RouterProvider router={router} />
       </Suspense>
     </Provider>
-  </React.StrictMode>
+  // {/* </React.StrictMode> */}
 )
 
