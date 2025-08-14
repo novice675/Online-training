@@ -3,6 +3,7 @@ import http from "../utils/axios";
 import { Toast, NavBar, Input, List, Button, Popup } from "antd-mobile";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CommentTree } from "./CommentTree";
+import { useWsevent } from "./grids/Wsevent";
 interface Co {
   _id: string;
   time: string;
@@ -29,6 +30,17 @@ export default function Comment() {
 
   const [comment, setcomment] = useState<Co[]>([]);
   const [pid, setpid] = useState("");
+  const {wsRef}=useWsevent('ws://localhost:3008',moment_id as string,{
+    onMessage:(ev)=>{
+      const data=JSON.parse(ev.data)
+      if(data.type=='add'){
+        getlist()
+      }else if (data.type=='del'){
+        getlist()
+      }
+    }
+  })
+  
   const getlist = async () => {
     let res = await http.get("/WYQ/comment", { moment_id });
     if (res.code == 200) {
@@ -63,7 +75,7 @@ export default function Comment() {
     }
   };
   const del=async(id:string)=>{
-    let res= await http.delete('/WYQ/delcomment',{_id:id})
+    let res= await http.delete('/WYQ/delcomment',{_id:id,moment_id})
     if(res.code==200){
       Toast.show({
         icon:"success",
@@ -79,7 +91,10 @@ export default function Comment() {
   }
   useEffect(() => {
     getlist();
+
+
   }, []);
+
   return (
     <div>
       <NavBar

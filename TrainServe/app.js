@@ -16,6 +16,9 @@ const LCY = require('./routes/LCY')
 const LCYping = require('./routes/LCYping')
 const LCYchat = require('./routes/LCYchat')
 const WYQ = require('./routes/WYQ')
+
+const Service=require('./routes/Service')
+
 const Menjin = require('./routes/Menjin')
 const HeTong = require('./routes/HeTong')
 const KeHu = require('./routes/KeHu')
@@ -29,10 +32,11 @@ const OperationOverview = require('./routes/OperationOverview')
 const MongoStatus = require('./routes/mongoStatus')
 
 
+
 var app = express();
 
 app.use(cors());
-
+app.use('/_AMapService',Service)
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');

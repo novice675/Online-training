@@ -7,6 +7,7 @@ import './index.css'
 import router from './router'
 import store from './store/index'
 
+
 const rootElement = document.getElementById('root')
 
 if (!rootElement) {
@@ -15,11 +16,12 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
+
     <Provider store={store}>
       <Suspense fallback={<div>loading...</div>}>
         <RouterProvider router={router} />
       </Suspense>
     </Provider>
-  </React.StrictMode>
+  // {/* </React.StrictMode> */}
 )
 

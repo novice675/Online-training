@@ -4,24 +4,29 @@ const mongoose = require('mongoose')
 const socketManager = require('../socket/index')
 
 var express = require('express')
-var multiparty = require('multiparty')
+
+var multiparty=require('multiparty')
+const wsevent=require('../bin/wsevent')
 var router = express.Router()
-router.post('/addcom', async (req, res) => {
-  console.log(req.body);
-  const exists = await Company.findOne({ name: req.body.name });
-  if (exists) {
-    return res.send({
-      code: 400,
-      msg: "该公司名称已存在",
-    });
-  }
-  let re = await Company.create(req.body)
-  console.log(re);
-  res.send({
-    code: 200,
-    msg: "添加成功",
-    id: re._id
-  })
+const {createProxyMiddleware}=require('http-proxy-middleware')
+require('dotenv').config()
+router.post('/addcom',async (req,res)=>{
+    console.log(req.body);
+    const exists = await Company.findOne({ name: req.body.name });
+    if (exists) {
+      return res.send({
+        code: 400,
+        msg: "该公司名称已存在",
+      });
+    }
+    let re=await Company.create(req.body)
+    console.log(re);
+    res.send({
+        code:200,
+        msg:"添加成功",
+        id:re._id
+    })
+
 })
 
 // addcom的图片上传
@@ -352,63 +357,44 @@ router.delete('/visitor/batchDelete', async (req, res) => {
   }
 });
 
-router.post("/addmoment", async (req, res) => {
-  try {
-    // console.log(req.body);
-    const newMoment = await Moment.create(req.body);
-    
-    // 获取完整的文章信息用于通知
-    const momentWithUser = await Moment.aggregate([
-      { $match: { _id: newMoment._id } },
-      {
-        $lookup: {
-          from: 'employee',
-          foreignField: "_id",
-          localField: "user_id",
-          as: "employee",
-          pipeline: [{ $project: { picture: 1, name: 1 } }]
+router.get("/moment", async (req, res) => {
+  let list=await Moment.aggregate([
+    // {$match:{}},
+    {
+        $lookup:{
+            from:'employee',
+            foreignField:"_id",
+            localField:"user_id",
+            as:"employee",
+            pipeline:[{$project:{picture:1,name:1}}]
         }
-      },
-      {
-        $lookup: {
-          from: "visitor",
-          localField: "user_id",
-          foreignField: "_id",
-          as: "visitor",
-          pipeline: [{ $project: { picture: 1, name: 1 } }]
+    },
+    {
+        $lookup:{
+            from:"visitor",
+            localField:"user_id",
+            foreignField:"_id",
+            as:"visitor",
+            pipeline:[{$project:{picture:1,name:1}}]
         }
-      },
-      {
-        $addFields: {
-          user: {
-            $cond: {
-              if: { $eq: ["$type", "员工"] },
-              then: { $arrayElemAt: ["$employee", 0] },
-              else: { $arrayElemAt: ["$visitor", 0] }
+    },
+    {
+        $addFields:{
+            picture:{
+                $cond:{
+                    if:{$eq:["$type","员工"]},
+                    then:{$arrayElemAt:["$employee.picture",0]},
+                    else:{$arrayElemAt:["$visitor.picture",0]}
+                }
             }
-          }
         }
-      }
-    ]);
-
-    // 通知移动端
-    socketManager.notifyArticleCreated({
-      title: req.body.title || '新动态',
-      content: req.body.content
-    });
-
-    res.send({
-      code: 200,
-      msg: "发布成功",
-      data: newMoment
-    });
-  } catch (error) {
-    console.error('发布文章失败:', error);
-    res.send({
-      code: 500,
-      msg: "发布失败"
-    });
-  }
+    },
+  ])
+  // console.log(list);
+  res.send({
+    code: 200,
+    list
+  });
 });
 
 router.get("/moment", async (req, res) => {
@@ -487,14 +473,16 @@ router.get("/comment", async (req, res) => {
       }
     }
   ])
-  // console.log(list, 'list');
 
-  let commentmap = {}
-  let toplevel = []
-  list.forEach(i => {
-    i.replies = []
-    commentmap[i._id.toString()] = i
-    if (!i.pid) {
+  // console.log(list,'list');
+
+  let commentmap={}
+  let toplevel=[]
+  list.forEach(i=>{
+    i.replies=[]
+    commentmap[i._id.toString()]=i
+    if(!i.pid){
+
       toplevel.push(i)
     }
   })
@@ -504,16 +492,20 @@ router.get("/comment", async (req, res) => {
       if (pcomment) {
         i.pname = pcomment.user.name
         pcomment.replies.push(i)
-        console.log(pcomment, 'pcomment');
 
-      } else {
+        // console.log(pcomment,'pcomment');
+        
+      }else{
+
         console.log(`${i._id}子评论找不到对应的父评论`);
 
       }
     }
   })
-  console.log(toplevel,'toplevel');
-  console.log(toplevel[0].replies[0].replies.length,999);
+
+  // console.log(toplevel,'toplevel');
+  // console.log(toplevel[0].replies[0].replies.length,999);
+
   
   res.send({
     code: 200,
@@ -523,99 +515,41 @@ router.get("/comment", async (req, res) => {
 
 
 router.post("/addcomment", async (req, res) => {
-  try {
-    // console.log(req.body,'comment');
-    const newComment = await Comment.create(req.body);
-    
-    // 获取完整的评论信息用于通知
-    const commentWithUser = await Comment.aggregate([
-      { $match: { _id: newComment._id } },
-      {
-        $lookup: {
-          from: 'employee',
-          foreignField: '_id',
-          localField: 'user_id',
-          as: 'employee'
-        }
-      },
-      {
-        $lookup: {
-          from: 'visitor',
-          foreignField: '_id',
-          localField: 'user_id',
-          as: 'visitor'
-        }
-      },
-      {
-        $addFields: {
-          user: {
-            $cond: [
-              { $eq: ['$type', '员工'] },
-              { $arrayElemAt: ["$employee", 0] },
-              { $arrayElemAt: ["$visitor", 0] }
-            ]
-          }
-        }
-      }
-    ]);
-
-    // 通知移动端
-    socketManager.notifyCommentCreated({ content: req.body.content });
-
-    res.send({
-      code: 200,
-      msg: "评论成功",
-      data: newComment
-    });
-  } catch (error) {
-    console.error('添加评论失败:', error);
-    res.send({
-      code: 500,
-      msg: "评论失败"
-    });
-  }
+  // console.log(req.body,'comment');
+  await Comment.create(req.body);
+  res.send({
+    code: 200,
+  });
+  const wss=req.app.locals.wss
+  const momentid=req.body.moment_id
+  wss.broadcast(momentid,{type:'add'})
+  console.log('add');
 });
 
-router.delete('/delcomment', async (req, res) => {
-  try {
-    // console.log(req.query._id);
-    const { _id } = req.query;
-    
-    // 获取要删除的评论信息
-    const commentToDelete = await Comment.findById(_id);
-    
-    const didel = async (id) => {
-      let delcomments = await Comment.find({ pid: id })
-      // console.log(delcomments);
-      if (delcomments.length) {
-        for (let i of delcomments) {
-          await didel(i._id)
-          console.log("删除了id为", i._id);
-          
-          // 通知删除子评论
-          socketManager.notifyCommentDeleted(i._id, i.moment_id);
-        }
+router.delete('/delcomment',async(req,res)=>{
+  console.log(req.query._id);
+  const {_id,moment_id}=req.query
+  const didel=async(id)=>{
+    let delcomments=await Comment.find({pid:id})
+    console.log(delcomments);
+    if(delcomments.length){
+      for(let i of delcomments){
+        await didel(i._id)
+        console.log("删除了id为",i._id);
+        
       }
-      await Comment.deleteOne({ _id: id })
-      // console.log("删除了当前");
     }
-    
-    await didel(_id);
-    
-    // 通知移动端
-    socketManager.notifyCommentDeleted(_id);
-    
-    res.send({
-      code: 200,
-      msg: "删除成功"
-    })
-  } catch (error) {
-    console.error('删除评论失败:', error);
-    res.send({
-      code: 500,
-      msg: "删除失败"
-    });
+    await Comment.deleteOne({_id:id})
+    console.log("删除了当前");
+
   }
+  await didel(_id)
+  res.send({
+    code:200
+  })  
+  const wss=req.app.locals.wss
+  const data={type:'del'}
+  wss.broadcast(moment_id,data)
 })
 
 // 删除文章
@@ -844,5 +778,6 @@ router.delete('/employee/batchDelete', async (req, res) => {
     });
   }
 });
+
 
 module.exports = router

@@ -7,7 +7,12 @@
 var app = require('../app');
 var debug = require('debug')('rbac-pro:server');
 var http = require('http');
-var socketManager = require('../socket/index');
+
+var WebSocket=require('ws')
+var wsevent=require('./wsevent')
+
+//var socketManager = require('../socket/index');
+
 
 /**
  * Get port from environment and store in Express.
@@ -21,7 +26,9 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
-
+var wss=new WebSocket.Server({server})
+wsevent(wss)
+app.locals.wss=wss
 /**
  * Initialize Socket.io
  */

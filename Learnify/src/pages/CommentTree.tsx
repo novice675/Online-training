@@ -23,10 +23,10 @@ interface Coprops {
 }
 export const CommentTree:React.FC<Coprops> = ({ comment,setVisible1,setpid,del}) => {
   return (
-    <div className={styles['comment-container']}>
-      {comment.map((i:Co) => (
-        <div key={i._id} className={i.pid?styles.childcomment:''}>
-          <div 
+    <div className={styles["comment-container"]}>
+      {comment.map((i: Co) => (
+        <div key={i._id}>
+          <div
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -35,9 +35,11 @@ export const CommentTree:React.FC<Coprops> = ({ comment,setVisible1,setpid,del})
               margin: "0 auto",
               borderBottom: "1px solid #eee",
               padding: "10px 0",
+              minWidth: "290px",
             }}
-            className={i.pid?styles.add:''}
+             className={i.pid ? styles.childcomment : ""}
           >
+            {/* 头像 */}
             <div style={{ width: "20%" }}>
               <img
                 src={i.user.picture}
@@ -45,11 +47,25 @@ export const CommentTree:React.FC<Coprops> = ({ comment,setVisible1,setpid,del})
                 style={{ width: "50px", height: "50px", borderRadius: "50%" }}
               />
             </div>
-            <div style={{ flex: 1 }}>
-              <div
-                style={{ fontWeight: "bold" }}
-              >{i.pid?`${i.user.name}回复${i.pname}`:i.user.name}</div>
+            {/* 右侧 */}
+            <div style={{ flex: "1 1 250px" }}>
+              {/* 姓名 */}
+              <div style={{ fontWeight: "bold",display:'flex',alignItems:'center',justifyContent:'space-between' }}>
+                {i.pid ? `${i.user.name}回复${i.pname}` : i.user.name}
+                <div
+                  style={{
+                    width: "20px",
+                    color: "red",
+                    fontSize: "25px",
+                    textAlign: "right",
+                  }}
+                >
+                  ♥
+                </div>
+              </div>
+              {/* 回复 */}
               <div>{i.content}</div>
+              {/* 时间按钮 */}
               <div style={{ fontSize: "12px", color: "#888" }}>
                 {new Date(i.time).toLocaleString()}
                 &emsp;
@@ -61,16 +77,20 @@ export const CommentTree:React.FC<Coprops> = ({ comment,setVisible1,setpid,del})
                 >
                   回复
                 </button>
-                <button onClick={()=>del(i._id)}>删除</button>
+                <button onClick={() => del(i._id)}>删除</button>
               </div>
-            </div>
-            <div style={{ width: "15%", color: "red", fontSize: "25px" }}>
-              ♥
             </div>
           </div>
 
           <div>
-            {i.replies.length>0&&<CommentTree comment={i.replies} setVisible1={setVisible1} setpid={setpid} del={del}/>}
+            {i.replies.length > 0 && (
+              <CommentTree
+                comment={i.replies}
+                setVisible1={setVisible1}
+                setpid={setpid}
+                del={del}
+              />
+            )}
           </div>
         </div>
       ))}
