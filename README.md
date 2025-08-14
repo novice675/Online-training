@@ -1,4 +1,4 @@
-# rbacProject
+# Online-training
 
 
 
@@ -15,7 +15,7 @@ Already a pro? Just edit this README.md and make it your own. Want to make it ea
 
 ```
 cd existing_repo
-git remote add origin https://jihulab.com/novice675-group/rbacproject.git
+git remote add origin https://github.com/novice675/Online-training.git
 git branch -M main
 git push -uf origin main
 ```

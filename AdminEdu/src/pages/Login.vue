@@ -64,7 +64,7 @@ const handleClick = async () => {
             localStorage.setItem('user', JSON.stringify(res.data.data));
             // 再设置到 Pinia store
             userStore.setUserInfo(res.data.data);
-            router.push('/index');
+            router.push('/home/situation');
         }
     } catch (error) {
         console.error('登录失败:', error);
@@ -74,84 +74,107 @@ const handleClick = async () => {
 
 <style scoped>
 .login-container {
+    position: relative;
+    min-height: 100vh;
+    width: 100vw;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background: #f5f7fa;
-    position: relative;
-    padding: 20px;
+    background: radial-gradient(ellipse at center, #0a1a2f 80%, #082c61 100%);
+    overflow: hidden;
 }
 
+
 .login-form {
-    background: white;
-    padding: 2.5rem;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    width: 100%;
-    max-width: 420px;
-    z-index: 1;
-    /* 定义登录表单的淡入上滑动画，持续0.5秒，缓出效果 */
-    animation: fadeInUp 0.5s ease-out;
+    position: relative;
+    background: rgba(10, 30, 60, 0.85);
+    border-radius: 16px;
+    box-shadow: 0 0 32px 8px #1e90ff44, 0 0 0 2px #1e90ff;
+    border: 1.5px solid #1e90ff;
+    padding: 2.5rem 2.5rem 2rem 2.5rem;
+    width: 370px;
+    z-index: 2;
+    animation: fadeInUp 0.7s cubic-bezier(.42, 0, .58, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
 
 .decoration-left,
 .decoration-right {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 30%;
-    /* 背景渐变色，从#f91807到#764ba2，角度135度 */
-    background: linear-gradient(135deg, #f91807 0%, #764ba2 100%);
-    z-index: 0;
+    width: 32%;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .decoration-left {
     left: 0;
-    /* clip-path创建左侧装饰块的三角形形状 */
+    background: linear-gradient(135deg, #0a1a2f 60%, #1e90ff 100%);
+    opacity: 0.25;
     clip-path: polygon(0 0, 100% 0, 0 100%);
 }
 
 .decoration-right {
     right: 0;
-    /* clip-path创建右侧装饰块的三角形形状 */
+    background: linear-gradient(-135deg, #0a1a2f 60%, #1e90ff 100%);
+    opacity: 0.25;
     clip-path: polygon(100% 0, 100% 100%, 0 100%);
 }
 
+
 h2 {
-    text-align: center;
-    color: #1a1a1a;
+    text-align: left;
+    color: #1e90ff;
     margin-bottom: 2rem;
-    font-size: 1.8rem;
+    font-size: 2rem;
+    font-family: 'Orbitron', '微软雅黑', sans-serif;
+    letter-spacing: 2px;
+    font-weight: 700;
+    width: 100%;
 }
+
 
 .input-group {
     margin-bottom: 1.2rem;
+    width: 100%;
 }
+
 
 label {
     display: block;
     margin-bottom: 0.5rem;
-    color: #333;
+    color: #1e90ff;
     font-weight: 500;
+    font-size: 1rem;
+    letter-spacing: 1px;
 }
+
 
 input[type="text"],
 input[type="password"] {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    border: 1.5px solid #1e90ff;
+    border-radius: 8px;
     font-size: 1rem;
+    background: rgba(20, 40, 80, 0.7);
+    color: #fff;
+    box-shadow: 0 0 8px #1e90ff33;
     transition: all 0.3s ease;
 }
+
 
 input[type="text"]:focus,
 input[type="password"]:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    border-color: #00cfff;
+    box-shadow: 0 0 0 2px #00cfff99;
 }
+
 
 .options {
     display: flex;
@@ -159,76 +182,102 @@ input[type="password"]:focus {
     align-items: center;
     margin-top: 0.5rem;
     margin-bottom: 1.5rem;
+    width: 100%;
 }
+
 
 .remember-me {
     display: flex;
     align-items: center;
     cursor: pointer;
+    color: #1e90ff;
 }
+
 
 .remember-me input {
     margin-right: 0.5rem;
+    accent-color: #1e90ff;
 }
 
+
 .forgot-password {
-    color: #667eea;
+    color: #1e90ff;
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     transition: color 0.3s ease;
 }
 
 .forgot-password:hover {
-    color: #5a67d8;
+    color: #00cfff;
 }
+
 
 .submit-btn {
     width: 100%;
-    padding: 0.75rem;
-    background: #667eea;
+    padding: 0.85rem;
+    background: linear-gradient(90deg, #1e90ff 0%, #00cfff 100%);
     border: none;
-    border-radius: 6px;
-    color: white;
-    font-size: 1.1rem;
-    font-weight: 600;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 700;
     cursor: pointer;
+    box-shadow: 0 0 12px #1e90ff66;
+    letter-spacing: 2px;
+    margin-top: 10px;
     transition: all 0.3s ease;
 }
 
 .submit-btn:hover {
-    background: #5a67d8;
-    transform: translateY(-2px);
+    background: linear-gradient(90deg, #00cfff 0%, #1e90ff 100%);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 0 24px #00cfff99;
 }
+
 
 .register-link {
     text-align: center;
     margin-top: 1.5rem;
-    color: #666;
-    font-size: 0.95rem;
+    color: #1e90ff;
+    font-size: 1rem;
+    letter-spacing: 1px;
 }
 
 .register-link a {
-    color: #667eea;
-    text-decoration: none;
+    color: #00cfff;
+    text-decoration: underline;
     margin-left: 0.3rem;
     transition: color 0.3s ease;
 }
 
 .register-link a:hover {
-    color: #5a67d8;
+    color: #1e90ff;
 }
 
-@keyframes fadeInUp {
 
-    /* 定义fadeInUp动画的关键帧，从透明和下移20px到完全显示和原位 */
+@keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(40px) scale(0.98);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
+}
+
+/* 背景星空特效，可选：可用canvas或伪元素实现，简单用伪元素模拟 */
+.login-container::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: url('https://img.alicdn.com/imgextra/i3/O1CN01QvQw2V1wQvQw2V1wQvQw2V1wQvQw2V1wQvQw2V1wQvQw2V1wQvQw2V.png') repeat center center;
+    opacity: 0.18;
 }
 </style>

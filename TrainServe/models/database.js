@@ -9,15 +9,108 @@ let CompanySchema = new mongoose.Schema({
     type: String,      // 企业名称，唯一
     unique: true
   },
-  inaddress: String,   // 入驻地址
+  inaddress: String,   // 所属楼宇
   type: String,        // 企业类型
   logo: String,        // 企业 logo
   house: String,       // 房间号或楼号
-  outaddress: String   // 企业所再地址
+  outaddress: String,  // 企业所再地址
+  // 新增外键字段，用于规范化数据结构
+  buildingId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Building',
+  },
+  houseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'House',
+  }
 })
 
+// 中间件：当企业保存时，自动更新房间状态
+CompanySchema.pre('save', async function(next) {
+  try {
+    const HouseModel = mongoose.model('House');
+    
+    // 如果是新企业或者房间ID发生了变化
+    if (this.isNew || this.isModified('houseId')) {
+      // 如果原来有房间，先将原房间设为空闲
+      if (!this.isNew && this.isModified('houseId')) {
+        const originalCompany = await mongoose.model('Company').findById(this._id);
+        if (originalCompany && originalCompany.houseId) {
+          await HouseModel.findByIdAndUpdate(originalCompany.houseId, { status: '空闲' });
+        }
+      }
+      
+      // 如果有新的房间ID，将新房间设为已租
+      if (this.houseId) {
+        await HouseModel.findByIdAndUpdate(this.houseId, { status: '已租' });
+      }
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// 中间件：当企业被删除时，自动将房间状态设为空闲
+CompanySchema.pre('remove', async function(next) {
+  try {
+    if (this.houseId) {
+      const HouseModel = mongoose.model('House');
+      await HouseModel.findByIdAndUpdate(this.houseId, { status: '空闲' });
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// 中间件：当企业被findOneAndDelete删除时，也要更新房间状态
+CompanySchema.pre('findOneAndDelete', async function(next) {
+  try {
+    const company = await this.model.findOne(this.getFilter());
+    if (company && company.houseId) {
+      const HouseModel = mongoose.model('House');
+      await HouseModel.findByIdAndUpdate(company.houseId, { status: '空闲' });
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// 中间件：当企业被updateOne/findOneAndUpdate更新时，处理房间状态
+CompanySchema.pre('findOneAndUpdate', async function(next) {
+  try {
+    const update = this.getUpdate();
+    
+    // 如果更新中包含houseId字段
+    if (update.houseId !== undefined || update.$set?.houseId !== undefined) {
+      const HouseModel = mongoose.model('House');
+      const newHouseId = update.houseId || update.$set?.houseId;
+      
+      // 获取原企业数据
+      const originalCompany = await this.model.findOne(this.getFilter());
+      
+      if (originalCompany) {
+        // 如果原来有房间，设为空闲
+        if (originalCompany.houseId) {
+          await HouseModel.findByIdAndUpdate(originalCompany.houseId, { status: '空闲' });
+        }
+        
+        // 如果有新房间，设为已租
+        if (newHouseId) {
+          await HouseModel.findByIdAndUpdate(newHouseId, { status: '已租' });
+        }
+      }
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 /**
- * 人员表 Person
+ * 人员表 Person·
  */
 let EmployeeSchema = new mongoose.Schema({
   company_id: {

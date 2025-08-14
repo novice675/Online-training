@@ -21,8 +21,15 @@ import Sendmement from "../pages/Sendmement";
 import Comment from "../pages/Comment";
 import Middle from "../pages/Middle";
 import Visitors_detail from "../pages/grids/Visitors_detail";
+import AutoChat from '../pages/chat/AutoChat';
+import NewsDetail from '../pages/NewsDetail';
+import CommentPage from '../pages/CommentPage';
+import ReplyDetailPage from '../pages/ReplyDetailPage';
+import PublishNews from '../pages/PublishNews';
+import AuditMessages from '../pages/AuditMessages';
 const App = React.lazy(() => import("../App"));
 const Login = React.lazy(() => import("../pages/Login"));
+
 
 // 定义路由类型
 interface RouteConfig {
@@ -30,16 +37,14 @@ interface RouteConfig {
   element: React.ReactNode;
 }
 
-//
-const Islogin = (zu) => {
-  let Com = zu.children.type;
+
+const Islogin = ({ children }: { children: React.ReactElement }) => {
+   
+  let Com = children.type  
   console.log(Com);
-  return sessionStorage.getItem("token") ? (
-    <Com></Com>
-  ) : (
-    <Navigate to="/login"></Navigate>
-  );
-};
+  return sessionStorage.getItem("token") ? <Com /> : <Navigate to="/login" />
+
+}
 
 const routes = createBrowserRouter([
   {
@@ -85,8 +90,27 @@ const routes = createBrowserRouter([
   { path: "/comment", element: <Comment></Comment> },
   { path: "/middle", element: <Middle></Middle> },
   { path: "/visitors_detail", element: <Visitors_detail></Visitors_detail> },
-
-  
+  {
+    path: '/autochat',
+    element: <AutoChat />,
+  },
+  {
+    path: '/news/:id',
+    element: <NewsDetail />,
+  },
+  {
+    path: '/comments/:newsId',
+    element: <CommentPage />,
+  },
+  {
+    path: '/news/:newsId/replies',
+    element: <ReplyDetailPage />,
+  },
+  {
+    path: '/publish-news',
+    element: <PublishNews />,
+  },
+  { path: "/audit-messages", element: <AuditMessages></AuditMessages> },
 ]);
 
 export default routes;

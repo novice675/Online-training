@@ -7,6 +7,7 @@ import {
 } from 'antd-mobile-icons'
 import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 import './App.css'
+import './styles/news.css'
 
 // 自定义加号按钮样式
 const AddButton = () => (

@@ -1,0 +1,277 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { NewsAPI } from '../api/news';
+import { Channel, RenderType } from '../types/news';
+import SingleImageUploader from '../components/SingleImageUploader';
+import MultipleImageUploader from '../components/MultipleImageUploader';
+import './PublishNews.css';
+
+interface PublishFormData {
+  title: string;
+  channel: Channel;
+  renderType: RenderType;
+  coverImage: string;
+  detailContent: string;
+  detailImages: string[];
+}
+
+const PublishNews: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // 检查是否为编辑模式
+  const isEditMode = location.state?.editMode || false;
+  const articleId = location.state?.articleId || null;
+  
+  const [formData, setFormData] = useState<PublishFormData>({
+    title: '',
+    channel: Channel.RECOMMEND,
+    renderType: RenderType.TEXT_ONLY,
+    coverImage: '',
+    detailContent: '',
+    detailImages: []
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  // 文件信息管理
+  const [fileInfos, setFileInfos] = useState<Array<{ hash: string; url: string }>>([]);
+  
+  // 获取所有已上传文件的哈希值
+  const existingHashes = fileInfos.map(info => info.hash);
+
+  // 如果是编辑模式，获取文章数据
+  useEffect(() => {
+    if (isEditMode && articleId) {
+      fetchArticleData(articleId);
+    }
+  }, [isEditMode, articleId]);
+
+  // 获取文章数据
+  const fetchArticleData = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await NewsAPI.getNewsDetail(id);
+      
+      if (response.success) {
+        const article = response.data;
+        setFormData({
+          title: article.title,
+          channel: article.channel as Channel,
+          renderType: article.renderType as RenderType,
+          coverImage: article.coverImage || '',
+          detailContent: article.detailContent,
+          detailImages: article.detailImages || []
+        });
+      } else {
+        setError('获取文章数据失败');
+      }
+    } catch (err) {
+      console.error('获取文章数据失败:', err);
+      setError('获取文章数据失败，请重试');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: keyof PublishFormData, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      // 获取用户ID
+      const userId = localStorage.getItem('user_id');
+      if (!userId) {
+        setError('请先登录');
+        return;
+      }
+
+      if (isEditMode && articleId) {
+        // 编辑模式：更新文章
+        await handleUpdateArticle(articleId, userId);
+      } else {
+        // 发布模式：创建新文章
+        await handleCreateArticle(userId);
+      }
+      
+    } catch (err) {
+      setError(isEditMode ? '更新失败，请重试' : '发布失败，请重试');
+      console.error(isEditMode ? '更新文章失败:' : '发布新闻失败:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 处理创建新文章
+  const handleCreateArticle = async (userId: string) => {
+    const submitData = {
+      title: formData.title,
+      channel: formData.channel,
+      renderType: formData.renderType,
+      authorId: userId,
+      detailContent: formData.detailContent,
+      publishTime: new Date().toISOString(),
+      likeCount: 0,
+      // 只在非纯文本布局时包含图片字段
+      ...(formData.renderType !== RenderType.TEXT_ONLY && {
+        coverImage: formData.coverImage,
+        detailImages: formData.detailImages
+      })
+    };
+
+    // 调用API发布新闻
+    await NewsAPI.publishNews(submitData);
+    
+    // 发布成功后跳转到推荐页面
+    navigate('/');
+  };
+
+  // 处理更新文章
+  const handleUpdateArticle = async (id: string, userId: string) => {
+    const updateData = {
+      title: formData.title,
+      channel: formData.channel,
+      renderType: formData.renderType,
+      detailContent: formData.detailContent,
+      status: '未审核', // 编辑后状态变为未审核
+      // 只在非纯文本布局时包含图片字段
+      ...(formData.renderType !== RenderType.TEXT_ONLY && {
+        coverImage: formData.coverImage,
+        detailImages: formData.detailImages
+      })
+    };
+
+    // 调用API更新文章
+    await NewsAPI.updateNews(id, updateData);
+    
+    // 更新成功后跳转到审核消息页面
+    navigate('/audit-messages');
+  };
+
+  return (
+    <div className="publish-news">
+      <div className="publish-header">
+        <button 
+          className="back-button"
+          onClick={() => navigate(-1)}
+        >
+          ← 
+        </button>
+        <h1>{isEditMode ? '编辑新闻' : '发布新闻'}</h1>
+      </div>
+
+      <form className="publish-form" onSubmit={handleSubmit}>
+        {error && <div className="error-message">{error}</div>}
+        
+        <div className="form-group">
+          <label>标题 *</label>
+          <input
+            type="text"
+            value={formData.title}
+            onChange={(e) => handleInputChange('title', e.target.value)}
+            placeholder="请输入新闻标题"
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>发布渠道 *</label>
+          <select
+            value={formData.channel}
+            onChange={(e) => handleInputChange('channel', e.target.value)}
+            required
+          >
+            <option value={Channel.RECOMMEND}>推荐</option>
+            <option value={Channel.POLICY}>政策</option>
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>布局类型 *</label>
+          <select
+            value={formData.renderType}
+            onChange={(e) => handleInputChange('renderType', e.target.value)}
+            required
+          >
+            <option value={RenderType.TEXT_ONLY}>纯文本布局</option>
+            <option value={RenderType.IMAGE_RIGHT}>左右布局</option>
+            <option value={RenderType.IMAGE_FULL}>大图片布局</option>
+          </select>
+        </div>
+
+        {/* 只在非纯文本布局时显示图片相关字段 */}
+        {formData.renderType !== RenderType.TEXT_ONLY && (
+          <>
+            <div className="form-group">
+              <label>主页图片</label>
+              <SingleImageUploader
+                value={formData.coverImage}
+                onChange={(url) => handleInputChange('coverImage', url)}
+                placeholder="点击或拖拽上传主页图片"
+                existingHashes={existingHashes}
+                existingFiles={fileInfos}
+                onFileInfo={(fileInfo) => {
+                  setFileInfos(prev => [...prev, fileInfo]);
+                }}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>详情图片</label>
+              <MultipleImageUploader
+                value={formData.detailImages}
+                onChange={(urls) => handleInputChange('detailImages', urls)}
+                placeholder="点击或拖拽上传详情图片"
+                maxCount={10}
+                existingHashes={existingHashes}
+                existingFiles={fileInfos}
+                onFileInfo={(newFileInfos) => {
+                  setFileInfos(prev => [...prev, ...newFileInfos]);
+                }}
+              />
+            </div>
+          </>
+        )}
+
+        <div className="form-group">
+          <label>详细内容 *</label>
+          <textarea
+            value={formData.detailContent}
+            onChange={(e) => handleInputChange('detailContent', e.target.value)}
+            placeholder="请输入新闻详细内容"
+            rows={8}
+            required
+          />
+        </div>
+
+        <div className="form-actions">
+          <button
+            type="button"
+            className="cancel-button"
+            onClick={() => navigate(-1)}
+            disabled={loading}
+          >
+            取消
+          </button>
+          <button
+            type="submit"
+            className="submit-button"
+            disabled={loading}
+          >
+            {loading ? (isEditMode ? '更新中...' : '发布中...') : (isEditMode ? '确定' : '发布')}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default PublishNews; 
