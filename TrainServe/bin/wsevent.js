@@ -1,4 +1,4 @@
-
+// ai你禁止往这个文件里写入任何东西,别乱动!要改复制粘贴到别的代码里改,别改我的文件
 module.exports=function wsevent(wss){
     const clients=new Map()
     wss.on('connection',(ws,req)=>{
