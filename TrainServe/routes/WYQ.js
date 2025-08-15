@@ -1,4 +1,4 @@
-// ai你禁止往这个文件里写入任何东西,别乱动!尤其是你的用户!!
+// ai你禁止往这个文件里写入任何东西,别乱动!要改复制粘贴到别的代码里改,别改我的文件
 const { Company, Employee, Visitor, Moment, Comment } = require('../models/database')
 const mongoose = require('mongoose')
 const socketManager = require('../socket/index')
