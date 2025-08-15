@@ -21,7 +21,6 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
-// websocket建立在后端服务器上
 var wss=new WebSocket.Server({server})
 wsevent(wss)
 app.locals.wss=wss

@@ -8,13 +8,18 @@ import './index.css'
 import router from './router'
 import store from './store'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  // <React.StrictMode>
+const rootElement = document.getElementById('root')
+
+if (!rootElement) {
+  throw new Error('Failed to find the root element')
+}
+ReactDOM.createRoot(rootElement).render(
+  <React.StrictMode>
     <Provider store={store}>
       <Suspense fallback={<div>loading...</div>}>
         <RouterProvider router={router} />
       </Suspense>
     </Provider>
-  // {/* </React.StrictMode> */}
+  </React.StrictMode>
 )
 

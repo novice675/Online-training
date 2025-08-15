@@ -160,7 +160,6 @@ router.get("/infovisitor", async (req, res) => {
 router.post("/addmoment", async (req, res) => {
   console.log(req.body);
   await Moment.create(req.body);
-  wsevent.
   res.send({
     code: 200,
   });
@@ -284,15 +283,9 @@ router.post("/addcomment", async (req, res) => {
     code: 200,
   });
   const wss=req.app.locals.wss
-  // 只用send..的话..应该只会发给一个人吧,行吧,wss根本没有这个send方法
-
-  // wss.send(JSON.stringify({type:'add'}))
-
   const momentid=req.body.moment_id
   wss.broadcast(momentid,{type:'add'})
-  console.log('====================================');
   console.log('add');
-  console.log('====================================');
 });
 
 router.delete('/delcomment',async(req,res)=>{
