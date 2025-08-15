@@ -192,6 +192,14 @@ router.get("/infovisitor", async (req, res) => {
 });
 
 
+
+router.post("/addmoment", async (req, res) => {
+  console.log(req.body);
+  await Moment.create(req.body);
+  res.send({
+    code: 200,
+  });
+
 // 新增：访客列表接口（支持分页和筛选）
 router.get("/visitor/list", async (req, res) => {
   try {

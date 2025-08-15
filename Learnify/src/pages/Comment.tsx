@@ -27,10 +27,9 @@ export default function Comment() {
   const [info, setinfo] = useState({
     content: "",
   });
-
   const [comment, setcomment] = useState<Co[]>([]);
   const [pid, setpid] = useState("");
-  const {wsRef}=useWsevent('ws://localhost:3008',moment_id as string,{
+  useWsevent('ws://localhost:3008',moment_id as string,{
     onMessage:(ev)=>{
       const data=JSON.parse(ev.data)
       if(data.type=='add'){
