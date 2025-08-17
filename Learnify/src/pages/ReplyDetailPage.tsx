@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, MessageCircle, ThumbsUp, Reply, Send } from "lucide-react";
 import CommentAPI, { type CommentItem } from "../utils/commentApi.ts";
 import UserAPI from "../api/user.ts";
+import { useRealTimeComments } from "../composables/useRealTimeComments";
 import "./ReplyDetailPage.css";
 
 interface ReplyDetailPageProps {}
@@ -13,14 +14,25 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
   const [searchParams] = useSearchParams();
   const commentId = searchParams.get('commentId');
   const [mainComment, setMainComment] = useState<CommentItem | null>(null);
-  const [replies, setReplies] = useState<CommentItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCommentForm, setShowCommentForm] = useState(false);
   const [replyTo, setReplyTo] = useState<CommentItem | null>(null);
   const [commentContent, setCommentContent] = useState("");
 
   const repliesListRef = useRef<HTMLDivElement>(null);
+
+  // 使用实时评论Hook获取回复列表
+  const {
+    comments: replies,
+    loading,
+    error: repliesError,
+    refresh: refreshReplies
+  } = useRealTimeComments({
+    commentId: commentId || undefined,
+    page: 1,
+    limit: 1000,
+    autoRefresh: true
+  });
 
   // 滚动到新评论
   const scrollToNewComment = (domKey: string) => {
@@ -63,27 +75,27 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
     }
   };
 
-  // 获取回复列表
-  const fetchReplies = async () => {
-    if (!newsId || !mainComment) return;
+  // 获取回复列表 - 现在由 useRealTimeComments Hook 自动处理
+  // const fetchReplies = async () => {
+  //   if (!newsId || !mainComment) return;
     
-    try {
-      setLoading(true);
-      const response = await CommentAPI.getReplies(mainComment._id, { 
-        page: 1, 
-        limit: 1000 // 获取所有回复，不使用分页
-      });
+  //   try {
+  //     setLoading(true);
+  //     const response = await CommentAPI.getReplies(mainComment._id, { 
+  //       page: 1, 
+  //       limit: 1000 // 获取所有回复，不使用分页
+  //     });
       
-      if (response.success) {
-        setReplies(response.data.list);
-      }
-    } catch (err) {
-      console.error("获取回复失败:", err);
-      setError("获取回复失败，请重试");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     if (response.success) {
+  //       setReplies(response.data.list);
+  //     }
+  //   } catch (err) {
+  //     console.error("获取回复失败:", err);
+  //     setError("获取回复失败，请重试");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // 组件挂载时获取数据
   useEffect(() => {
@@ -93,12 +105,12 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
     initData();
   }, [newsId]);
 
-  // 主评论获取后加载回复
-  useEffect(() => {
-    if (mainComment) {
-      fetchReplies();
-    }
-  }, [mainComment]);
+  // 主评论获取后加载回复 - 现在由 useRealTimeComments Hook 自动处理
+  // useEffect(() => {
+  //   if (mainComment) {
+  //     fetchReplies();
+  //   }
+  // }, [mainComment]);
 
 
 
@@ -147,9 +159,6 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
         rootId: mainComment._id
       };
 
-      // 立即添加到回复列表末尾（乐观渲染）
-      setReplies(prev => [...prev, tempReply]);
-      
       // 立即滚动到新位置
       scrollToNewComment(tempReply.clientKey || tempReply._id);
       
@@ -164,28 +173,12 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
         replyToAuthor: mainComment.userId.username
       });
 
-      // 用真实数据替换临时数据
-      if (response.success) {
-        setReplies(prev => 
-          prev.map(reply => 
-            reply._id === tempReply._id 
-              ? { ...response.data, clientKey: tempReply.clientKey }
-              : reply
-          )
-        );
-      } else {
-        // 如果失败，移除临时数据
-        setReplies(prev => 
-          prev.filter(reply => reply._id !== tempReply._id)
-        );
+      // 实时更新会自动处理新评论的添加
+      if (!response.success) {
         alert("发布失败，请重试");
       }
     } catch (err) {
       console.error("发布回复失败:", err);
-      // 移除临时数据
-      setReplies(prev => 
-        prev.filter(reply => reply._id.startsWith('temp-'))
-      );
       alert("发布回复失败，请重试");
     }
   };
@@ -233,9 +226,6 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
         rootId: replyTo.rootId || replyTo._id
       };
 
-      // 立即添加到回复列表末尾（乐观渲染）
-      setReplies(prev => [...prev, tempReply]);
-      
       // 立即滚动到新位置
       scrollToNewComment(tempReply.clientKey || tempReply._id);
       
@@ -251,45 +241,26 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
         replyToAuthor: replyTo.userId.username
       });
 
-      // 用真实数据替换临时数据
-      if (response.success) {
-        setReplies(prev => 
-          prev.map(reply => 
-            reply._id === tempReply._id ? { ...response.data, clientKey: tempReply.clientKey } : reply
-          )
-        );
-      } else {
-        // 如果失败，移除临时数据
-        setReplies(prev => 
-          prev.filter(reply => reply._id !== tempReply._id)
-        );
+      // 实时更新会自动处理新评论的添加
+      if (!response.success) {
         alert("回复失败，请重试");
       }
     } catch (err) {
       console.error("回复失败:", err);
-      // 移除临时数据
-      setReplies(prev => 
-        prev.filter(reply => reply._id.startsWith('temp-'))
-      );
       alert("回复失败，请重试");
     }
   };
 
-  // 点赞回复
+  // 点赞回复 - 实时更新会自动处理点赞状态
   const handleLikeReply = async (reply: CommentItem) => {
     try {
       const response = await CommentAPI.toggleLikeComment(reply._id, {
         action: 'like'
       });
 
-      if (response.success) {
-        setReplies(prev => 
-          prev.map(item => 
-            item._id === reply._id 
-              ? { ...item, likeCount: response.data.likeCount }
-              : item
-          )
-        );
+      // 实时更新会自动处理点赞状态的变化
+      if (!response.success) {
+        console.error("点赞失败");
       }
     } catch (err) {
       console.error("点赞失败:", err);
@@ -417,7 +388,7 @@ export default function ReplyDetailPage({}: ReplyDetailPageProps) {
         ) : error ? (
           <div className="error">
             <p>{error}</p>
-            <button onClick={() => fetchReplies()}>重试</button>
+            <button onClick={() => refreshReplies()}>重试</button>
           </div>
         ) : replies.length === 0 ? (
           <div className="empty">暂无回复，快来抢沙发吧！</div>

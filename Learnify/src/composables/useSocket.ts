@@ -14,6 +14,7 @@ interface UseSocketReturn {
   disconnect: () => void;
   subscribeToNews: (callback: (news: NewsItem) => void) => () => void;
   subscribeToComments: (callback: (comment: any) => void) => () => void;
+  subscribeToCommentUpdates: (callback: (data: { id: string; action: 'created' | 'updated' | 'deleted' }) => void) => () => void;
   subscribeToArticleUpdates: (callback: (data: { id: string; action: 'created' | 'updated' | 'deleted' | 'statusChanged' }) => void) => () => void;
   subscribeToTenantUpdates: (callback: (data: { id: string; action: 'created' | 'updated' | 'deleted' }) => void) => () => void;
   subscribeToPersonUpdates: (callback: (data: { id: string; action: 'created' | 'updated' | 'deleted' }) => void) => () => void;
@@ -86,6 +87,35 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     // 返回清理函数
     const cleanup = () => {
       socketClient.off('comment_created', handleCommentCreated);
+      socketClient.off('comment_deleted', handleCommentDeleted);
+    };
+
+    eventCleanupRef.current.push(cleanup);
+    return cleanup;
+  }, []);
+
+  // 订阅评论更新事件
+  const subscribeToCommentUpdates = useCallback((callback: (data: { id: string; action: 'created' | 'updated' | 'deleted' }) => void) => {
+    const handleCommentCreated = (data: any) => {
+      callback({ id: data._id, action: 'created' });
+    };
+
+    const handleCommentUpdated = (data: any) => {
+      callback({ id: data._id, action: 'updated' });
+    };
+
+    const handleCommentDeleted = (data: { id: string }) => {
+      callback({ id: data.id, action: 'deleted' });
+    };
+
+    socketClient.on('comment_created', handleCommentCreated);
+    socketClient.on('comment_updated', handleCommentUpdated);
+    socketClient.on('comment_deleted', handleCommentDeleted);
+
+    // 返回清理函数
+    const cleanup = () => {
+      socketClient.off('comment_created', handleCommentCreated);
+      socketClient.off('comment_updated', handleCommentUpdated);
       socketClient.off('comment_deleted', handleCommentDeleted);
     };
 
@@ -199,6 +229,7 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     disconnect,
     subscribeToNews,
     subscribeToComments,
+    subscribeToCommentUpdates,
     subscribeToArticleUpdates,
     subscribeToTenantUpdates,
     subscribeToPersonUpdates,

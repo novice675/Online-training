@@ -7,7 +7,7 @@
         <h2>访客信息登记</h2>
       </div>
       <div class="action-buttons">
-        <el-button type="primary" @click="handleAdd" :icon="Plus">新增</el-button>
+
         <el-button type="danger"  @click="handleBatchDelete" :icon="Delete">
           批量删除 ({{ multipleSelection.length }})
         </el-button>

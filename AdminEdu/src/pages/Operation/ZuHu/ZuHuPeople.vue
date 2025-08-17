@@ -222,17 +222,17 @@ const fetchEmployeeList = async () => {
     loading.value = true
     const params = {
       page: pagination.page,
-      pageSize: pagination.size,
+      size: pagination.size,
       ...searchForm
     }
     
     const response = await employeeList(params)
     
     if (response.data.code === 200) {
-      tableData.value = response.data.data.list
-      pagination.total = response.data.data.total
+      tableData.value = response.data.data.list || []
+      pagination.total = response.data.data.total || 0
     } else {
-      ElMessage.error('获取人员列表失败')
+      ElMessage.error(response.data.msg || '获取人员列表失败')
     }
   } catch (error) {
     console.error('获取人员列表失败:', error)
@@ -243,7 +243,9 @@ const fetchEmployeeList = async () => {
 }
 
 // 搜索处理
-const handleSearch = () => {
+const handleSearch = (filterData: any) => {
+  // 更新搜索表单数据
+  Object.assign(searchForm, filterData)
   pagination.page = 1
   fetchEmployeeList()
 }

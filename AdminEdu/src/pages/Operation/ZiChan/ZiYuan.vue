@@ -4,7 +4,7 @@
     <div class="page-header">
       <h2>房间信息管理</h2>
       <div class="header-actions">
-        <el-button type="primary" @click="handleAdd">新增</el-button>
+
         <el-button type="warning" @click="handleBatchDelete" :disabled="selectedRows.length === 0">
           批量删除
         </el-button>

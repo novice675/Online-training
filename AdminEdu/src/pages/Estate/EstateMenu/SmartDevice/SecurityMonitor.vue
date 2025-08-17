@@ -7,7 +7,7 @@
           <h2>智能门禁设备</h2>
         </div>
         <div class="action-buttons">
-          <el-button type="primary" @click="add" :icon="Plus">新增设备</el-button>
+  
           <el-button type="danger" @click="addDel" :disabled="multipleSelection.length === 0" :icon="Delete">
             批量删除 ({{ multipleSelection.length }})
           </el-button>

@@ -1,8 +1,15 @@
-import React from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Middle() {
   const location = useLocation();
+  const navigate=useNavigate()
   const { text, type } = location.state || "";
-  return <div>{type == "url" ? `已跳转到${text}` : text}</div>;
+  useEffect(()=>{
+    if(type=='url'){
+      window.location.replace(text)
+    }
+  },[])
+  return <div>{type=='text'?text:''}
+    </div>;
 }

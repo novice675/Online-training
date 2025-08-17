@@ -9,7 +9,7 @@ const AppUser = require('../models/AppUser');
 // 获取新闻列表接口
 router.get('/news', async (req, res) => {
   try {
-    const { page = 1, limit = 10, renderType, tag, channel } = req.query;
+    const { page = 1, limit = 10, renderType, tag, channel, status } = req.query;
     
     // 构建查询条件
     const query = {};
@@ -27,6 +27,11 @@ router.get('/news', async (req, res) => {
     // 如果指定了频道，添加到查询条件
     if (channel) {
       query.channel = channel;
+    }
+    
+    // 如果指定了状态，添加到查询条件
+    if (status) {
+      query.status = status;
     }
     
     // 计算跳过的文档数量

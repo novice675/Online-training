@@ -3,6 +3,7 @@ import http from "../utils/axios";
 import { Toast, NavBar, Input, List, Button, Popup } from "antd-mobile";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CommentTree } from "./CommentTree";
+import { useRealTimeComments } from "../composables/useRealTimeComments";
 interface Co {
   _id: string;
   time: string;
@@ -26,60 +27,127 @@ export default function Comment() {
   const [info, setinfo] = useState({
     content: "",
   });
-
-  const [comment, setcomment] = useState<Co[]>([]);
   const [pid, setpid] = useState("");
-  const getlist = async () => {
-    let res = await http.get("/WYQ/comment", { moment_id });
-    if (res.code == 200) {
-      setcomment(res.list);
-    } else {
-      Toast.show({
-        icon: "field",
-        content: "获取评论错误,",
-      });
-    }
-  };
+  
+  // 使用实时评论Hook
+  const {
+    comments,
+    loading,
+    error,
+    refresh
+  } = useRealTimeComments({
+    newsId: moment_id || undefined,
+    page: 1,
+    limit: 100,
+    autoRefresh: true
+  });
+
+  // 将新的评论数据结构转换为旧的格式以保持兼容性
+  const comment = comments.map((item: any) => ({
+    _id: item._id,
+    time: item.createdAt,
+    content: item.content,
+    moment_id: item.newsId,
+    type: item.userId?.username || '',
+    user_id: item.userId?._id || '',
+    user: {
+      name: item.userId?.username || '',
+      picture: item.userId?.avatar || '/images/1.png'
+    },
+    replies: item.replies || [],
+    pname: item.replyToAuthor || '',
+    pid: item.parentId || ''
+  })) as Co[];
 
   // const [content,setcontent]=useState('')
   const addcomment = async () => {
-    const user_id = localStorage.getItem("user_id");
-    const role = localStorage.getItem("role");
-    let res = await http.post("/WYQ/addcomment", {
-      ...info,
-      moment_id: moment_id,
-      type: role,
-      user_id: user_id,
-      pid: pid ? pid : null,
-    });
-    if (res.code == 200) {
+    if (!info.content.trim()) {
       Toast.show({
-        icon: "success",
-        content: "发布成功",
+        icon: "fail",
+        content: "请输入评论内容",
       });
-      setVisible1(false)
-      setpid('')
-      getlist();
+      return;
+    }
+
+    const user_id = localStorage.getItem("user_id");
+    if (!user_id) {
+      Toast.show({
+        icon: "fail",
+        content: "请先登录",
+      });
+      return;
+    }
+
+    try {
+      let res;
+      if (pid) {
+        // 回复评论
+        res = await http.post("/LCYping/comments/" + pid + "/replies", {
+          content: info.content,
+          userId: user_id,
+          replyToAuthor: "用户" // 这里可以根据实际情况获取被回复者的用户名
+        });
+      } else {
+        // 发布主评论
+        res = await http.post("/LCYping/news/" + moment_id + "/comments", {
+          content: info.content,
+          userId: user_id
+        });
+      }
+
+      if (res.success) {
+        Toast.show({
+          icon: "success",
+          content: "发布成功",
+        });
+        setVisible1(false);
+        setpid('');
+        setinfo({ content: "" });
+        // 实时更新会自动处理，不需要手动刷新
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "发布失败",
+        });
+      }
+    } catch (error) {
+      console.error("发布评论失败:", error);
+      Toast.show({
+        icon: "fail",
+        content: "发布失败，请重试",
+      });
     }
   };
-  const del=async(id:string)=>{
-    let res= await http.delete('/WYQ/delcomment',{_id:id})
-    if(res.code==200){
+  const del = async (id: string) => {
+    try {
+      // 这里需要根据实际的删除API来调整
+      // 由于没有看到删除评论的API，暂时保留原来的逻辑
+      let res = await http.delete('/WYQ/delcomment', { _id: id, moment_id });
+      if (res.code == 200) {
+        Toast.show({
+          icon: "success",
+          content: "删除成功"
+        });
+        // 实时更新会自动处理，不需要手动刷新
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "删除错误请联系客服"
+        });
+      }
+    } catch (error) {
+      console.error("删除评论失败:", error);
       Toast.show({
-        icon:"success",
-        content:"删除成功"
-      })
-      getlist()
-    }else{
-      Toast.show({
-        icon:"field",
-        content:"删除错误请联系客服"
-      })
+        icon: "fail",
+        content: "删除失败，请重试"
+      });
     }
-  }
-  useEffect(() => {
-    getlist();
-  }, []);
+  };
+  // 实时更新会自动处理数据加载，不需要手动调用
+  // useEffect(() => {
+  //   getlist();
+  // }, []);
+
   return (
     <div>
       <NavBar

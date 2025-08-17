@@ -3,11 +3,9 @@
     <!-- 页面头部 -->
     <PageHeader 
       title="租户信息管理"
-      :show-add="true"
+      :show-add="false"
       :show-batch-delete="true"
       :selected-count="selectedRows.length"
-      add-text="新增"
-      @add="handleAddWithData"
       @batch-delete="handleBatchDelete"
     />
 

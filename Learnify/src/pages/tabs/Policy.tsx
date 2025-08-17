@@ -17,7 +17,8 @@ export default function Policy() {
     channel: Channel.POLICY,
     page: 1,
     limit: 20,
-    autoRefresh: true
+    autoRefresh: true,
+    status: '审核成功' // 只显示审核成功的新闻
   });
 
   // 处理新闻点击

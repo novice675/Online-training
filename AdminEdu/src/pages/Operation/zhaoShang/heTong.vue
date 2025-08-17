@@ -2,10 +2,9 @@
   <div class="hetong-container">
     <PageHeader 
       title="合同管理"
-      :show-add="true"
+      :show-add="false"
       :show-batch-delete="true"
       :selected-count="selectedRows.length"
-      @add="handleAdd"
       @batch-delete="handleBatchDelete"
     />
 
@@ -185,39 +184,7 @@ const handleSubmit = async () => {
   }
 }
 
-// 重写新增处理函数，自动生成合同编号
-const handleAdd = async () => {
-  try {
-    // 生成新的合同编号
-    const newHebian = await generateContractNumber()
-    
-    // 调用原始新增方法
-    originalHandleAdd()
-    
-    // 设置自动生成的合同编号
-    formData.value.he_bian = newHebian
-  } catch (error) {
-    console.error('生成合同编号失败:', error)
-    ElMessage.error('生成合同编号失败')
-  }
-}
 
-// 生成合同编号的函数
-const generateContractNumber = async (): Promise<string> => {
-  try {
-    const response = await generateHetongNumber()
-    if (response.data.code === 200 && response.data.data) {
-      return response.data.data.he_bian
-    } else {
-      throw new Error(response.data.msg || '生成合同编号失败')
-    }
-  } catch (error) {
-    console.error('生成合同编号时出错:', error)
-    // 如果出错，使用时间戳作为后备方案
-    const timestamp = Date.now().toString().slice(-4)
-    return `HT${new Date().getFullYear()}${timestamp}`
-  }
-}
 
 // 处理表单数据更新
 const handleFormDataUpdate = (newFormData: HetongData) => {

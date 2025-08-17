@@ -32,6 +32,7 @@ export interface NewsItem {
   coverImage?: string;
   detailContent: string;
   detailImages?: string[];
+  status?: string; // 添加状态字段
   createdAt: string;
   updatedAt: string;
 }
@@ -66,4 +67,5 @@ export interface GetNewsParams {
   renderType?: RenderType;
   tag?: string;
   channel?: Channel;
+  status?: string; // 添加状态过滤参数
 } 

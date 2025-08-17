@@ -9,7 +9,7 @@ export default function Login() {
       let user:{company_id?:string,role?:string,_id?:string}={}
       localStorage.setItem('com_id',user.company_id||'688b06dc52db26ae1e69b4b6')
       localStorage.setItem('role',user.role||'员工')
-      localStorage.setItem('user_id',user._id||'689341ab4f2cd04e5f5a2692')
+      localStorage.setItem('user_id',user._id||'688b258c82e870e203e576d0')
       sessionStorage.setItem('token','1234')
 
 

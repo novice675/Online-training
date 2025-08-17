@@ -9,6 +9,7 @@ interface UseRealTimeNewsOptions {
   page?: number;
   limit?: number;
   autoRefresh?: boolean;
+  status?: string; // 添加状态过滤选项
 }
 
 interface UseRealTimeNewsReturn {
@@ -22,7 +23,7 @@ interface UseRealTimeNewsReturn {
 }
 
 export function useRealTimeNews(options: UseRealTimeNewsOptions): UseRealTimeNewsReturn {
-  const { channel, page = 1, limit = 20, autoRefresh = true } = options;
+  const { channel, page = 1, limit = 20, autoRefresh = true, status } = options;
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,10 +37,14 @@ export function useRealTimeNews(options: UseRealTimeNewsOptions): UseRealTimeNew
       if (prevList.find(item => item._id === news._id)) {
         return prevList;
       }
+      // 如果设置了状态过滤，只添加符合条件的新闻
+      if (status && news.status !== status) {
+        return prevList;
+      }
       // 添加到列表开头
       return [news, ...prevList].slice(0, limit);
     });
-  }, [limit]);
+  }, [limit, status]);
 
   // 从列表中移除新闻
   const removeNews = useCallback((id: string) => {
@@ -65,6 +70,7 @@ export function useRealTimeNews(options: UseRealTimeNewsOptions): UseRealTimeNew
       const response = await NewsAPI.getNewsByChannel(channel, {
         page,
         limit,
+        status, // 传递状态过滤参数
       });
       
       if (response.success) {
@@ -78,7 +84,7 @@ export function useRealTimeNews(options: UseRealTimeNewsOptions): UseRealTimeNew
     } finally {
       setLoading(false);
     }
-  }, [channel, page, limit]);
+  }, [channel, page, limit, status]);
 
   // 订阅实时更新
   useEffect(() => {
