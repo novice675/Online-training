@@ -596,7 +596,7 @@ router.get("/employee/list", async (req, res) => {
     console.log('获取租户人员列表请求参数:', req.query);
     const {
       page = 1,
-      pageSize = 10,
+      size = 10,
       name = '',
       phone = '',
       companyName = '',
@@ -619,8 +619,8 @@ router.get("/employee/list", async (req, res) => {
     console.log('查询条件:', query);
 
     // 计算分页
-    const skip = (parseInt(page) - 1) * parseInt(pageSize);
-    const limit = parseInt(pageSize);
+    const skip = (parseInt(page) - 1) * parseInt(size);
+    const limit = parseInt(size);
 
     // 聚合查询，关联企业信息
     let pipeline = [
@@ -715,7 +715,7 @@ router.get("/employee/list", async (req, res) => {
         list,
         total,
         page: parseInt(page),
-        pageSize: parseInt(pageSize)
+        pageSize: parseInt(size)
       }
     });
   } catch (error) {

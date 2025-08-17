@@ -7,7 +7,7 @@
         <h2>车辆信息管理</h2>
       </div>
       <div class="action-buttons">
-        <el-button type="primary" @click="handleAdd" :icon="Plus">新增车辆</el-button>
+
         <el-button type="danger" :disabled="multipleSelection.length === 0" @click="handleBatchDelete" :icon="Delete">
           批量删除 ({{ multipleSelection.length }})
         </el-button>

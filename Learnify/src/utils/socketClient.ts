@@ -143,7 +143,7 @@ class SocketClient {
 
 // 创建默认实例
 const socketClient = new SocketClient({
-  url: 'http://localhost:3008'
+  url: 'http://localhost:3009'
 });
 
 export default socketClient;

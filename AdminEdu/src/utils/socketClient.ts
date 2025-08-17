@@ -3,7 +3,7 @@ import { ElMessage, ElNotification } from 'element-plus'
 
 class SocketClient {
   private socket: Socket | null = null
-  private url = 'http://localhost:3008'
+  private url = 'http://localhost:3009'
 
   connect() {
     if (this.socket?.connected) return

@@ -11,7 +11,7 @@ var http = require('http');
 var WebSocket=require('ws')
 var wsevent=require('./wsevent')
 
-//var socketManager = require('../socket/index');
+var socketManager = require('../socket/index');
 
 
 /**
@@ -29,10 +29,15 @@ var server = http.createServer(app);
 var wss=new WebSocket.Server({server})
 wsevent(wss)
 app.locals.wss=wss
+
 /**
- * Initialize Socket.io
+ * Initialize Socket.io on separate port
  */
-socketManager.init(server);
+const ioServer = http.createServer();
+socketManager.init(ioServer);
+ioServer.listen(3009, () => {
+  console.log('Socket.io server running on port 3009');
+});
 
 /**
  * Listen on provided port, on all network interfaces.

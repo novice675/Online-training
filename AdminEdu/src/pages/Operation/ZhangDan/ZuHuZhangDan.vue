@@ -4,7 +4,7 @@
     <div class="page-header">
       <h2>租户账单管理</h2>
       <div class="header-actions">
-        <el-button type="primary" @click="handleAdd">新增</el-button>
+
         <el-button 
           type="danger" 
           :disabled="selectedRows.length === 0"
@@ -573,7 +573,9 @@ const fetchList = async () => {
 }
 
 // 搜索
-const handleSearch = () => {
+const handleSearch = (filterData: any) => {
+  // 更新搜索表单数据
+  Object.assign(filterForm, filterData)
   pagination.page = 1
   fetchList()
 }
