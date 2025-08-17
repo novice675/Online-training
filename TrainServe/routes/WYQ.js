@@ -1,7 +1,6 @@
 
 const { Company, Employee, Visitor, Moment, Comment } = require('../models/database')
 const mongoose = require('mongoose')
-const socketManager = require('../socket/index')
 
 var express = require('express')
 var multiparty = require('multiparty')
@@ -64,9 +63,6 @@ router.post('/addcomem', async (req, res) => {
       }
     ]);
 
-    // 通知移动端
-    socketManager.notifyPersonCreated({ name: req.body.name });
-    
     res.send({
       code: 200,
       msg: "添加成功",
@@ -391,12 +387,6 @@ router.post("/addmoment", async (req, res) => {
       }
     ]);
 
-    // 通知移动端
-    socketManager.notifyArticleCreated({
-      title: req.body.title || '新动态',
-      content: req.body.content
-    });
-
     res.send({
       code: 200,
       msg: "发布成功",
@@ -559,9 +549,6 @@ router.post("/addcomment", async (req, res) => {
       }
     ]);
 
-    // 通知移动端
-    socketManager.notifyCommentCreated({ content: req.body.content });
-
     res.send({
       code: 200,
       msg: "评论成功",
@@ -602,9 +589,6 @@ router.delete('/delcomment', async (req, res) => {
     
     await didel(_id);
     
-    // 通知移动端
-    socketManager.notifyCommentDeleted(_id);
-    
     res.send({
       code: 200,
       msg: "删除成功"
@@ -626,9 +610,6 @@ router.delete('/delmoment/:id', async (req, res) => {
     const deletedMoment = await Moment.findByIdAndDelete(id);
     
     if (deletedMoment) {
-      // 通知移动端
-      socketManager.notifyArticleDeleted(id, deletedMoment.title || '文章');
-      
       res.send({
         code: 200,
         msg: '删除成功'
@@ -794,9 +775,6 @@ router.delete('/employee/delete/:id', async (req, res) => {
     const result = await Employee.findByIdAndDelete(id);
     
     if (result) {
-      // 通知移动端
-      socketManager.notifyPersonDeleted(id, result.name);
-      
       res.send({
         code: 200,
         msg: '删除成功'

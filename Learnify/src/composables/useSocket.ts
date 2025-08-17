@@ -122,19 +122,6 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     return cleanup;
   }, []);
 
-  // 自动连接
-  useEffect(() => {
-    if (autoConnect) {
-      connect();
-    }
-
-    // 清理函数
-    return () => {
-      eventCleanupRef.current.forEach(cleanup => cleanup());
-      eventCleanupRef.current = [];
-    };
-  }, [autoConnect, connect]);
-
   // 订阅租户更新事件
   const subscribeToTenantUpdates = useCallback((callback: (data: { id: string; action: 'created' | 'updated' | 'deleted' }) => void) => {
     const handleTenantCreated = (data: any) => {
@@ -192,6 +179,19 @@ export function useSocket(options: UseSocketOptions = {}): UseSocketReturn {
     eventCleanupRef.current.push(cleanup);
     return cleanup;
   }, []);
+
+  // 自动连接
+  useEffect(() => {
+    if (autoConnect) {
+      connect();
+    }
+
+    // 清理函数
+    return () => {
+      eventCleanupRef.current.forEach(cleanup => cleanup());
+      eventCleanupRef.current = [];
+    };
+  }, [autoConnect, connect]);
 
   return {
     connected: socketClient.connected,

@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import ArticleCard from '../components/ArticleCard';
 import type { Article } from '../components/ArticleCard';
 import NewsAPI from '../api/news';
+import { useSocket } from '../composables/useSocket';
 import './AuditMessages.css';
 
 const AuditMessages: React.FC = () => {
@@ -22,6 +23,9 @@ const AuditMessages: React.FC = () => {
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   // 搜索状态引用，用于防抖
   const searchKeywordRef = useRef<string>('');
+
+  // 使用Socket Hook获取实时更新
+  const { subscribeToArticleUpdates } = useSocket();
 
   const fetchUserArticles = useCallback(async (page: number = 1, reset: boolean = false) => {
     if (!userId) return;
@@ -141,6 +145,41 @@ const AuditMessages: React.FC = () => {
   useEffect(() => {
     fetchUserArticles(1, true);
   }, [fetchUserArticles]);
+
+  // 实时更新监听
+  useEffect(() => {
+    // 订阅文章更新事件
+    const unsubscribe = subscribeToArticleUpdates((data) => {
+      console.log('收到文章更新事件:', data);
+      
+      switch (data.action) {
+        case 'created':
+          // 新文章创建，重新获取第一页数据
+          fetchUserArticles(1, true);
+          break;
+        case 'updated':
+          // 文章更新，重新获取当前页数据
+          fetchUserArticles(currentPage);
+          break;
+        case 'deleted':
+          // 文章删除，从本地列表中移除
+          setArticles(prev => prev.filter(article => article._id !== data.id));
+          setTotal(prev => Math.max(0, prev - 1));
+          break;
+        case 'statusChanged':
+          // 文章状态变化，重新获取数据
+          fetchUserArticles(currentPage);
+          break;
+        default:
+          console.log('未知的文章操作:', data.action);
+      }
+    });
+
+    // 清理函数
+    return () => {
+      unsubscribe();
+    };
+  }, [subscribeToArticleUpdates, fetchUserArticles, currentPage]);
 
   // 清理定时器
   useEffect(() => {

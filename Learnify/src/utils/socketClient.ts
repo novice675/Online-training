@@ -38,7 +38,7 @@ class SocketClient {
         autoConnect: this.config.autoConnect,
         reconnection: this.config.reconnection,
         reconnectionAttempts: this.config.reconnectionAttempts,
-        reconnectionDelay: this.config.reconnectionDelay,
+        reconnectionDelay: this.config.reconnectDelay,
         timeout: 20000,
       });
 
