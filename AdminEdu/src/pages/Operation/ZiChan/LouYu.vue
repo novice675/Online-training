@@ -4,7 +4,9 @@
     <div class="page-header">
       <h2>楼宇信息管理</h2>
       <div class="header-actions">
-
+        <el-button type="primary" @click="handleAdd">
+          新增楼宇
+        </el-button>
         <el-button type="warning" @click="handleBatchDelete" :disabled="selectedRows.length === 0">
           批量删除
         </el-button>
@@ -64,8 +66,11 @@
             {{ (scope.row.managedArea || 0).toLocaleString() }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100" fixed="right">
+        <el-table-column label="操作" width="150" fixed="right">
           <template #default="scope">
+            <el-button size="small" type="primary" link @click="handleEdit(scope.row)">
+              编辑
+            </el-button>
             <el-button size="small" type="danger" link @click="handleDelete(scope.row)">
               删除
             </el-button>
@@ -426,7 +431,19 @@ const handleSubmit = async () => {
         ElMessage.error(response.data.msg || '更新失败')
       }
     } else {
-      const response = await addBuilding(buildingForm)
+      const payload = {
+        name: (buildingForm.name || '').trim(),
+        address: (buildingForm.address || '').trim(),
+        description: buildingForm.description || '',
+        aboveGroundFloors: Number(buildingForm.aboveGroundFloors ?? 0),
+        undergroundFloors: Number(buildingForm.undergroundFloors ?? 0),
+        buildingArea: Number(buildingForm.buildingArea ?? 0),
+        aboveGroundArea: Number(buildingForm.aboveGroundArea ?? 0),
+        undergroundArea: Number(buildingForm.undergroundArea ?? 0),
+        managedArea: Number(buildingForm.managedArea ?? 0),
+        propertyFee: Number(buildingForm.propertyFee ?? 0)
+      }
+      const response = await addBuilding(payload)
       if (response.data.code === 200) {
         ElMessage.success('添加成功')
         dialogVisible.value = false
@@ -446,6 +463,9 @@ const handleSubmit = async () => {
 // 重置表单
 const resetForm = () => {
   buildingFormRef.value?.resetFields()
+  // 清理可能残留的 _id，避免误传导致新增报错
+  // @ts-ignore
+  delete (buildingForm)._id
   Object.assign(buildingForm, {
     name: '',
     address: '',

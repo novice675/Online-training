@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const BuildingModel = require('../models/Building')
+const mongoose = require('mongoose')
 
 // 获取楼宇列表
 router.get('/', async (req, res) => {
@@ -68,6 +69,10 @@ router.get('/detail/:id', async (req, res) => {
 // 添加楼宇
 router.post('/add', async (req, res) => {
     try {
+        // 兼容前端误传 _id，确保新建时删除该字段
+        if (req.body && typeof req.body === 'object' && '_id' in req.body) {
+            delete req.body._id;
+        }
         // 验证必填字段
         const { name, address, aboveGroundFloors, undergroundFloors } = req.body;
         
@@ -108,6 +113,10 @@ router.post('/add', async (req, res) => {
             floors
         };
         
+        // 保障有 _id（极端情况下第三方中间件可能剥离 _id 生成）
+        if (!buildingData._id) {
+            buildingData._id = new mongoose.Types.ObjectId();
+        }
         let building = await BuildingModel.create(buildingData);
         res.send({
             code: 200,

@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const HouseModel = require('../models/House')
 const BuildingModel = require('../models/Building')
+const mongoose = require('mongoose')
 
 // 获取房间信息列表（支持分页和搜索）
 router.get('/', async (req, res) => {
@@ -99,6 +100,10 @@ router.get('/building/:buildingId/floor/:floor', async (req, res) => {
 // 添加房间
 router.post('/add', async (req, res) => {
     try {
+        // 兼容前端误传 _id，确保新建时删除该字段
+        if (req.body && typeof req.body === 'object' && '_id' in req.body) {
+            delete req.body._id;
+        }
         // 先验证楼宇是否存在
         const building = await BuildingModel.findById(req.body.buildingId);
         if (!building) {
@@ -159,6 +164,10 @@ router.post('/add', async (req, res) => {
             });
         }
         
+        // 保障有 _id
+        if (!req.body._id) {
+            req.body._id = new mongoose.Types.ObjectId();
+        }
         let house = await HouseModel.create(req.body);
         // 返回包含楼宇信息的房间数据
         house = await HouseModel.findById(house._id).populate('buildingId');

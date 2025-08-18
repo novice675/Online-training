@@ -4,7 +4,7 @@
     <div class="page-header">
       <h2>房间信息管理</h2>
       <div class="header-actions">
-
+        <el-button type="primary" @click="handleAdd">新增房间</el-button>
         <el-button type="warning" @click="handleBatchDelete" :disabled="selectedRows.length === 0">
           批量删除
         </el-button>
@@ -482,7 +482,18 @@ const handleSave = async () => {
         ElMessage.error(response.data.msg || '更新失败')
       }
     } else {
-      const response = await addHouse(houseForm)
+      const payload = {
+        buildingId: houseForm.buildingId,
+        floor: Number(houseForm.floor ?? 0),
+        number: (houseForm.number || '').trim(),
+        area: Number(houseForm.area ?? 0),
+        pricingArea: Number(houseForm.pricingArea ?? 0),
+        rent: Number(houseForm.rent ?? 0),
+        propertyFee: Number(houseForm.propertyFee ?? 0),
+        status: houseForm.status,
+        description: houseForm.description || ''
+      }
+      const response = await addHouse(payload)
       if (response.data.code === 200) {
         ElMessage.success('添加成功')
         dialogVisible.value = false
@@ -504,6 +515,8 @@ const handleSave = async () => {
 // 重置表单
 const resetForm = () => {
   houseFormRef.value?.resetFields()
+  // @ts-ignore 清理可能残留的 _id，避免误传导致新增报错
+  delete (houseForm as any)._id
   Object.assign(houseForm, {
     buildingId: '',
     floor: null,

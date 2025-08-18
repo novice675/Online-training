@@ -2,6 +2,7 @@ const mongoose = require('../db/index');
 
 // 房间
 const HouseSchema = new mongoose.Schema({
+    _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
     // 房间号
     number: {
         type: String,

@@ -2,6 +2,7 @@ const mongoose = require('../db/index');
 
 // 楼宇
 const BuildingSchema = new mongoose.Schema({
+    _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
     // 楼宇名称
     name: {
         type: String,
